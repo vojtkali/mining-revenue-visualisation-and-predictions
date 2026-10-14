@@ -1,0 +1,211 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Těžba v kostce</title><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><nav class="site-nav" aria-label="Stránky"><a href="index.html" aria-current=page>Těžba v kostce</a><a href="s21xp.html">S21 XP</a><a href="s21xp-faq.html">S21 XP FAQ</a><a href="s21xp-nakup.html">S21 XP vs. nákup</a><a href="z15pro.html">Z15 Pro</a><a href="z15pro-faq.html">Z15 Pro FAQ</a><a href="z15pro-nakup.html">Z15 Pro vs. nákup</a><a href="l9.html">L9</a><a href="l9-faq.html">L9 FAQ</a><a href="l9-nakup.html">L9 vs. nákup</a></nav>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wght@600;700&display=swap">
+<style>
+/* Layout: one column control bench — parameters row, KPI strip, two main charts, supporting hashprice panel, method notes */
+:root{
+  --bg:#f7f8f7; --panel:#ffffff; --line:#e3e6e4; --grid:#eceeed;
+  --fg:#141816; --fg2:#4d5450; --muted:#7a817d;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#6250d6; --s5:#eda100; --chip:#fdf1d6; --chipfg:#7a5300; --ref:#8a908c;
+  --est:rgba(237,161,0,.10); --good:#0a7d4f; --bad:#c23a3a;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121514; --panel:#1a1e1c; --line:#2c312e; --grid:#252a27;
+  --fg:#eef1ef; --fg2:#b9c0bc; --muted:#8b928e;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#c98500; --chip:#3a2f12; --chipfg:#f2c76b; --ref:#8b928e;
+  --est:rgba(201,133,0,.14); --good:#3fc58a; --bad:#ec7070; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121514; --panel:#1a1e1c; --line:#2c312e; --grid:#252a27;
+  --fg:#eef1ef; --fg2:#b9c0bc; --muted:#8b928e;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#9085e9; --s5:#c98500; --chip:#3a2f12; --chipfg:#f2c76b; --ref:#8b928e;
+  --est:rgba(201,133,0,.14); --good:#3fc58a; --bad:#ec7070; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 56px;display:grid;gap:22px}
+header h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,4vw,36px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--fg2);max-width:72ch}
+.spec{font-family:var(--f-mono);font-size:13px;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.controls label{display:grid;gap:4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--fg2);min-width:0}
+.controls input{font:500 15px var(--f-mono);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;box-sizing:border-box}
+.controls select{font:500 15px var(--f-body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;box-sizing:border-box}
+td .s{color:var(--muted);font-size:12px;margin-left:6px}
+.controls input:focus-visible{outline:2px solid var(--s1);outline-offset:1px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.kpis{grid-template-columns:1fr}}
+.kpi{border-top:2px solid var(--line);padding-top:10px;min-width:0}
+.kpi .l{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--fg2)}
+.kpi .v{font:600 24px var(--f-mono);font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .s{font-size:13px;color:var(--muted)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+section.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 18px 12px;min-width:0}
+section.card h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0}
+section.card .sub{color:var(--fg2);margin:4px 0 10px;max-width:80ch;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--fg2);margin-bottom:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--ref) 0 4px,transparent 4px 7px)!important}
+.legend i.box{height:10px;background:var(--est)!important;border:1px solid var(--line)}
+.chart{position:relative;height:380px}
+.chart.small{height:220px}
+.notes{color:var(--fg2);font-size:13.5px;display:grid;gap:6px;max-width:90ch}
+.notes h3{font-family:var(--f-display);font-size:16px;color:var(--fg);margin:0 0 2px}
+.notes a{color:var(--s1)}
+.tbl{overflow-x:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th,td{padding:7px 10px;white-space:nowrap;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-weight:500;color:var(--fg2);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+td:first-child,th:first-child{text-align:left}
+td{font-family:var(--f-mono)} td:first-child{font-family:var(--f-body)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:-1px}
+code{font-family:var(--f-mono);font-size:12.5px}
+@media (max-width:520px){.chart{height:300px}.kpi .v{font-size:20px}}
+.toc{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:13.5px}
+.toc a{color:var(--s1);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--panel)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--s1)}
+.group{display:grid;gap:4px}
+.group>h2{font-family:var(--f-display);font-size:22px;margin:8px 0 6px;scroll-margin-top:12px}
+.qa{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding-block:12px;border-top:1px solid var(--line)}
+.qa h3{margin:0;font:600 15.5px/1.35 var(--f-body);color:var(--fg)}
+.qa .a{color:var(--fg2);max-width:78ch}
+.qa .a p{margin:0 0 6px}
+.qa .a b,.qa .a .n{color:var(--fg)}
+.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.95em;white-space:nowrap}
+.chip{display:inline-block;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;background:var(--chip);color:var(--chipfg);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.verify{background:var(--chip);color:var(--chipfg);border-radius:6px;padding:6px 10px;font-size:13.5px;margin-top:4px;max-width:78ch}
+.lead{font-size:13.5px;color:var(--fg2);max-width:90ch}
+.cmp{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
+.cmp th,.cmp td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:normal}
+.cmp thead th{font:600 13px var(--f-body);color:var(--fg);text-transform:none;letter-spacing:0;background:var(--panel)}
+.cmp tbody th{font:500 13.5px var(--f-body);color:var(--fg2);width:30%;text-transform:none;letter-spacing:0}
+.cmp td{font-family:var(--f-body);color:var(--fg)}
+.cmp td .n{font-size:.95em}
+.qa h3{font-size:15px}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px}
+.links a{color:var(--s1)}
+.money{display:flex;flex-direction:column;gap:1px}
+.money .usd{font:600 15px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--fg)}
+.money .czk{font:400 12.5px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Těžba v kostce: S21 XP, Z15 Pro a L9</h1>
+  <p>Stručné odpovědi na nejčastější otázky pro tři stroje vedle sebe. Stav k 13. 10. 2026; elektřina $0,07/kWh, poplatek poolu 20 %, uptime 95 %, výplata v BTC. Ceny strojů: S21 XP $7 180, Z15 Pro $10 000, L9 $7 100. Projekce je pro stroj koupený dnes na 5 let; BTC roste o 20 % ročně, v nejhorším scénáři o 10 % ročně. Přepočet na koruny kurzem 21,00 Kč/USD (ČNB, srpen 2026).</p>
+</header>
+
+<section class="group" id="kostka">
+  <h2>Ve zkratce</h2>
+  <div class="tbl"><table class="cmp">
+    <thead><tr><th></th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead>
+    <tbody>
+      <tr><th>Co těží</th><td>Bitcoin</td><td>Zcash</td><td>Dogecoin + Litecoin (merge mining)</td></tr>
+      <tr><th>Čistě za den dnes</th><td><span class="money"><span class="usd">$1,92</span><span class="czk">40 Kč</span></span></td><td><span class="money"><span class="usd">$33,63</span><span class="czk">706 Kč</span></span></td><td><span class="money"><span class="usd">$1,75</span><span class="czk">37 Kč</span></span></td></tr>
+      <tr><th>Čistě za měsíc dnes</th><td><span class="money"><span class="usd">$58</span><span class="czk">1 230 Kč</span></span></td><td><span class="money"><span class="usd">$1 024</span><span class="czk">21 500 Kč</span></span></td><td><span class="money"><span class="usd">$53</span><span class="czk">1 120 Kč</span></span></td></tr>
+      <tr><th>BTC za měsíc dnes</th><td><span class="n">0,0028</span></td><td><span class="n">0,0139</span></td><td><span class="n">0,0025</span></td></tr>
+      <tr><th>O kolik může klesnout cena, než je stroj ve ztrátě</th><td><span class="n">25 %</span> (BTC pod $62 600)</td><td><span class="n">88 %</span> (ZEC pod $142)</td><td><span class="n">25 %</span> (DOGE i LTC)</td></tr>
+      <tr><th>Další halving a jeho dopad</th><td>duben 2028, výnos −50 %</td><td>listopad 2028, výnos −50 %</td><td>LTC červenec 2027, výnos jen −8 %; DOGE halving nemá</td></tr>
+      <tr><th>Zaplacení při držení BTC, základní scénář</th><td>do 5 let ne</td><td>září 2027</td><td>září 2031</td></tr>
+      <tr><th>Za 5 let: hodnota BTC − všechno zaplacené</th><td class="neg"><span class="n">−$4 460</span></td><td class="pos"><span class="n">+$41 223</span></td><td class="pos"><span class="n">+$130</span></td></tr>
+      <tr><th>1 BTC z těžby vás stojí</th><td><span class="n">$276 000</span></td><td><span class="n">$63 000</span></td><td><span class="n">$205 000</span></td></tr>
+      <tr><th>Hlavní riziko</th><td>růst sítě a halving 2028</td><td>pád ceny ZEC po prudkém růstu</td><td>cena DOGE (84 % výnosu)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend" style="margin-top:12px"><span><i style="background:var(--s2)"></i>Nejhorší scénář</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Nejlepší</span></div>
+  <div class="chart small"><canvas id="cSum" aria-label="Hodnota BTC minus všechno zaplacené za 5 let"></canvas></div>
+  <p class="lead">Hodnota vytěžených BTC za 5 let minus cena stroje a elektřina. Co přesně jednotlivé scénáře předpokládají:</p>
+  <div class="tbl"><table class="cmp">
+    <thead><tr><th>Scénář</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead>
+    <tbody>
+      <tr><th><span class="sw" style="background:var(--s2)"></span>Nejhorší</th><td>BTC +10 % ročně</td><td>ZEC první rok −70 %, pak beze změny; BTC +10 % ročně</td><td>DOGE a LTC −30 % ročně; BTC +10 % ročně</td></tr>
+      <tr><th><span class="sw" style="background:var(--s1)"></span>Základní</th><td>BTC +20 % ročně</td><td>ZEC první rok −40 %, pak +10 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +10 % ročně; BTC +20 % ročně</td></tr>
+      <tr><th><span class="sw" style="background:var(--s3)"></span>Nejlepší</th><td>BTC +40 % ročně</td><td>ZEC první rok +30 %, pak +20 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +30 % ročně; BTC +20 % ročně</td></tr>
+      <tr><th>Výkon sítě (všechny scénáře)</th><td>+35 % ročně</td><td>+10 % ročně a navíc sleduje cenu ZEC (při 10× vyšší ceně 2× vyšší výkon)</td><td>+15 % ročně a navíc sleduje ceny DOGE a LTC (stejně jako u Z15 Pro)</td></tr>
+      <tr><th>Halving</th><td>duben 2028, odměna na polovinu</td><td>listopad 2028, odměna na polovinu</td><td>jen Litecoin, červenec 2027 (výnos −8 %)</td></tr>
+      <tr><th>Společné</th><td colspan="3">Stroj koupený dnes a běží nepřetržitě 5 let, i ve ztrátě. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Ceny se mění plynule (složeně), poplatky v blocích zůstávají na dnešní úrovni.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="group" id="vydelek">
+  <h2>Výdělek</h2>
+  <div class="qa"><h3>Kolik stroj vydělá denně a měsíčně?</h3><div class="a"><p>Čistě po elektřině a poplatku: S21 XP <span class="n">$1,92</span> denně (<span class="n">$58</span> měsíčně), Z15 Pro <span class="n">$33,63</span> (<span class="n">$1 024</span>), L9 <span class="n">$1,75</span> (<span class="n">$53</span>). Výnos před elektřinou: <span class="n">$235</span>, <span class="n">$1 159</span> a <span class="n">$212</span> měsíčně.</p></div></div>
+  <div class="qa"><h3>Kolik BTC dostanu?</h3><div class="a"><p>Měsíčně <span class="n">0,0028</span> / <span class="n">0,0139</span> / <span class="n">0,0025</span> BTC. Množství klesá s růstem sítě a s halvingem; Z15 Pro a L9 navíc dostávají méně BTC, když jejich mince zlevní proti BTC.</p></div></div>
+  <div class="qa"><h3>Jak moc se výnos mění?</h3><div class="a"><p>Za posledních 12 měsíců byl čistý denní výnos: S21 XP <span class="n">$0,01–4,31</span>, Z15 Pro <span class="n">$9–48</span>, L9 <span class="n">$0,57–7,50</span>. Mění se každý den s cenou mince a výkonem sítě; obtížnost se přepočítává každé 2 týdny (BTC), 3,5 dne (LTC) nebo po každém bloku (ZEC, DOGE).</p></div></div>
+  <div class="qa"><h3>Jak stroj vydělával posledních 6 a 12 měsíců?</h3><div class="a"><p>Za 12 měsíců: S21 XP <span class="n">0,035 BTC</span> a <span class="n">$572</span> čistě, Z15 Pro <span class="n">0,123 BTC</span> a <span class="n">$8 148</span>, L9 <span class="n">0,036 BTC</span> a <span class="n">$894</span>. Za 6 měsíců zhruba polovina. Jde o výpočet z dat sítě, ne o výpisy reálných strojů.</p></div></div>
+</section>
+
+<section class="group" id="navratnost">
+  <h2>Návratnost</h2>
+  <div class="qa"><h3>Za jak dlouho se stroj zaplatí?</h3><div class="a"><p>Při dnešních podmínkách bez změn: S21 XP <span class="n">10,3 roku</span>, Z15 Pro <span class="n">10 měsíců</span>, L9 <span class="n">11,1 roku</span>. Podmínky se ale mění, proto platí spíš scénáře:</p>
+    <div class="tbl"><table class="cmp"><thead><tr><th>Zaplacení při držení BTC</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
+      <tr><th>Nejlepší scénář</th><td>únor 2030</td><td>červenec 2027</td><td>srpen 2030</td></tr>
+      <tr><th>Základní</th><td>do 5 let ne</td><td>září 2027</td><td>září 2031</td></tr>
+      <tr><th>Nejhorší</th><td>do 5 let ne</td><td>březen 2028</td><td>do 5 let ne</td></tr>
+    </tbody></table></div></div></div>
+  <div class="qa"><h3>Jaké je ROI a kolik procent ročně čekat?</h3><div class="a"><p>První rok při dnešních podmínkách: S21 XP <span class="n">10 %</span>, Z15 Pro <span class="n">123 %</span>, L9 <span class="n">9 %</span> z ceny stroje. Dál méně. Pevné roční procento u těžby neexistuje; ROI za 5 let v základním scénáři je −62 %, +412 % a +2 %.</p></div></div>
+  <div class="qa"><h3>Je výnos, návratnost nebo množství BTC garantované?</h3><div class="a"><p>Ne. Výnos závisí na ceně mince, výkonu sítě a halvingu, které nikdo neovlivní. Kalkulace jsou scénáře, ne slib.</p></div></div>
+</section>
+
+<section class="group" id="vypocet">
+  <h2>Jak se počítá</h2>
+  <div class="qa"><h3>Z čeho se výnos počítá a co je v něm?</h3><div class="a"><p>Odměna sítě za den × výkon stroje ÷ výkon sítě × uptime × (1 − poplatek poolu), převedeno na BTC podle denního kurzu. Odečtena je elektřina. Nezahrnuto: daně, opravy, pokles výkonu stroje. Ukazujeme výnos před i po elektřině.</p></div></div>
+  <div class="qa"><h3>Co je hashrate a difficulty?</h3><div class="a"><p>Hashrate je výkon (váš stroj i celá síť). Difficulty síť upravuje tak, aby bloky vznikaly stále stejně rychle. Když síť přidá 10 % výkonu, vytěžíte o 9 % méně. Za poslední rok: BTC síť −5 %, Zcash +232 %, Litecoin −21 %.</p></div></div>
+</section>
+
+<section class="group" id="rizika">
+  <h2>Rizika</h2>
+  <div class="qa"><h3>Co když cena klesne nebo vyroste?</h3><div class="a"><p>Elektřina stojí pořád stejně, takže zisk reaguje na cenu silněji než výnos. Pokles ceny mince o 10 %: S21 XP čistě −41 %, Z15 Pro −11 %, L9 −40 %. U Z15 Pro a L9 cena BTC mění jen to, kolik BTC dostanete, ne hodnotu v USD.</p></div></div>
+  <div class="qa"><h3>Co udělá halving?</h3><div class="a"><p>Sníží odměnu na polovinu. S21 XP (duben 2028): bod zvratu stoupne z $62 600 asi na $195 000 za BTC, takže je pak stroj v základním scénáři denně ve ztrátě. Z15 Pro (listopad 2028): bod zvratu z $142 asi na $347 za ZEC, rezerva zůstává. L9: halving má jen Litecoin (červenec 2027), výnos klesne asi o 8 %.</p></div></div>
+  <div class="qa"><h3>Může být stroj ve ztrátě? Dá se vypnout?</h3><div class="a"><p>Ano, když výnos klesne pod cenu elektřiny. Stroj jde kdykoli vypnout a zapnout; vypnutý nespotřebuje ani nevydělá. Každý stroj těží jen svůj algoritmus (SHA-256, Equihash, Scrypt). Pokud stroj ve ztrátě běží dál, každý vytěžený BTC stojí víc, než kdybyste ho koupili.</p></div></div>
+  <div class="qa"><h3>Jaký je nejhorší scénář?</h3><div class="a"><p>Ve všech třech BTC roste jen o 10 % ročně. S21 XP: od března 2028 denně ve ztrátě, za 5 let −$9 200 proti všemu zaplacenému. Z15 Pro: ZEC navíc −70 %, stroj se přesto zaplatí (březen 2028) a za 5 let +$10 900. L9: DOGE a LTC −30 % ročně, ztráta od července 2027, za 5 let −$9 300.</p></div></div>
+</section>
+
+<section class="group" id="vsbtc">
+  <h2>Těžit, nebo koupit BTC?</h2>
+  <div class="qa"><h3>Co vyjde lépe za stejné peníze?</h3><div class="a"><p>Za stejnou částku (stroj + elektřina na 5 let), základní scénář:</p>
+    <div class="tbl"><table class="cmp"><thead><tr><th>BTC za 5 let</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
+      <tr><th>Těžba</th><td><span class="n">0,064</span></td><td><b><span class="n">0,286</span></b></td><td><span class="n">0,081</span></td></tr>
+      <tr><th>Jednorázový nákup dnes</th><td><b><span class="n">0,214</span></b></td><td><span class="n">0,217</span></td><td><b><span class="n">0,199</span></b></td></tr>
+      <tr><th>Týdenní DCA</th><td><span class="n">0,140</span></td><td><span class="n">0,143</span></td><td><span class="n">0,131</span></td></tr>
+    </tbody></table></div>
+    <p>Těžba vyhrává jen u Z15 Pro, dokud je ZEC drahý. Historicky (od uvedení stroje) by jednorázový nákup BTC porazil těžbu v 100 % dní u S21 XP, v 46 % u L9 a v 19 % u Z15 Pro.</p></div></div>
+  <div class="qa"><h3>Proč tedy těžit?</h3><div class="a"><p>Pravidelný přísun BTC bez nákupu najednou a možnost získat BTC pod tržní cenou, pokud je elektřina levná nebo mince stroje silná. Proti tomu: stroj ztrácí hodnotu a výnos klesá s růstem sítě a s halvingem.</p></div></div>
+</section>
+
+<section class="notes">
+  <h3>Podrobné stránky</h3>
+  <div class="links"><a href="s21xp-faq.html">FAQ S21 XP</a><a href="z15pro-faq.html">FAQ Z15 Pro</a><a href="l9-faq.html">FAQ L9</a><a href="s21xp.html">S21 XP grafy</a><a href="z15pro.html">Z15 Pro grafy</a><a href="l9.html">L9 grafy</a></div>
+  <div>Data: Coin Metrics (do 23. 5. 2026), potom grafy a exporty cen a body z vyhledávání; nejméně přesná jsou data L9 od června 2026. Na podrobných stránkách lze všechny parametry změnit.</div>
+</section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let chart;
+function render(){
+  if (chart) chart.destroy();
+  const v = [[-9165,-4460,11030],[10930,41223,78219],[-9327,130,4689]];
+  const ds = [['Nejhorší','--s2'],['Základní','--s1'],['Nejlepší','--s3']].map(([l,c],i) => ({label:l, data:v.map(r=>r[i]), backgroundColor:css(c), borderRadius:4, borderSkipped:false, barPercentage:.8, categoryPercentage:.7}));
+  const fmt = x => (x<0?'−':'+')+'$'+Math.abs(Math.round(x)).toLocaleString('cs-CZ');
+  chart = new Chart(document.getElementById('cSum'), {type:'bar', data:{labels:['S21 XP','Z15 Pro','L9'], datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false, animation:false, plugins:{legend:{display:false},
+      tooltip:{backgroundColor:css('--panel'), titleColor:css('--fg'), bodyColor:css('--fg2'), borderColor:css('--line'), borderWidth:1, callbacks:{label:it=>` ${it.dataset.label}: ${fmt(it.parsed.y)}`}}},
+      scales:{x:{grid:{display:false}, ticks:{color:css('--fg2'), font:{family:'IBM Plex Sans', size:12}}, border:{color:css('--line')}},
+              y:{grid:{color:css('--grid')}, border:{display:false}, ticks:{color:css('--fg2'), font:{family:'IBM Plex Mono', size:11}, callback:x=>(x<0?'−':'')+'$'+Math.abs(x/1000)+'k'}}}}});
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+new MutationObserver(render).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+render();
+</script><style>
+.site-nav{display:flex;flex-wrap:wrap;gap:6px 14px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--line);background:var(--panel);font:500 13.5px var(--f-body)}
+.site-nav a{color:var(--fg2);text-decoration:none}
+.site-nav a[aria-current]{color:var(--fg);font-weight:600}
+.site-nav a:hover,.site-nav a:focus-visible{color:var(--s1)}
+.site-foot{max-width:1120px;margin:0 auto;padding-block:8px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  color:var(--muted);font-size:12.5px}
+</style><footer class="site-foot">Výpočty jsou modelové scénáře z veřejných dat sítí a nejsou investičním doporučením ani zárukou výnosu. Zdroj dat: Coin Metrics Community Data a další uvedené zdroje.</footer></body></html>

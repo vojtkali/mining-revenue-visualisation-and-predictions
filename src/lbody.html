@@ -1,0 +1,58 @@
+<div class="wrap">
+<header>
+  <h1>S21 XP vs. jednorázový nákup: na načasování záleží</h1>
+  <p>Těžba se srovnává s jednorázovým nákupem BTC za stejnou celkovou částku: cena stroje plus veškerá elektřina od začátku těžby do konce odhadu. Rozdíl je v tom, kdy nákup provedete: na začátku těžby, na dně, uprostřed bull marketu, na vrcholu nebo kdykoli jindy. Parametry stroje a projekce jsou stejné jako na hlavní stránce S21 XP.</p>
+  <div class="spec"><span>270 TH/s</span><span>3 645 W</span><span>13,5 J/TH</span><span>SHA-256, vzduchem chlazený</span></div>
+</header>
+
+<form class="controls" id="f" onsubmit="return false">
+  <label for="start">Začátek těžby<input id="start" type="date" value="2024-06-17" min="2024-06-01" max="2026-10-12"></label>
+  <label for="kwh">Elektřina, USD/kWh<input id="kwh" type="number" step="0.005" min="0" value="0.07"></label>
+  <label for="poolFee">Poplatek poolu, %<input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="uptime">Uptime, %<input id="uptime" type="number" step="1" min="50" max="100" value="95"></label>
+  <label for="hwS">Cena stroje, USD<input id="hwS" type="number" step="100" min="0" value="7180"></label>
+  <label for="th">Výkon, TH/s<input id="th" type="number" step="1" min="1" value="270"></label>
+  <label for="w">Příkon, W<input id="w" type="number" step="5" min="1" value="3645"></label>
+</form>
+
+<form class="controls" id="fx" onsubmit="return false">
+  <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
+  <label for="sc">Scénář ceny pro projekci<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
+  <label for="yBear">Pesimistický: cena BTC, % za rok<input id="yBear" type="number" step="1" min="-90" max="500" value="10"></label>
+  <label for="yBase">Základní: cena BTC, % za rok<input id="yBase" type="number" step="1" min="-90" max="500" value="20"></label>
+  <label for="yBull">Optimistický: cena BTC, % za rok<input id="yBull" type="number" step="1" min="-90" max="500" value="40"></label>
+  <label for="hgr">Růst hashrate sítě, % za rok<input id="hgr" type="number" step="5" min="-50" max="200" value="35"></label>
+  <label for="feeBull">Nárůst poplatků v bull marketu, %<input id="feeBull" type="number" step="10" min="-90" max="2000" value="33"></label>
+</form>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Cena BTC se od dnešní ceny mění o zadané procento za rok, každý rok stejně (plynule, složeně). Hashrate sítě roste zadaným tempem. Halvingy (kolem 10. 4. 2028, dále po 4 letech) snižují dotaci za blok na polovinu. Stroj běží nepřetržitě, i když je denní výnos nižší než cena elektřiny.</p>
+
+<div class="kpis" id="kpis"></div>
+
+<section class="card">
+  <h2>Kolik BTC koupíte podle dne nákupu</h2>
+  <p class="sub">Každý bod křivky je jednorázový nákup za celou částku (<span id="budget"></span>) v daný den. Modrá čára je stack, který těžba natěží do konce odhadu. Kde je křivka nad ní, nákup v ten den by přinesl víc BTC než těžba.</p>
+  <div class="legend"><span><i style="background:var(--s2)"></i>BTC z jednorázového nákupu v daný den</span><span><i style="background:var(--s1)"></i>Stack z těžby na konci odhadu</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="chart"><canvas id="l1" aria-label="BTC z jednorázového nákupu podle dne"></canvas></div>
+</section>
+
+<section class="card">
+  <h2>Stack v čase: těžba vs. vybrané dny nákupu</h2>
+  <p class="sub">Nákup A je vždy v den začátku těžby (pole nahoře). Data nákupů B–E si můžete změnit; nákup s datem před začátkem těžby nebo po konci odhadu se nezobrazí. Výchozí body jsou vybrané z historie cen: dno v září 2024 ($53 800), den po amerických volbách v listopadu 2024 (střed bull marketu), historický vrchol 6. 10. 2025 ($124 800) a dno v červnu 2026 ($58 000).</p>
+  <form class="controls" id="fl" onsubmit="return false">
+    <label for="ls2">Nákup B (dno 2024)<input id="ls2" type="date" value="2024-09-06"></label>
+    <label for="ls3">Nákup C (střed bull marketu)<input id="ls3" type="date" value="2024-11-06"></label>
+    <label for="ls4">Nákup D (vrchol)<input id="ls4" type="date" value="2025-10-06"></label>
+    <label for="ls5">Nákup E (dno 2026)<input id="ls5" type="date" value="2026-06-30"></label>
+  </form>
+  <div class="legend" id="leg2" style="margin-top:14px"></div>
+  <div class="chart"><canvas id="l2" aria-label="Stack v čase podle dne nákupu"></canvas></div>
+  <div class="tbl"><table id="ltab"></table></div>
+</section>
+
+<section class="notes">
+  <h3>Metodika</h3>
+  <div><b>Částka:</b> stejná jako v grafu 3 na hlavní stránce: cena stroje plus elektřina za celé období těžby (od začátku těžby do konce odhadu). Při pozdějším nákupu leží peníze do dne nákupu bez úroku.</div>
+  <div><b>Těžba:</b> stejný výpočet jako na hlavní stránce (konstantní poplatky, růst hashrate, halving 2028). Stroj běží nepřetržitě.</div>
+  <div><b>Ceny:</b> do 23. 5. 2026 denní data Coin Metrics, do 13. 10. 2026 ceny odečtené z vašeho grafu, potom projekce podle zvoleného scénáře.</div>
+</section>
+</div>

@@ -1,0 +1,64 @@
+<div class="wrap">
+<header>
+  <h1>L9 vs. jednorázový nákup: na načasování záleží</h1>
+  <p>Těžba LTC + DOGE s výplatou v BTC se srovnává s jednorázovým nákupem BTC za stejnou celkovou částku: cena stroje plus veškerá elektřina od začátku těžby do konce odhadu. Rozdíl je v tom, kdy nákup provedete. Parametry stroje a projekce jsou stejné jako na hlavní stránce L9.</p>
+  <div class="spec"><span>16,2 GH/s</span><span>3 260 W</span><span>0,20 J/MH</span><span>Scrypt · LTC + DOGE</span><span>výplata v BTC</span></div>
+</header>
+
+<form class="controls" id="f" onsubmit="return false">
+  <label for="start">Začátek těžby<input id="start" type="date" value="2024-05-15" min="2024-05-01" max="2026-10-12"></label>
+  <label for="kwh">Elektřina, USD/kWh<input id="kwh" type="number" step="0.005" min="0" value="0.07"></label>
+  <label for="poolFee">Poplatek poolu, %<input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="uptime">Uptime, %<input id="uptime" type="number" step="1" min="50" max="100" value="95"></label>
+  <label for="hwL">Cena stroje, USD<input id="hwL" type="number" step="100" min="0" value="7100"></label>
+  <label for="th">Výkon, GH/s<input id="th" type="number" step="0.1" min="0.1" value="16.2"></label>
+  <label for="w">Příkon, W<input id="w" type="number" step="5" min="1" value="3260"></label>
+</form>
+
+<form class="controls" id="fx" onsubmit="return false">
+  <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
+  <label for="sc">Scénář pro projekci<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
+  <label for="lbB">Pesimistický: BTC, % ročně<input id="lbB" type="number" step="1" min="-90" max="500" value="10"></label>
+  <label for="llB">Pesimistický: LTC, % ročně<input id="llB" type="number" step="5" min="-90" max="500" value="-20"></label>
+  <label for="ldB">Pesimistický: DOGE, % ročně<input id="ldB" type="number" step="5" min="-90" max="500" value="-20"></label>
+  <label for="lbM">Základní: BTC, % ročně<input id="lbM" type="number" step="1" min="-90" max="500" value="20"></label>
+  <label for="llM">Základní: LTC, % ročně<input id="llM" type="number" step="5" min="-90" max="500" value="10"></label>
+  <label for="ldM">Základní: DOGE, % ročně<input id="ldM" type="number" step="5" min="-90" max="500" value="10"></label>
+  <label for="lbU">Optimistický: BTC, % ročně<input id="lbU" type="number" step="1" min="-90" max="500" value="40"></label>
+  <label for="llU">Optimistický: LTC, % ročně<input id="llU" type="number" step="5" min="-90" max="500" value="30"></label>
+  <label for="ldU">Optimistický: DOGE, % ročně<input id="ldU" type="number" step="5" min="-90" max="500" value="40"></label>
+  <label for="lhg">Růst hashrate Scrypt, % ročně<input id="lhg" type="number" step="5" min="-50" max="300" value="15"></label>
+  <label for="lk">Citlivost hashrate na ceny LTC/DOGE<input id="lk" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
+</form>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Ceny BTC, LTC a DOGE se mění o zadané procento ročně. Hashrate sítě Scrypt roste základním tempem a navíc sleduje ceny LTC a DOGE (vážené podle podílu na výnosu): citlivost 0,3 znamená, že při 10× vyšších cenách je hashrate 2× vyšší. Halving Litecoinu kolem 30. 7. 2027 sníží odměnu LTC na polovinu; Dogecoin halving nemá (10 000 DOGE za blok napořád). Dnes tvoří DOGE asi 85 % výnosu, takže halving LTC výnos sníží jen asi o 8 %. Stroj běží nepřetržitě.</p>
+
+<div class="kpis" id="kpis"></div>
+
+<section class="card">
+  <h2>Kolik BTC koupíte podle dne nákupu</h2>
+  <p class="sub">Každý bod křivky je jednorázový nákup za celou částku (<span id="budget"></span>) v daný den. Modrá čára je stack, který těžba vyplatí do konce odhadu. Kde je křivka nad ní, nákup v ten den by přinesl víc BTC než těžba.</p>
+  <div class="legend"><span><i style="background:var(--s2)"></i>BTC z jednorázového nákupu v daný den</span><span><i style="background:var(--s1)"></i>Stack z těžby na konci odhadu</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="chart"><canvas id="l1" aria-label="BTC z jednorázového nákupu podle dne"></canvas></div>
+</section>
+
+<section class="card">
+  <h2>Stack v čase: těžba vs. vybrané dny nákupu</h2>
+  <p class="sub">Nákup A je vždy v den začátku těžby (pole nahoře). Data nákupů B–E si můžete změnit; nákup s datem před začátkem těžby nebo po konci odhadu se nezobrazí. Výchozí body jsou vybrané z historie cen: dno v září 2024 ($53 800), den po amerických volbách v listopadu 2024 (střed bull marketu), historický vrchol 6. 10. 2025 ($124 800) a dno v červnu 2026 ($58 000).</p>
+  <form class="controls" id="fl" onsubmit="return false">
+    <label for="ls2">Nákup B (dno 2024)<input id="ls2" type="date" value="2024-09-06"></label>
+    <label for="ls3">Nákup C (střed bull marketu)<input id="ls3" type="date" value="2024-11-06"></label>
+    <label for="ls4">Nákup D (vrchol)<input id="ls4" type="date" value="2025-10-06"></label>
+    <label for="ls5">Nákup E (dno 2026)<input id="ls5" type="date" value="2026-06-30"></label>
+  </form>
+  <div class="legend" id="leg2" style="margin-top:14px"></div>
+  <div class="chart"><canvas id="l2" aria-label="Stack v čase podle dne nákupu"></canvas></div>
+  <div class="tbl"><table id="ltab"></table></div>
+</section>
+
+<section class="notes">
+  <h3>Metodika</h3>
+  <div><b>Částka:</b> stejná jako v grafu 3 na hlavní stránce: cena stroje plus elektřina za celé období těžby (od začátku těžby do konce odhadu). Při pozdějším nákupu leží peníze do dne nákupu bez úroku.</div>
+  <div><b>Těžba:</b> stejný výpočet jako na hlavní stránce (konstantní poplatky, růst hashrate, halving 2028). Stroj běží nepřetržitě.</div>
+  <div><b>Ceny:</b> do 23. 5. 2026 denní data Coin Metrics, potom ceny BTC odečtené z vašeho grafu a ceny LTC a DOGE dopočítané z bodů z vyhledávání, od 14. 10. 2026 projekce podle zvoleného scénáře.</div>
+</section>
+</div>
