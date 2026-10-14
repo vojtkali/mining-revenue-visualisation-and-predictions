@@ -1,12 +1,12 @@
 <div class="wrap">
 <header>
   <h1>Antminer Z15 Pro: těžba Zcash s výplatou v BTC</h1>
-  <p>Denní výnos jednoho stroje od začátku dodávek (červen 2023) do 13. 10. 2026 a odhad do zvoleného data. Stroj těží Zcash (Equihash), pool každý den vyplácí v BTC podle kurzu ZEC/BTC. Parametry níže si můžete upravit, grafy se přepočítají.</p>
+  <p>Denní výnos jednoho stroje od začátku dodávek (červen 2023) do {{LAST}} a odhad do zvoleného data. Stroj těží Zcash (Equihash), pool každý den vyplácí v BTC podle kurzu ZEC/BTC. Parametry níže si můžete upravit, grafy se přepočítají.</p>
   <div class="spec"><span>840 kSol/s</span><span>2 780 W</span><span>3,31 J/kSol</span><span>Equihash · Zcash</span><span>výplata v BTC</span></div>
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="start">Začátek těžby<input id="start" type="date" value="2023-06-15" min="2023-06-01" max="2026-10-12"></label>
+  <label for="start">Začátek těžby<input id="start" type="date" value="2023-06-15" min="2023-06-01" max="{{DATA_MAX}}"></label>
   <label for="kwh">Elektřina, USD/kWh<input id="kwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="poolFee">Poplatek poolu, %<input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="uptime">Uptime, %<input id="uptime" type="number" step="1" min="50" max="100" value="95"></label>
@@ -91,6 +91,7 @@
   <div><b>Výplata v BTC:</b> denní výnos v ZEC = (80 % nových ZEC + poplatky) × výkon stroje / hashrate sítě. Zbylých 20 % odměny jde do fondů Zcash (8 % Zcash Community Grants, 12 % fond řízený držiteli ZEC) podle současných pravidel do halvingu v roce 2028. Projekce počítá s 80 % i po něm. Výnos se převádí na BTC podle denního kurzu ZEC/BTC a poté se odečte poplatek poolu. Výchozí poplatek poolu je 20 % jako u S21 XP.</div>
   <div><b>Do 23. 5. 2026:</b> denní data <a href="https://github.com/coinmetrics/data">Coin Metrics Community</a> pro ZEC a BTC (cena, <code>HashRate</code> v GSol/s s 7denním průměrem, <code>IssTotNtv + FeeTotNtv</code>). Halving Zcash v listopadu 2024 snížil odměnu z 3,125 na 1,5625 ZEC/blok.</div>
   <div><b>24. 5. – 13. 10. 2026 (žlutě podbarveno):</b> denní cena ZEC z vašeho exportu z CoinMarketCap. Řádek s časem 02:00 odpovídá uzavírací ceně předchozího dne; po tomto posunu se export s Coin Metrics shoduje s mediánovou odchylkou 0,16 %. Hashrate sítě Zcash je odečtená z vašeho grafu 2Miners (zhruba po 2 týdnech, lineárně mezi body, s přesností asi ±5 dní a ±0,5 GSol/s) a přenásobená 0,96, protože 2Miners vychází v překryvu asi o 4 % výš než Coin Metrics. Růst: ~16 GSol/s koncem května, ~24 v červenci, ~29 v září, 30,6 dnes. Cena BTC je stejná jako na stránce S21 XP.</div>
+  {{LIVE_NOTE}}
   <div><b>Projekce:</b> poplatky v blocích Zcash jsou zanedbatelné (pod 0,5 % odměny), proto varianta s rostoucími poplatky jako u S21 XP tady není.</div>
   <div><b>Nezahrnuto:</b> chlazení, hosting, daně, odpisy, pokles výkonu stroje a výkyvy kurzu během dne.</div>
 </section>

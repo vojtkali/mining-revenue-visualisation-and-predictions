@@ -5,7 +5,7 @@
     python3 scripts/build_site.py --artifact OUT_DIR
                                              # claude.ai artifact files (no <html>/<head> wrapper)
 """
-import json, re, sys
+import datetime as dt, json, math, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -59,6 +59,12 @@ def read(name):
     return (SRC / name).read_text(encoding='utf-8')
 
 
+def fill(text, values, where):
+    out = re.sub(r'\{\{([\w.]+)\}\}', lambda m: str(values[m.group(1)]), text)
+    assert '{{' not in out, f'{where}: unfilled placeholder'
+    return out
+
+
 def page_html(head, body, data, app):
     parts = [read(head + '.html'), read(body + '.html'), CHART]
     if data:
@@ -66,7 +72,169 @@ def page_html(head, body, data, app):
         parts.append(read(app + '.js') + '</script>')
     else:
         parts.append('<script>' + read(app + '.js') + '</script>')
-    return '\n'.join(parts)
+    return fill('\n'.join(parts), summary_values() if body == 'sumbody' else page_values(), body)
+
+
+# ---------- values derived from the datasets ----------
+EST_END = '2026-10-13'   # last day of the hand-collected estimates (yellow zone); later rows come from public APIs
+D = dt.date.fromisoformat
+
+
+def cz_date(d):
+    d = D(d) if isinstance(d, str) else d
+    return f'{d.day}. {d.month}. {d.year}'
+
+
+def meta():
+    return json.loads((DATA / 'meta.json').read_text(encoding='utf-8'))
+
+
+def page_values():
+    rows = {k: json.loads((DATA / f'{k}.json').read_text(encoding='utf-8'))['rows'] for k in ('btc', 'zec', 'l9')}
+    last = rows['btc'][-1]['d']
+    assert all(r[-1]['d'] == last for r in rows.values()), 'datasets end on different days'
+    live = last > EST_END
+    first_live = cz_date(D(EST_END) + dt.timedelta(1))
+    return {
+        'LAST': cz_date(last),
+        'NEXT': cz_date(D(last) + dt.timedelta(1)),
+        'DATA_MAX': (D(last) - dt.timedelta(1)).isoformat(),
+        'P_BTC': round(rows['btc'][-1]['p']),
+        'P_ZEC': round(rows['zec'][-1]['z']),
+        'P_LTC': round(rows['l9'][-1]['l'], 2),
+        'P_DOGE': round(rows['l9'][-1]['g'], 4),
+        'LIVE_NOTE': (f'<div><b>{first_live} – {cz_date(last)}:</b> denní aktualizace z veřejných API: ceny z CoinGecko '
+                      '(záložně Coinbase a Blockchair), hashrate a odměny BTC z mempool.space, hashrate Litecoinu z litecoinspace.org, '
+                      'Zcash a Dogecoinu z Blockchair (24h odhad vyhlazený). Odměny ZEC, LTC a DOGE za den zůstávají na poslední známé '
+                      'hodnotě, při halvingu se půlí.</div>') if live else '',
+        'LIVE_SENT': f' Od {first_live} denní data z veřejných API (CoinGecko, mempool.space, Blockchair).' if live else '',
+        'LIVE_SHORT': f' od {first_live} denní data z veřejných API,' if live else '',
+    }
+
+
+# ---------- summary page (index) from numbers harvested off the FAQ pages ----------
+MONTHS = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec']
+MONTHS_GEN = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince']
+# rows of each FAQ scenario table: worst, base, best
+SCEN = {'s21': ('Pesimistický', 'Základní', 'Optimistický'), 'z15': ('Propad', 'Korekce', 'Růst'), 'l9': ('Propad', 'Základní', 'Růst')}
+
+
+MINUS = '\u2212'
+
+
+def num(s):
+    s = s.replace('\u2212', '-').replace('\xa0', '').replace(' ', '').replace('$', '').replace('%', '').replace('BTC', '').replace(',', '.')
+    return float(s)
+
+
+def sep(n):
+    return f'{n:,}'.replace(',', ' ')
+
+
+def usd(x, sign=False):
+    s = '$' + sep(abs(round(x)))
+    return ('\u2212' if x < 0 else '+' if sign else '') + s
+
+
+def sig3(x):
+    return round(x, 2 - int(math.floor(math.log10(abs(x))))) if x else 0
+
+
+def money_cell(usd_text, rate, step):
+    czk = round(num(usd_text) * rate / step) * step
+    return (f'<td><span class="money"><span class="usd">{usd_text}</span>'
+            f'<span class="czk">{MINUS if czk < 0 else ""}{sep(abs(czk))} Kč</span></span></td>')
+
+
+def parse_cz(s):
+    m = re.fullmatch(r'(\d+)\. (\d+)\. (\d{4})', s.strip())
+    return (int(m.group(3)), int(m.group(2))) if m else None
+
+
+def month_year(s, none='do 5 let ne'):
+    ym = parse_cz(s)
+    return f'{MONTHS[ym[1] - 1]} {ym[0]}' if ym else none
+
+
+def since(s):
+    ym = parse_cz(s)
+    return f'od {MONTHS_GEN[ym[1] - 1]} {ym[0]}' if ym else None
+
+
+def pct_signed(x):
+    x = round(x)
+    return ('\u2212' if x < 0 else '+' if x > 0 else '') + f'{abs(x)} %'
+
+
+def summary_values():
+    h = json.loads((DATA / 'harvest.json').read_text(encoding='utf-8'))
+    m = meta()
+    rate = float(m['czk'])
+    live = page_values()['LIVE_SHORT']
+    out = {'today': h['s21']['v']['today'], 'rate': f'{rate:.2f}'.replace('.', ','), 'rateSrc': m['czkSource'],
+           'liveShort': ',' + live.rstrip(',') if live else ''}
+    chart, mine, lump, dca = [], [], [], []
+    for k in ('s21', 'z15', 'l9'):
+        v, pay = h[k]['v'], h[k]['pay']
+        head = [c.lower() for c in pay[0]]
+        col = lambda name: next(i for i, c in enumerate(head) if c.startswith(name))
+        row = lambda lbl: next(r for r in pay[1:] if r[0].startswith(lbl))
+        worst, base, best = (row(l) for l in SCEN[k])
+        c_val, c_hold, c_roi, c_loss = col('stack − zaplaceno'), col('zaplacení, držení'), col('roi'), col('první den ve ztrátě')
+        val = lambda r: num(r[c_val])
+        chart.append([round(val(worst)), round(val(base)), round(val(best))])
+        net_day = num(v['netDay'])
+        margin = num(v['beMargin'])
+        coin = {'s21': 'BTC', 'z15': 'ZEC', 'l9': 'DOGE i LTC'}[k]
+        if margin <= 0:
+            margin_txt = 'už dnes ve ztrátě'
+        elif k == 'l9':
+            margin_txt = f'<span class="n">{v["beMargin"]}</span> (DOGE i LTC)'
+        else:
+            margin_txt = f'<span class="n">{v["beMargin"]}</span> ({coin} pod {usd(sig3(num(v["bePrice"])))})'
+        loss_base, loss_worst = since(base[c_loss]), since(worst[c_loss])
+        x = {
+            'btcM': v['btcMonth'].replace(' BTC', ''), 'margin': margin_txt,
+            'payBase': month_year(base[c_hold]), 'payBest': month_year(best[c_hold]), 'payWorst': month_year(worst[c_hold]),
+            'cellBase': f'<td class="{"pos" if val(base) >= 0 else "neg"}"><span class="n">{usd(val(base), True)}</span></td>',
+            'perBtc': usd(sig3(num(v['costPerBtc']))),
+            'netDay': v['netDay'], 'netMonth': v['netMonth'], 'revMonth': v['revMonth'],
+            'range': v['netMin'] + '–' + v['netMax'].replace('$', ''),
+            'btc12': f"{num(v['btc12']):.3f}".replace('.', ',') + ' BTC', 'net12': v['net12'],
+            'paySimple': v['paySimple'], 'roiY': v['roiY'], 'roi5': pct_signed(num(base[c_roi])),
+            'hrGrowth': pct_signed(num(v['hrGrowth12'])),
+            'drop10': pct_signed((num(v['netDn10']) / net_day - 1) * 100) if net_day > 0 else 've ztrátě už teď',
+            'be': usd(sig3(num(v['bePrice']))) if k != 'l9' else '', 'beH': usd(sig3(num(v['bePriceH']))) if k != 'l9' else '',
+            'worstLoss': f'{loss_worst} denně ve ztrátě' if loss_worst else 'do ztráty nespadne',
+            'worstEnd': usd(sig3(val(worst)), True),
+            'beat': f'{round(h[k]["lumpBeat"][0] / h[k]["lumpBeat"][1] * 100)} %',
+        }
+        if k == 'z15':
+            x['worstPay'] = f'stroj se přesto zaplatí ({month_year(worst[c_hold])})' if parse_cz(worst[c_hold]) else 'stroj se do 5 let nezaplatí'
+            x['worstLoss'] = f'{loss_worst} je ve ztrátě' if loss_worst else 'do ztráty nespadne'
+        if k == 'l9':
+            x['ltcHalf'] = v['ltcShareHalf']; x['dogeShare'] = v['dogeShare']
+            x['worstLoss'] = f'ztráta {loss_worst}' if loss_worst else 'bez denní ztráty'
+        if k == 's21':
+            x['halvingTail'] = (f', takže v základním scénáři je stroj denně ve ztrátě {loss_base}' if loss_base
+                                else ', v základním scénáři ale stroj do ztráty nespadne')
+        if k == 'z15':
+            x['halvingTail'] = f', v základním scénáři ztráta {loss_base}' if loss_base else ', rezerva zůstává'
+        out.update({f'{k}.{a}': b for a, b in x.items()})
+        out.setdefault('rowDay', ''); out['rowDay'] += money_cell(v['netDay'], rate, 1)
+        out.setdefault('rowMonth', ''); out['rowMonth'] += money_cell(v['netMonth'], rate, 10)
+        mine.append(num(v['btc5y'])); lump.append(num(v['lump5y'])); dca.append(num(v['dca5y']))
+    cols = list(zip(mine, lump, dca))
+    for key, vals, i in (('rowMine', mine, 0), ('rowLump', lump, 1), ('rowDca', dca, 2)):
+        out[key] = ''.join(
+            (f'<td><b><span class="n">{f"{x:.3f}".replace(".", ",")}</span></b></td>' if x == max(cols[j])
+             else f'<td><span class="n">{f"{x:.3f}".replace(".", ",")}</span></td>') for j, x in enumerate(vals))
+    names = ['S21 XP', 'Z15 Pro', 'L9']
+    win = [names[j] for j, c in enumerate(cols) if c[0] == max(c)]
+    out['winners'] = ('Těžba nevyhrává u žádného stroje.' if not win else
+                      f'Těžba vyhrává u {" a ".join(win)}.' if len(win) < 3 else 'Těžba vyhrává u všech tří strojů.')
+    out['CHART'] = json.dumps(chart)
+    return out
 
 
 def public(out, html, label):

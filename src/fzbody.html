@@ -6,8 +6,8 @@
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="zZec">Cena ZEC, USD<input id="zZec" type="number" step="10" min="1" value="1219"></label>
-  <label for="zBtc">Cena BTC, USD<input id="zBtc" type="number" step="1000" min="1000" value="83231"></label>
+  <label for="zZec">Cena ZEC, USD<input id="zZec" type="number" step="10" min="1" value="{{P_ZEC}}"></label>
+  <label for="zBtc">Cena BTC, USD<input id="zBtc" type="number" step="1000" min="1000" value="{{P_BTC}}"></label>
   <label for="zKwh">Elektřina, USD/kWh<input id="zKwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="zFee">Poplatek poolu, %<input id="zFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="zUp">Uptime, %<input id="zUp" type="number" step="1" min="50" max="100" value="95"></label>
@@ -142,6 +142,6 @@
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě do 23. 5. 2026 z Coin Metrics (ceny ZEC a BTC, hashrate a odměny), potom cena ZEC z CoinMarketCap, cena BTC z grafu a hashrate Zcash z grafu 2Miners. Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash roste zadaným tempem a sleduje cenu ZEC, halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
+  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě do 23. 5. 2026 z Coin Metrics (ceny ZEC a BTC, hashrate a odměny), potom cena ZEC z CoinMarketCap, cena BTC z grafu a hashrate Zcash z grafu 2Miners.{{LIVE_SENT}} Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash roste zadaným tempem a sleduje cenu ZEC, halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
 </section>
 </div>

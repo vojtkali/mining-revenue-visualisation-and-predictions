@@ -6,9 +6,9 @@
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="qLtc">Cena LTC, USD<input id="qLtc" type="number" step="1" min="1" value="61.34"></label>
-  <label for="qDoge">Cena DOGE, USD<input id="qDoge" type="number" step="0.005" min="0.001" value="0.0844"></label>
-  <label for="qBtc">Cena BTC, USD<input id="qBtc" type="number" step="1000" min="1000" value="83231"></label>
+  <label for="qLtc">Cena LTC, USD<input id="qLtc" type="number" step="1" min="1" value="{{P_LTC}}"></label>
+  <label for="qDoge">Cena DOGE, USD<input id="qDoge" type="number" step="0.005" min="0.001" value="{{P_DOGE}}"></label>
+  <label for="qBtc">Cena BTC, USD<input id="qBtc" type="number" step="1000" min="1000" value="{{P_BTC}}"></label>
   <label for="qKwh">Elektřina, USD/kWh<input id="qKwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="qFee">Poplatek poolu, %<input id="qFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="qUp">Uptime, %<input id="qUp" type="number" step="1" min="50" max="100" value="95"></label>
@@ -143,6 +143,6 @@
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: L9, 16,2 GH/s, 3 260 W. Data sítí do 23. 5. 2026 z Coin Metrics (ceny LTC, DOGE a BTC, hashrate a odměny), potom ceny LTC a DOGE a hashrate Litecoinu z bodů z vyhledávání a cena BTC z grafu. Projekce: ceny LTC a DOGE podle scénáře, cena BTC o zadané procento ročně, hashrate Scrypt roste zadaným tempem a sleduje ceny LTC a DOGE, halving Litecoinu kolem 30. 7. 2027, Dogecoin bez halvingu, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/EV6kP3pBeG4WnoPVSpGfAv">L9: merge mining LTC + DOGE</a>. Cena stroje je $7 100.</div>
+  <div>Stroj: L9, 16,2 GH/s, 3 260 W. Data sítí do 23. 5. 2026 z Coin Metrics (ceny LTC, DOGE a BTC, hashrate a odměny), potom ceny LTC a DOGE a hashrate Litecoinu z bodů z vyhledávání a cena BTC z grafu.{{LIVE_SENT}} Projekce: ceny LTC a DOGE podle scénáře, cena BTC o zadané procento ročně, hashrate Scrypt roste zadaným tempem a sleduje ceny LTC a DOGE, halving Litecoinu kolem 30. 7. 2027, Dogecoin bez halvingu, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/EV6kP3pBeG4WnoPVSpGfAv">L9: merge mining LTC + DOGE</a>. Cena stroje je $7 100.</div>
 </section>
 </div>

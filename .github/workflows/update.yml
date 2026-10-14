@@ -1,0 +1,45 @@
+name: Denní aktualizace dat
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # every day 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and Chart.js
+        run: |
+          npm install --no-save --no-package-lock playwright@1.64.0 chart.js@4.4.1
+          npx playwright install --with-deps chromium
+      - name: Fetch today's prices and hashrates
+        run: python3 scripts/update_live.py
+      - name: Build pages
+        run: python3 scripts/build_site.py
+      - name: Read numbers off the FAQ pages for the summary
+        run: node scripts/harvest.js
+      - name: Rebuild summary page
+        run: python3 scripts/build_site.py
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/derived docs
+          if git diff --cached --quiet; then echo 'nothing changed'; exit 0; fi
+          git commit -m "Denní aktualizace dat $(date -u +%F)"
+          git push

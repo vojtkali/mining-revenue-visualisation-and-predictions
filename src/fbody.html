@@ -6,7 +6,7 @@
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="fPrice">Cena BTC, USD<input id="fPrice" type="number" step="1000" min="1000" value="83231"></label>
+  <label for="fPrice">Cena BTC, USD<input id="fPrice" type="number" step="1000" min="1000" value="{{P_BTC}}"></label>
   <label for="fKwh">Elektřina, USD/kWh<input id="fKwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="fFee">Poplatek poolu, %<input id="fFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="fUp">Uptime, %<input id="fUp" type="number" step="1" min="50" max="100" value="95"></label>
@@ -113,6 +113,6 @@
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: 270 TH/s, 3 645 W. Data sítě do 23. 5. 2026 z Coin Metrics (denní cena BTC, hashrate a odměny), do 13. 10. 2026 ceny odečtené z grafu a hashrate z úprav obtížnosti. Projekce: cena BTC se mění o zadané procento ročně, hashrate roste zadaným tempem, halving kolem 10. 4. 2028, transakční poplatky na dnešní úrovni, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/DiNVfn1d7mGmYRQYYaENSj">S21 XP: těžba od uvedení na trh</a>.</div>
+  <div>Stroj: 270 TH/s, 3 645 W. Data sítě do 23. 5. 2026 z Coin Metrics (denní cena BTC, hashrate a odměny), do 13. 10. 2026 ceny odečtené z grafu a hashrate z úprav obtížnosti.{{LIVE_SENT}} Projekce: cena BTC se mění o zadané procento ročně, hashrate roste zadaným tempem, halving kolem 10. 4. 2028, transakční poplatky na dnešní úrovni, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/DiNVfn1d7mGmYRQYYaENSj">S21 XP: těžba od uvedení na trh</a>.</div>
 </section>
 </div>

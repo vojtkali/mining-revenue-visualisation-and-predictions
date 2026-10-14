@@ -29,13 +29,24 @@ Všechny parametry (cena elektřiny, poplatek poolu, uptime, cena stroje, scén�
 ## Data
 
 - `data/derived/*.json` – denní datasety použité na stránkách (cena, hashrate sítě, odměny, hashvalue).
-- Do 23. 5. 2026 [Coin Metrics Community Data](https://github.com/coinmetrics/data); poté ceny BTC odečtené z denního grafu, ceny ZEC z exportu CoinMarketCap (`data/manual/`), hashrate Zcash z grafu 2Miners a pro LTC/DOGE body z veřejných zdrojů. Úseky po 23. 5. 2026 jsou na stránkách podbarvené jako odhad.
+- Do 23. 5. 2026 [Coin Metrics Community Data](https://github.com/coinmetrics/data); poté ceny BTC odečtené z denního grafu, ceny ZEC z exportu CoinMarketCap (`data/manual/`), hashrate Zcash z grafu 2Miners a pro LTC/DOGE body z veřejných zdrojů. Úsek 24. 5. – 13. 10. 2026 je na stránkách podbarvený jako odhad.
+- Od 14. 10. 2026 se data doplňují denně z veřejných API (`scripts/update_live.py`): ceny CoinGecko (záložně Coinbase, Blockchair), hashrate a odměny BTC z mempool.space, hashrate LTC z litecoinspace.org, ZEC a DOGE z Blockchair, kurz USD/CZK z ČNB (`data/derived/meta.json`).
+- `data/derived/harvest.json` – čísla přečtená z vypočtených FAQ stránek (`scripts/harvest.js`), z nich se skládá souhrn `index.html`.
+
+## Automatická aktualizace
+
+GitHub Action `.github/workflows/update.yml` běží každý den v 6:17 UTC (a ručně přes *Run workflow*): stáhne aktuální data, sestaví stránky, přečte čísla pro souhrn, sestaví souhrn a změny commitne do `main`. GitHub Pages je pak zveřejní. Když chybí některá cena, běh skončí chybou a nic se nezapíše.
 
 ## Sestavení
 
 ```bash
-scripts/rebuild_data.sh          # stáhne Coin Metrics, přepočítá data a sestaví docs/
-python3 scripts/build_site.py    # jen sestaví docs/ z src/ a data/derived/
+python3 scripts/update_live.py   # doplní data do dneška z veřejných API
+python3 scripts/build_site.py    # sestaví docs/ z src/ a data/derived/
+npm i --no-save playwright@1.64.0 chart.js@4.4.1 && npx playwright install chromium
+node scripts/harvest.js          # přečte čísla z FAQ stránek pro souhrn
+python3 scripts/build_site.py    # znovu, aby souhrn použil nová čísla
+scripts/rebuild_data.sh          # přepočet z Coin Metrics od začátku (data končí 13. 10. 2026,
+                                 # denní řádky z API by se nahradily interpolací; spusťte pak update_live.py)
 ```
 
 Výpočty jsou modelové scénáře, ne investiční doporučení ani záruka výnosu.

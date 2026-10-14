@@ -2,7 +2,7 @@ const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).
 let chart;
 function render(){
   if (chart) chart.destroy();
-  const v = [[-9165,-4460,11030],[10930,41223,78219],[-9327,130,4689]];
+  const v = {{CHART}};
   const ds = [['Nejhorší','--s2'],['Základní','--s1'],['Nejlepší','--s3']].map(([l,c],i) => ({label:l, data:v.map(r=>r[i]), backgroundColor:css(c), borderRadius:4, borderSkipped:false, barPercentage:.8, categoryPercentage:.7}));
   const fmt = x => (x<0?'−':'+')+'$'+Math.abs(Math.round(x)).toLocaleString('cs-CZ');
   chart = new Chart(document.getElementById('cSum'), {type:'bar', data:{labels:['S21 XP','Z15 Pro','L9'], datasets:ds},

@@ -1,12 +1,12 @@
 <div class="wrap">
 <header>
   <h1>Antminer L9: merge mining LTC + DOGE s výplatou v BTC</h1>
-  <p>Denní výnos jednoho stroje od uvedení (květen 2024) do 13. 10. 2026 a odhad do zvoleného data. L9 těží algoritmus Scrypt a díky merge miningu dostává současně odměny v Litecoinu (LTC) i Dogecoinu (DOGE). Pool obojí každý den převede a vyplatí v BTC. Parametry níže si můžete upravit, grafy se přepočítají.</p>
+  <p>Denní výnos jednoho stroje od uvedení (květen 2024) do {{LAST}} a odhad do zvoleného data. L9 těží algoritmus Scrypt a díky merge miningu dostává současně odměny v Litecoinu (LTC) i Dogecoinu (DOGE). Pool obojí každý den převede a vyplatí v BTC. Parametry níže si můžete upravit, grafy se přepočítají.</p>
   <div class="spec"><span>16,2 GH/s</span><span>3 260 W</span><span>0,20 J/MH</span><span>Scrypt · LTC + DOGE</span><span>výplata v BTC</span></div>
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="start">Začátek těžby<input id="start" type="date" value="2024-05-15" min="2024-05-01" max="2026-10-12"></label>
+  <label for="start">Začátek těžby<input id="start" type="date" value="2024-05-15" min="2024-05-01" max="{{DATA_MAX}}"></label>
   <label for="kwh">Elektřina, USD/kWh<input id="kwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="poolFee">Poplatek poolu, %<input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="uptime">Uptime, %<input id="uptime" type="number" step="1" min="50" max="100" value="95"></label>
@@ -95,6 +95,7 @@
   <div><b>Merge mining:</b> stroj těží Litecoin a současně se stejnou prací Dogecoin (a případně další menší mince, které tu nepočítáme). Denní výnos = LTC za den × podíl stroje na hashrate LTC × cena LTC + DOGE za den × podíl na hashrate DOGE × cena DOGE. Pool obojí převede na BTC podle denních kurzů a odečte poplatek.</div>
   <div><b>Do 23. 5. 2026:</b> denní data <a href="https://github.com/coinmetrics/data">Coin Metrics Community</a> pro LTC, DOGE a BTC (ceny, <code>HashRate</code> v TH/s se 7denním průměrem, <code>IssTotNtv + FeeTotNtv</code>).</div>
   <div><b>24. 5. – 13. 10. 2026 (žlutě podbarveno):</b> hrubý odhad. Ceny LTC a DOGE jsou lineárně dopočítané z několika bodů z vyhledávání (LTC ~$51 začátkem června, ~$44 v srpnu, $61 k 13. 10.; DOGE ~$0,10 v květnu, $0,084 k 13. 10.), hashrate Litecoinu z údaje 2,44 PH/s k 12. 10. 2026. Cena BTC je stejná jako na stránce S21 XP. Zpřesním, pokud dodáte exporty cen LTC a DOGE a hashrate Litecoinu za letošek.</div>
+  {{LIVE_NOTE}}
   <div><b>Nezahrnuto:</b> chlazení, hosting, daně, odpisy, pokles výkonu stroje, další merge-mined mince a výkyvy kurzu během dne.</div>
 </section>
 </div>

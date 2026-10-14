@@ -6,7 +6,7 @@
 </header>
 
 <form class="controls" id="f" onsubmit="return false">
-  <label for="start">Začátek těžby<input id="start" type="date" value="2023-06-15" min="2023-06-01" max="2026-10-12"></label>
+  <label for="start">Začátek těžby<input id="start" type="date" value="2023-06-15" min="2023-06-01" max="{{DATA_MAX}}"></label>
   <label for="kwh">Elektřina, USD/kWh<input id="kwh" type="number" step="0.005" min="0" value="0.07"></label>
   <label for="poolFee">Poplatek poolu, %<input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
   <label for="uptime">Uptime, %<input id="uptime" type="number" step="1" min="50" max="100" value="95"></label>
@@ -59,6 +59,6 @@
   <h3>Metodika</h3>
   <div><b>Částka:</b> stejná jako v grafu 3 na hlavní stránce: cena stroje plus elektřina za celé období těžby (od začátku těžby do konce odhadu). Při pozdějším nákupu leží peníze do dne nákupu bez úroku.</div>
   <div><b>Těžba:</b> stejný výpočet jako na hlavní stránce (konstantní poplatky, růst hashrate, halving 2028). Stroj běží nepřetržitě.</div>
-  <div><b>Ceny:</b> do 23. 5. 2026 denní data Coin Metrics, potom ceny BTC odečtené z vašeho grafu a ceny ZEC z exportu CoinMarketCap, od 14. 10. 2026 projekce podle zvoleného scénáře.</div>
+  <div><b>Ceny:</b> do 23. 5. 2026 denní data Coin Metrics, potom ceny BTC odečtené z vašeho grafu a ceny ZEC z exportu CoinMarketCap,{{LIVE_SHORT}} od {{NEXT}} projekce podle zvoleného scénáře.</div>
 </section>
 </div>
