@@ -56,7 +56,10 @@ PUBLIC_CSS = '''<style>
 
 
 def read(name):
-    return (SRC / name).read_text(encoding='utf-8')
+    text = (SRC / name).read_text(encoding='utf-8')
+    if name.endswith('.js'):  # /*@include other.js*/ pulls a shared block into the app's own scope
+        text = re.sub(r'/\*@include ([\w.]+)\*/', lambda m: read(m.group(1)), text)
+    return text
 
 
 def fill(text, values, where):

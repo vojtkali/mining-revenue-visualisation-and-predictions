@@ -171,9 +171,12 @@ function renderProj(p, s, iT){
   const res = Object.keys(SC).map(k => { const r = compute(p, k), e = r[r.length-1];
     return {k, name:SC[k][0], col:SC[k][1], r, e, off:r.slice(iT+1).filter(x=>x.loss).length,
             pay:r.find(x=>x.d>TODAY && x.hodl>=p.hw), held:r.slice(iT).every(x=>x.hodl>=p.hw)}; });
+  const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
+  res.forEach(x => { const [n,,b,z1,z2] = SC[x.k], t = `${n} (ZEC ${sgp(pctv(z1))}, pak ${sgp(pctv(z2,-90))} / rok; BTC ${sgp(pctv(b,-90))})`;
+    x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
   const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
     .concat([ref('Cena stroje', L.map(()=>p.hw))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));

@@ -20,7 +20,18 @@ const pct = (v, d=0) => v===null ? '—' : (v*100).toLocaleString('cs-CZ',{maxim
 const sats = v => Math.round(v*1e8).toLocaleString('cs-CZ') + ' sats';
 const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsíců` : `${y.toLocaleString('cs-CZ',{minimumFractionDigits:1,maximumFractionDigits:1})} roku`; };
 const KS = 840, W = 2780;
-const SCN = [['Propad ZEC −70 %, pak 0 %; BTC +10 %',-.70,0,'--s2',.10],['Stagnace ZEC 0 %',0,0,'--fg2'],['Korekce ZEC −40 %, pak +10 % ročně',-.40,.10,'--s1'],['Růst ZEC +30 %, pak +20 % ročně',.30,.20,'--s3']];
+const SCN_DEF = [['Propad ZEC −70 %, pak 0 %; BTC +10 %',-.70,0,'--s2',.10],['Stagnace ZEC 0 %',0,0,'--fg2'],['Korekce ZEC −40 %, pak +10 % ročně',-.40,.10,'--s1'],['Růst ZEC +30 %, pak +20 % ročně',.30,.20,'--s3']];
+// with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, ZEC 1st year, ZEC later]
+const SCN_IN = [['Pesimistický','bB','zB1','zB2'], null, ['Základní','bM','zM1','zM2'], ['Optimistický','bU','zU1','zU2']];
+const pcs = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100))} %`;
+function scnNow(){
+  const v = (id, lo) => Math.max(lo, (parseFloat(document.getElementById(id)?.value) || 0)/100);
+  if (!document.getElementById('bM')) return SCN_DEF;
+  return SCN_DEF.map((s,i) => { const m = SCN_IN[i];
+    if (!m) { const br = v('bM',-.9); return [`Stagnace ZEC 0 %; BTC ${pcs(br)} ročně`, 0, 0, s[3], br]; }
+    const br = v(m[1],-.9), z1 = v(m[2],-.95), z2 = v(m[3],-.9);
+    return [`${m[0]}: ZEC ${pcs(z1)}, pak ${pcs(z2)} ročně; BTC ${pcs(br)}`, z1, z2, s[3], br]; });
+}
 
 function P(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
@@ -50,6 +61,47 @@ function proj(p, z1, z2, g=p.g, years=5){
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
 
+/*@include edge.js*/
+// "what would have to happen" for Z15 Pro: o = proj params + z1, z2 (ZEC path) and rs (resale share of hardware price)
+function edgeSimZ(o){
+  const {z1, z2, rs=0, ...pp} = o, pr = proj(pp, z1, z2);
+  const cmp = Economics.compare(pr.out, {hw:pp.hw, elecDay:pr.elec, energyGrowth:energyGrowth()}), c = cmp.at(-1);
+  return {mine:pr.end.stack+rs*pp.hw, spot:c.spotValue, dca:c.dcaValue, btcM:pr.btc, btcS:c.spot, btcD:c.dca, out:pr.out, cmp};
+}
+function renderEdgeZ(p, base){
+  const n1 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:1}), n3 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:3});
+  const sgn = v => (v<0?'−':'+')+n1(Math.abs(v)), money = x => '$'+Math.round(x).toLocaleString('cs-CZ');
+  const o0 = {...base.pp, z1:base.z1, z2:base.z2};
+  const LV = {
+    kwh:  {n:'Cena elektřiny', cur:o0.kwh, set:(o,x)=>{o.kwh=x}, min:0, max:.5, step:.01, dir:'pod', fx:x=>n3(x)+' USD/kWh', ax:x=>n3(x)},
+    z1:   {n:'Cena ZEC za první rok', cur:o0.z1*100, set:(o,x)=>{o.z1=x/100}, min:-95, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' %', ax:x=>sgn(x)+' %'},
+    z2:   {n:'Růst ceny ZEC v dalších letech', cur:o0.z2*100, set:(o,x)=>{o.z2=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    zec:  {n:'Cena ZEC v den nákupu', cur:o0.zec, set:(o,x)=>{o.zec=x}, min:5, max:o0.zec*50, step:Math.max(10,o0.zec*.1), dir:'nad', fx:money, ax:x=>'$'+kfmt(x)},
+    br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Zcash', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
+    fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
+    rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},
+  };
+  const VAR = [
+    {t:'ZEC si udrží cenu po prudkém růstu', key:'z1', base:{},
+     m:'ZEC během roku 2025–2026 vyrostl z desítek na více než tisíc USD. Pokud se cena v prvním roce po nákupu nezlomí, těžba vyplácí hodně BTC; korekce o desítky procent je ale po takovém růstu obvyklá.'},
+    {t:'Síť Zcash přestane růst', key:'g', base:{},
+     m:'Výkon sítě Zcash sleduje cenu ZEC: po růstu ceny přibývají stroje Z15 a Z15 Pro. Kdyby se nové stroje nedostaly na trh (omezená výroba Equihash ASICů) nebo by část minerů odešla, zbývající stroje dostávají větší podíl odměn.'},
+    {t:'BTC roste pomaleji než ZEC', key:'br', base:{},
+     m:'Pool vyplácí v BTC podle kurzu ZEC/BTC. Když BTC roste pomaleji, za stejné ZEC dostanete víc BTC, kdežto spot a DCA nakupují dražší BTC jen podle ceny BTC.'},
+    {t:'Levná elektřina (0,03 USD/kWh) a pomalejší síť Zcash', key:'g', base:{kwh:.03},
+     m:'Hosting na levném zdroji (vlastní FVE s přebytky, hydro, Skandinávie, Paraguay, Etiopie) a k tomu období, kdy síť Zcash roste pomalu.'},
+    {t:'ZEC po korekci stagnuje, elektřina 0,05 USD/kWh, levnější stroj', key:'hw', base:{kwh:.05, z1:-.4, z2:0},
+     m:'ZEC se po prudkém růstu propadne o 40 % a pak se cena nehýbe. Rozhoduje, za kolik stroj koupíte: ceny Equihash ASICů kolísají s cenou ZEC.'},
+    {t:'Prodej stroje za vyšší cenu, než stál', key:'rs', base:{},
+     m:'Ceny použitých strojů sledují výnosnost těžby. Při drahém ZEC se Z15 Pro prodávají i nad původní cenou, v medvědím trhu za zlomek. Po 5 letech a jednom halvingu ZEC je ale vysoká prodejní cena méně pravděpodobná.'},
+  ];
+  edgeSchedule({sim:edgeSimZ, o0, LV, VAR, scLabel:base.name.charAt(0).toLowerCase()+base.name.slice(1),
+    combo:{t:'Souhra: levná energie, levnější stroj, ZEC drží cenu, pomalá síť', base:{kwh:.03, hw:Math.min(o0.hw,6000), z1:0, g:0},
+      text:'Levný zdroj energie a cenu stroje lze ovlivnit. Aby ZEC držel cenu a síť zároveň nerostla, musel by ale trh s Equihash stroji zůstat omezený.'}});
+}
+
 function render(){
   const p = P(); charts.forEach(c=>c.destroy()); charts = [];
   const eff = KS*p.up*(1-p.fee), zecDay = L0.mz/(L0.hr*1e6)*eff, revDay = zecDay*p.zec, btcDay = revDay/p.btc;
@@ -60,12 +112,14 @@ function render(){
   const sum = (a,k) => a.reduce((s,x)=>s+x[k],0), h6 = hist.filter(x=>x.d>from6);
   const hps = hist.map(x=>x.hp), chg = hist.slice(1).map((x,i)=>Math.abs(x.hp/hist[i].hp-1)).sort((a,b)=>a-b), nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
-  const sc = SCN.map(([name,z1,z2,col,br]) => ({name,z1,z2,col,...proj(br===undefined?p:{...p,br},z1,z2)}));
+  const SCN = scnNow(), sc = SCN.map(([name,z1,z2,col,br]) => { const pp = br===undefined?p:{...p,br}; return {name,z1,z2,col,pp,...proj(pp,z1,z2)}; });
   const base = sc[p.si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
   const dcaS = comparison.map(o=>o.dca), lumpS = comparison.map(o=>o.spot);
   renderStrategyTable(base.out,p,base.elec);
+  renderEdgeZ(p, base);
+  const p10 = proj(base.pp, base.z1, base.z2, base.pp.g, 10);
   const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
   const V = {
     dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
@@ -82,6 +136,7 @@ function render(){
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
     price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(comparison.at(-1).dcaValue),
+    btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
     bearZec: usd(p.zec*0.3), bearEnd: usd(sc[0].end.hodl),
