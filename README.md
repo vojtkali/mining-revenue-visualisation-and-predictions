@@ -17,7 +17,7 @@ Společný modul `src/economics.js` zajišťuje stejný harmonogram vkladů vše
 - Těžba + držení: všechny výplaty zůstávají v BTC, energie se platí z vnějších vkladů.
 - Těžba + prodej: výplaty se denně prodávají a hromadí v USD. Energie se financuje stejnými vnějšími vklady. Prodejní výnos tedy není podruhé použitý jako nový vklad.
 - Spot: nákup BTC za počáteční vklad a za další vklady ve dnech ročních plateb energie. **Neinvestuje budoucí pětiletý rozpočet první den.**
-- DCA: každý roční vklad se rozdělí do 53 nákupů v jeho dnech 0, 7, …, 364. Nevyužitá hotovost se započítává do celkové hodnoty, bez úroku.
+- DCA: každý roční vklad se rozdělí do 53 nákupů v jeho dnech 0, 7, …, 364. V prvním roce se tak rozkládá cena stroje + první rok energie, v dalších letech jen roční platba energie. Nevyužitá hotovost se započítává do celkové hodnoty, bez úroku.
 - Poslední necelý rok také vyžaduje celou roční platbu. Nevyčerpaná energie je zobrazena odděleně a nepředpokládá se její vrácení. Prodejní hodnota ASICu je 0; servis, daně ani obchodní poplatky nákupů BTC nejsou modelované.
 - Výsledek = BTC × aktuální cena + hotovost − všechny vklady. ROI všech vkladů používá všechny dosavadní platby; samostatně je uveden poměr výsledku k ceně stroje. Není to anualizovaný výnos.
 - Návratnost při držení je první překročení vložené částky tržní hodnotou BTC, nikoli realizovaný příjem ani trvalá návratnost. Obnovení roční energie může výsledek znovu snížit.
@@ -35,13 +35,26 @@ BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimisti
 
 Halvingy jsou přibližná kalendářní data, skutečně závisí na výšce bloků. Projekce půlí pouze dotaci, zachovává transakční poplatky a normalizuje odměnu vůči datu posledních dat, takže už proběhlý halving neaplikuje podruhé. U ZEC je modelovaný podíl těžařů 80 % dotace; případná budoucí změna protokolu vyžaduje aktualizaci tohoto předpokladu.
 
+## Měny
+
+Všechny výpočty běží v USD: cena stroje, elektřina (USD/kWh) i ceny mincí. Koruny jsou jen přepočet pro zobrazení (souhrn a karty strojů) podle posledního kurzu ČNB uloženého v `data/derived/meta.json`, nikoli kurz v den jednotlivých plateb. Kurzové riziko plateb v CZK modelované není.
+
+## Limity modelu
+
+- Výkon sítě BTC v projekci roste zadaným tempem bez ohledu na cenu BTC (u ZEC a Scrypt sleduje cenu mince přes citlivost 0,3). V pesimistickém scénáři proto síť roste stejně rychle jako v optimistickém, ačkoli v reálu by část strojů při nízké hashprice vypnula; kapitulace minerů modelovaná není.
+- Ceny se mění plynule o stálé roční procento (CAGR); cykly, propady a volatilita nejsou modelované. Scénáře nejsou předpověď ani pravděpodobnosti.
+- Data budoucích halvingů jsou kalendářní odhad (rozestup 4 roky), skutečné datum určuje výška bloku.
+- Transakční poplatky zůstávají na dnešní úrovni v BTC za blok, pokud varianta neuvádí jinak.
+- Zbytková hodnota stroje je 0, výkon stroje v čase neklesá, poruchy a servis nejsou zahrnuté nad rámec uptime. Daně, poplatky burz a úroky z hotovosti nejsou modelované.
+- Výtěžnost je model z dat celé sítě, ne výpis konkrétního poolu; skutečné výplaty se liší podle poolu a štěstí.
+
 ## Data a reprodukovatelnost
 
 Zdrojem je [Coin Metrics Community API](https://community-api.coinmetrics.io/v4/timeseries/asset-metrics), metriky `PriceUSD`, `HashRate`, `IssTotNtv`, `FeeTotNtv` pro BTC, ZEC, LTC a DOGE, frekvence `1d`. Jednotky hashratu: BTC/LTC/DOGE TH/s, ZEC GSol/s. [Dokumentace metrik](https://docs.coinmetrics.io/network-data/network-data-overview/mining/hash-rate).
 
 - `data/source/coinmetrics.json`: úplný zdrojový snímek včetně URL, času stažení a původních čísel. Obsahuje i chybějící úsek 24. 5. – 14. 10. 2026; dřívější interpolace jsou nahrazeny denními pozorováními API.
 - `data/derived/*.json`: denní ceny UTC a zpětné sedmidenní průměry síťového hashratu a odměn. Hashrate je odhad sítě z blockchainu, nikoli přímo měřený součet strojů. Výtěžnost je model, nikoli přesná historická výplata poolu.
-- Aktualizace zahrnuje jen uzavřené UTC dny do včerejška. Chybějící den nebo veličina ukončí aktualizaci; neinterpoluje se a nepřenášejí se staré hodnoty jako nová pozorování.
+- Aktualizace zahrnuje jen uzavřené UTC dny do včerejška. Publikuje se po poslední den, který je kompletní pro všechny čtyři mince; neúplný den se doplní při dalším běhu. Zpoždění dat o více než 3 dny ukončí aktualizaci chybou. Mezery uvnitř historie aktualizaci také zastaví. Nic se neinterpoluje a staré hodnoty se nepřenášejí jako nová pozorování.
 - `data/derived/meta.json`: stav dat a datovaný kurz ČNB; pokud kurz nelze obnovit, zůstane předchozí **s původním datem**.
 - `data/manual/`: archiv původního ručního exportu, už není používán k výpočtu.
 - `data/derived/harvest.json`: souhrn skutečných výsledků vykreslených stránek pro `index.html`.
