@@ -102,15 +102,15 @@ code{font-family:var(--f-mono);font-size:12.5px}
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Výsledek před cenou stroje je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
+  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Výsledek před cenou stroje je tržba minus elektřina. Z USD získaných prodejem se jednou ročně předem zaplatí elektřina na celý další rok, proto křivka v den platby spadne a pak zase plynule roste. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
   <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (odečtená cena, hashrate z obtížnosti)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 
 <section class="card">
   <h2>2 · Těžím a držím: hodnota natěženého stacku v USD</h2>
-  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
+  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Elektřina se platí předem vždy za celý rok (v den dodání a pak každých 365 dní), proto oranžová křivka a s ní i čisté hodnoty dělají schody. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: kumulativní tržba z průběžného prodeje BTC v USD, ze které se jednou ročně zaplatí elektřina na další rok. Nad ní se držení vyplatilo víc než průběžný prodej.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej po roční platbě elektřiny (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Natěženo celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
@@ -135,7 +135,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
 <section class="card">
   <h2>5 · Scénáře: těžím a držím</h2>
   <p class="sub">Čistá hodnota stacku (natěžené BTC × cena − veškerá elektřina) za poslední rok a v projekci do <span class="endLabel"></span> pro všechny tři scénáře ceny. Sloupec „Dnů ve ztrátě“ udává, kolik dní v projekci má denní výnos menší hodnotu než elektřina; stroj přesto běží a natěží víc BTC.</p>
-  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i><span id="lg_bear">Pesimistický</span></span><span><i style="background:var(--s1)"></i><span id="lg_base">Základní</span></span><span><i style="background:var(--s3)"></i><span id="lg_bull">Optimistický</span></span><span><i class="dash"></i>Cena stroje</span></div>
   <div class="chart"><canvas id="c5" aria-label="Projekce čisté hodnoty při držení"></canvas></div>
   <div class="tbl"><table id="ptab"></table></div>
   <p class="sub" style="margin-top:10px">Scénáře nejsou předpověď. Ukazují, jak citlivý je výsledek na cenu BTC a na růst sítě. Čistá hodnota = natěžené BTC × cena v daném dni − veškerá elektřina zaplacená od začátku.</p>
@@ -393,9 +393,11 @@ function renderCompare(p,s,iT){
 function renderProj(p, s, iT){
   const res = Object.keys(SC).map(k => { const r = compute(p, k, false), e = r[r.length-1];
     return {name:SC[k][0], col:SC[k][1], r, e, off:r.slice(iT+1).filter(x=>x.loss).length, pay:r.find(x=>x.d>TODAY && x.hodl>=p.hw), held:r.slice(iT).every(x=>x.hodl>=p.hw)}; });
+  Object.keys(SC).forEach((k,i) => { const v = +$(SC[k][2]).value, t = `${SC[k][0]} (${v<0?'−':'+'}${Math.abs(v)}% / Ø rok)`;
+    res[i].label = t; const el = $('lg_'+k); if (el) el.textContent = t; });
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
   const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
     .concat([ref('Cena stroje', L.map(()=>p.hw))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
