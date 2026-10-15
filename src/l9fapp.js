@@ -11,11 +11,12 @@ let charts = [];
 
 
 const L0 = ALL[ALL.length-1], TODAY = L0.d;
-const HALVINGS = ['2027-07-30','2031-07-30'];   // Litecoin; Dogecoin has no halving
+const HALVINGS = ['2027-07-30', '2031-07-30', '2035-07-30', '2039-07-30', '2043-07-30'];
+const NEXT_HALVING = HALVINGS.find(d=>d>TODAY);   // Litecoin; Dogecoin has no halving
 const ltcSub = d => 1/Math.pow(2, HALVINGS.filter(h => d >= h).length);
 function addDays(s,n){ const d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 const daysBetween = (a,b) => Math.round((Date.parse(b)-Date.parse(a))/864e5);
-const pct = (v, d=0) => (v*100).toLocaleString('cs-CZ',{maximumFractionDigits:d}) + ' %';
+const pct = (v, d=0) => v===null ? '—' : (v*100).toLocaleString('cs-CZ',{maximumFractionDigits:d}) + ' %';
 const sats = v => Math.round(v*1e8).toLocaleString('cs-CZ') + ' sats';
 const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsíců` : `${y.toLocaleString('cs-CZ',{minimumFractionDigits:1,maximumFractionDigits:1})} roku`; };
 const GH = 16.2, W = 3260;
@@ -32,17 +33,21 @@ const ltcPerGH = L0.ml/(L0.hl*1e3), dogePerGH = L0.mg/(L0.hg*1e3);
 function proj(p, r, g=p.g, years=5){
   const N = Math.round(365*years), eff = GH*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
   let b=0, el=0, rev=0, firstLoss=null, payS=null, payH=null, btcPreH=0;
-  for (let t=1; t<=N; t++){
+  for (let t=0; t<N; t++){
     const d = addDays(TODAY, t), f = Math.pow(1+r, t/365), bp = p.btc*Math.pow(1+p.br, t/365);
     const hrF = Math.pow(1+g, t/365)*Math.pow(f, p.k);
-    const usdDay = (ltcPerGH*ltcSub(d)*p.ltc*f + dogePerGH*p.doge*f)/hrF*eff, m = usdDay/bp;
-    b += m; el += elec; rev += usdDay; if (d < HALVINGS[0]) btcPreH = b;
+    const usdDay = (((L0.ml-(L0.fl||0))*ltcSub(d)/ltcSub(TODAY)+(L0.fl||0))/(L0.hl*1e3)*p.ltc*f + dogePerGH*p.doge*f)/hrF*eff, m = usdDay/bp;
+    b += m; el += elec; rev += usdDay; if (d < NEXT_HALVING) btcPreH = b;
     if (firstLoss===null && usdDay < elec) firstLoss = d;
     if (payS===null && rev-el >= p.hw) payS = d;
     if (payH===null && b*bp-el >= p.hw) payH = d;
     out.push({d, f, bp, usd:usdDay, m, btc:b, el, stack:b*bp, hodl:b*bp-el, sell:rev-el});
   }
-  return {out, btc:b, el, elec, end:out[N-1], firstLoss, payS, payH, btcPreH};
+  const accounted = Economics.account(out,{hw:p.hw,elecDay:elec,energyGrowth:energyGrowth()});
+  firstLoss = accounted.find(o => o.m*o.price < o.elecDay)?.d ?? null;
+  payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
+  payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
+  return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
 
 function render(){
@@ -50,7 +55,7 @@ function render(){
   const eff = GH*p.up*(1-p.fee), uL = ltcPerGH*p.ltc, uD = dogePerGH*p.doge, revDay = (uL+uD)*eff, btcDay = revDay/p.btc;
   const elecDay = W/1000*24*p.kwh*p.up, netDay = revDay-elecDay, M = 30.44, shD = uD/(uL+uD);
   const beDrop = 1-elecDay/revDay, bePriceDoge = (elecDay/eff - uL)/dogePerGH;
-  const dH = daysBetween(TODAY, HALVINGS[0]);
+  const dH = daysBetween(TODAY, NEXT_HALVING);
   const from12 = addDays(TODAY,-365), from6 = addDays(TODAY,-182);
   const hist = ALL.filter(r => r.d > from12).map(r => { const m = r.hv*eff; return {d:r.d, e:r.e, rev:m*r.p, el:elecDay, net:m*r.p-elecDay, btc:m, hp:r.hv*r.p}; });
   const sum = (a,k) => a.reduce((s,x)=>s+x[k],0), h6 = hist.filter(x=>x.d>from6);
@@ -58,16 +63,18 @@ function render(){
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
   const sc = SCN.map(([name,r,col,br]) => ({name,r,col,...proj(br===undefined?p:{...p,br},r)}));
   const base = sc[p.si];
-  const lump = (p.hw + base.el)/p.btc;
-  const nB = Math.floor((base.out.length-1)/7)+1, perB = (p.hw+base.el)/nB; let dcaAcc = 0;
-  const dcaS = base.out.map((o,i) => { if (i%7===0) dcaAcc += perB/(i===0?p.btc:o.bp); return dcaAcc; });
+  const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
+  const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
+  const dcaS = comparison.map(o=>o.dca), lumpS = comparison.map(o=>o.spot);
+  renderStrategyTable(base.out,p,base.elec);
   const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
   const V = {
+    dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
     today: fmtDate(TODAY), btc: usd(p.btc), hw: usd(p.hw), fee: pct(p.fee), up: pct(p.up), btcR: (p.br>=0?'+':'')+pct(p.br),
     revDay: usd(revDay,2), elecDay: usd(elecDay,2), netDay: usd(netDay,2), revMonth: usd(revDay*M), elecMonth: usd(elecDay*M), netMonth: usd(netDay*M), netYear: usd(netDay*365),
     btcMonth: btc(btcDay*M), satsDay: sats(btcDay), ltcDay: (ltcPerGH*eff).toLocaleString('cs-CZ',{maximumFractionDigits:4}), dogeDay: Math.round(dogePerGH*eff).toLocaleString('cs-CZ'),
     dogeShare: pct(shD), ltcShare: pct(1-shD), ltcShareHalf: pct((1-shD)/2), hpGH: usd(uL+uD,3),
-    paySimple: netDay>0 ? yrs(p.hw/netDay) : 'nikdy (stroj je ve ztrátě)', roiY: pct(netDay*365/p.hw),
+    paySimple: netDay>0 ? yrs(p.hw/netDay) : 'nikdy (stroj je ve ztrátě)', roiY: pct(Economics.roi(netDay*365,p.hw)),
     netHr: `${(L0.hl/1000).toLocaleString('cs-CZ',{maximumFractionDigits:2})} PH/s`, hr12: `${(hr12.hl/1000).toLocaleString('cs-CZ',{maximumFractionDigits:2})} PH/s`,
     hrGrowth12: (L0.hl/hr12.hl-1>=0?'+':'')+pct(L0.hl/hr12.hl-1),
     hpMin: usd(Math.min(...hps),3), hpMax: usd(Math.max(...hps),3), netMin: usd(Math.min(...nets),2), netMax: usd(Math.max(...nets),2), hpChg: pct(chg[Math.floor(chg.length/2)],1),
@@ -76,7 +83,7 @@ function render(){
     payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : 'se do 5 let nezaplatí',
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
-    price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(dcaAcc*base.end.bp),
+    price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(comparison.at(-1).dcaValue),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
     bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl),
@@ -89,8 +96,8 @@ function render(){
     ['Rezerva do bodu zvratu', pct(beDrop), 'o kolik mohou klesnout ceny DOGE a LTC', beDrop],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
-  $('tPay').innerHTML = `<thead><tr><th>Scénář cen LTC a DOGE</th><th>DOGE za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
-    sc.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${usd(p.doge*x.end.f,4)}</td><td>${fmtPay(x.payS)}</td><td>${fmtPay(x.payH)}</td><td>${btc(x.btc)}</td><td>${usd(x.end.hodl-p.hw)}</td><td class="${x.end.hodl>=p.hw?'pos':'neg'}">${pct(x.end.hodl/p.hw-1)}</td><td>${x.firstLoss?fmtDate(x.firstLoss):'–'}</td></tr>`).join('')+'</tbody>';
+  $('tPay').innerHTML = `<thead><tr><th>Scénář cen LTC a DOGE</th><th>DOGE za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
+    sc.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${usd(p.doge*x.end.f,4)}</td><td>${fmtPay(x.payS)}</td><td>${fmtPay(x.payH)}</td><td>${btc(x.btc)}</td><td>${usd(x.end.hodl-p.hw)}</td><td class="${x.end.hodl>=p.hw?'pos':'neg'}">${pct(Economics.roi(x.end.hodl-p.hw,p.hw+x.el))}</td><td>${x.firstLoss?fmtDate(x.firstLoss):'–'}</td></tr>`).join('')+'</tbody>';
 
   const yrRows = []; for (let y=1; y<=5; y++){ const s0 = y===1?null:base.out[365*(y-1)-1], e = base.out[Math.min(base.out.length-1, 365*y-1)];
     const btcY = e.btc-(s0?s0.btc:0), elY = e.el-(s0?s0.el:0), sellY = e.sell-(s0?s0.sell:0);
@@ -108,7 +115,7 @@ function render(){
     line('Výnos', hist.map(x=>x.rev), css('--s1')), line('Elektřina', hist.map(x=>x.el), css('--s2')), line('Čistě', hist.map(x=>x.net), css('--s3'))]}}));
   charts.push(new Chart($('cVar'), {type:'line', plugins:[zones,crosshair], options:opts(v=>'$'+v.toFixed(2), v=>usd(v,3)+' /GH/den'), data:{labels:L, datasets:[
     line('Výnos za GH', hps, css('--s1')), ref('Bod zvratu', L.map(()=>elecDay/eff))]}}));
-  const mon = {}; base.out.forEach(o => { const k = o.d.slice(0,7)+'-01'; (mon[k] ||= {k, n:0, btc:0, rev:0, el:0}); mon[k].n++; mon[k].btc += o.m; mon[k].rev += o.usd; mon[k].el += base.elec; });
+  const mon = {}; base.out.forEach(o => { const k = o.d.slice(0,7)+'-01'; (mon[k] ||= {k, n:0, btc:0, rev:0, el:0}); mon[k].n++; mon[k].btc += o.m; mon[k].rev += o.usd; mon[k].el += o.elecDay; });
   Object.values(mon).forEach(o => { const f = 30.44/o.n; o.btc*=f; o.rev*=f; o.el*=f; });
   const MO = Object.values(mon).slice(1, -1);
   const monthlyX = o => { o.scales.x.ticks.callback = function(v){ const s=this.getLabelForValue(v); return s.slice(5,7)==='01' ? s.slice(0,4) : s.slice(5,7)==='07' ? 'čvc' : null; }; return o; };
@@ -117,18 +124,18 @@ function render(){
   charts.push(new Chart($('cBtcM'), {type:'line', plugins:[zones,crosshair], options:monthlyX(opts(yb, v=>btc(v))), data:{labels:MO.map(o=>o.k), datasets:[
     line('BTC za měsíc', MO.map(o=>o.btc), css('--s1'), {fill:'origin', backgroundColor:css('--s1')+'22'})]}}));
   charts.push(new Chart($('cHodl'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:[
-    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Elektřina celkem', base.out.map(o=>o.el), css('--s2')),
+    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Energie zaplacená předem', base.out.map(o=>o.el), css('--s2')),
     line('Hodnota stacku − elektřina', base.out.map(o=>o.hodl), css('--s3')), line('Čistě při prodeji', base.out.map(o=>o.sell), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
     ref('Cena stroje', LS.map(()=>p.hw))]}}));
   charts.push(new Chart($('cRoi'), {type:'line', plugins:[zones,crosshair], options:opts(v=>v+' %', v=>Math.round(v)+' %'), data:{labels:LS, datasets:
-    sc.map(x => line(x.name, x.out.map(o=>(o.hodl-p.hw)/p.hw*100), css(x.col))).concat([ref('Nula', LS.map(()=>0))])}}));
+    sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.15,'--s1'],[.3,'--s4'],[.6,'--s2']];
   charts.push(new Chart($('cHr'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:
     gs.map(([g,c]) => line(`Síť +${g*100} % ročně`, proj({...p, br:0}, 0, g).out.map(o=>o.btc), css(c)))}}));
   const linX = (o, lo, hi, title, fmt) => { o.scales.x = {type:'linear', min:lo, max:hi, grid:{display:false}, border:{color:css('--line')}, ticks:{color:css('--fg2'), callback:fmt, maxTicksLimit:8, font:{family:'IBM Plex Mono',size:11}}};
     o.plugins.tooltip.callbacks.title = it => `${title} ${fmt(it[0].parsed.x)}`; return o; };
   const xs = []; for (let v=-80; v<=200; v+=5) xs.push(v);
-  const halvF = (ltcPerGH/2*p.ltc + dogePerGH*p.doge)/(ltcPerGH*p.ltc + dogePerGH*p.doge)/Math.pow(1+p.g, dH/365);
+  const halvF = (((L0.ml-(L0.fl||0))/2+(L0.fl||0))/(L0.hl*1e3)*p.ltc + dogePerGH*p.doge)/(ltcPerGH*p.ltc + dogePerGH*p.doge)/Math.pow(1+p.g, dH/365);
   charts.push(new Chart($('cPrice'), {type:'line', plugins:[crosshair], options:linX(opts(v=>usd(v), v=>usd(v,2)), -80, 200, 'Změna cen LTC a DOGE', v=>(v>0?'+':'')+v+' %'), data:{datasets:[
     line('Dnes', xs.map(v=>({x:v, y:revDay*(1+v/100)-elecDay})), css('--s1')), line('Po halvingu LTC', xs.map(v=>({x:v, y:revDay*halvF*(1+v/100)-elecDay})), css('--s2')), ref('Nula', xs.map(v=>({x:v, y:0})))]}}));
   const xb = []; for (let v=20000; v<=500000; v+=10000) xb.push(v);
@@ -139,7 +146,7 @@ function render(){
   charts.push(new Chart($('cBe'), {type:'line', plugins:[zones,crosshair], options:opts(v=>'$'+v, v=>usd(v,2)), data:{labels:LS, datasets:
     [ref('Elektřina za den', LS.map(()=>base.elec))].concat(sc.map(x => line(x.name, x.out.map(o=>o.usd), css(x.col), {borderWidth:1.5})))}}));
   charts.push(new Chart($('cVs'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:[
-    line('Těžba', base.out.map(o=>o.btc), css('--s1')), line('Jednorázový nákup dnes', LS.map(()=>lump), css('--s2')), line('Týdenní DCA', dcaS, css('--s3'))]}}));
+    line('Těžba', base.out.map(o=>o.btc), css('--s1')), line('Spot při ročních vkladech', lumpS, css('--s2')), line('Týdenní DCA', dcaS, css('--s3'))]}}));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:
     sc.map(x => line(x.name, x.out.map(o=>o.hodl), css(x.col))).concat([ref('Cena stroje', LS.map(()=>p.hw))])}}));
 }

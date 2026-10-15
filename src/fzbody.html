@@ -18,10 +18,10 @@
   <label for="zK">Citlivost hashrate na cenu ZEC<input id="zK" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
 
-<div class="kpis" id="kpis"></div>
+<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
 
 <nav class="toc" aria-label="Obsah">
-  <a href="#vydelek">Kolik vydělá</a><a href="#navratnost">Návratnost a ROI</a><a href="#garance">Garance</a><a href="#vypocet">Jak se výnos počítá</a><a href="#cena">Cena ZEC a BTC</a><a href="#sit">Difficulty a hashrate</a><a href="#halving">Halving</a><a href="#ztrata">Když se nevyplácí</a><a href="#vsbtc">Těžit, nebo koupit BTC</a><a href="#historie">Historie</a><a href="#nejhorsi">Nejhorší scénáře</a>
+  <a href="#vydelek">Kolik vydělá</a><a href="#navratnost">Návratnost a ROI</a><a href="#garance">Garance</a><a href="#vypocet">Jak se výnos počítá</a><a href="#cena">Cena ZEC a BTC</a><a href="#sit">Difficulty a hashrate</a><a href="#halving">Halving</a><a href="#ztrata">Když se nevyplácí</a><a href="#vsbtc">Těžit, nebo koupit BTC</a><a href="#historie">Historie</a><a href="#nejhorsi">Pesimistické scénáře</a>
 </nav>
 
 <section class="group" id="vydelek">
@@ -38,7 +38,7 @@
   <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p>
     <p><b>Při držení BTC</b> si necháváte celou výplatu. Z vyplacených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>, BTC <span class="n" data-k="btcR"></span> ročně). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p>
     <p>Rok po roku:</p><div class="tbl"><table id="tYears"></table></div>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i style="background:var(--s2)"></i>Elektřina celkem</span><span><i style="background:var(--s3)"></i>Hodnota stacku − elektřina</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Hodnota stacku − elektřina</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div>
     <div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div>
     <div class="verify">K ověření: pokud účtujete další poplatky (hosting, servis, správa), doplňte je sem i do výpočtu.</div></div></div>
 </section>
@@ -48,7 +48,7 @@
   <div class="qa"><h3>Jaká je návratnost investice? Za jak dlouho se mi stroj zaplatí?</h3><div class="a"><p>Kdyby se podmínky nikdy nezměnily, stroj za <span class="n" data-k="hw"></span> by se zaplatil za <span class="n" data-k="paySimple"></span>. U Zcash se ale podmínky mění hodně: ZEC za poslední rok vyrostl z asi $50 na $1 200 a takový trh se může rychle otočit. Proto návratnost počítáme ve scénářích pro stroj koupený dnes:</p>
     <div class="tbl"><table id="tPay"></table></div>
     <p>„Prodej“ znamená, že vyplacené BTC každý den prodáváte. „Držení“ znamená, že BTC si necháváte a stroj se zaplatí, když hodnota všech vyplacených BTC překročí cenu stroje plus zaplacenou elektřinu.</p></div></div>
-  <div class="qa"><h3>Jaké je ROI? Kolik procent ročně můžu očekávat?</h3><div class="a"><p>Za první rok při dnešních podmínkách asi <span class="n" data-k="roiY"></span> z ceny stroje. Takové číslo ale u Zcash nejde brát jako roční výnos: odpovídá dnešní, velmi vysoké ceně ZEC. Při držení BTC se ROI v čase vyvíjí takto (hodnota BTC − elektřina − cena stroje, děleno cenou stroje):</p>
+  <div class="qa"><h3>Jaké je ROI? Kolik procent ročně můžu očekávat?</h3><div class="a"><p>Za první rok při dnešních podmínkách asi <span class="n" data-k="roiY"></span> z ceny stroje. Takové číslo ale u Zcash nejde brát jako roční výnos: odpovídá dnešní, velmi vysoké ceně ZEC. Při držení BTC se ROI v čase vyvíjí takto (hodnota BTC − zaplacená energie − cena stroje, děleno všemi vloženými penězi):</p>
     <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce</span><span><i style="background:var(--s3)"></i>Růst</span></div>
     <div class="chart small"><canvas id="cRoi" aria-label="ROI v čase podle scénáře"></canvas></div></div></div>
 </section>
@@ -70,7 +70,7 @@
   <div class="qa"><h3>Jsou ve výpočtu zahrnuté všechny poplatky?</h3><div class="a"><p>Zahrnutý je poplatek poolu (<span class="n" data-k="fee"></span>), který u výplaty v BTC obsahuje i převod ZEC na BTC, a elektřina. Nezahrnuté jsou daně, případné opravy a postupný pokles výkonu stroje.</p>
     <div class="verify">K ověření: doplňte poplatky, které účtujete vy.</div></div></div>
   <div class="qa"><h3>Jak moc se může výnos měnit?</h3><div class="a"><p>U Zcash extrémně. Za posledních 12 měsíců byl výnos mezi <span class="n" data-k="hpMin"></span> a <span class="n" data-k="hpMax"></span> za MSol/s za den. Pro tento stroj to znamená čistý výnos od <span class="n" data-k="netMin"></span> do <span class="n" data-k="netMax"></span> denně (při dnešní ceně elektřiny a poplatku).</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos, USD za MSol/s za den</span><span><i class="dash"></i>Bod zvratu při vaší elektřině</span><span><i class="box"></i>Data doplněná z grafů (po 23. 5. 2026)</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos, USD za MSol/s za den</span><span><i class="dash"></i>Bod zvratu při vaší elektřině</span><span><i class="box"></i>Odhady, pokud jsou v datech označené</span></div>
     <div class="chart small"><canvas id="cVar" aria-label="Výnos za 12 měsíců"></canvas></div></div></div>
   <div class="qa"><h3>Jak často se výnos přepočítává? Proč dnes kalkulačka ukazuje jiné číslo než včera?</h3><div class="a"><p>Výnos se mění neustále: ceny ZEC a BTC se hýbou každou minutu a obtížnost sítě Zcash se upravuje po každém bloku (každých 75 sekund). Za posledních 12 měsíců se výnos ze dne na den měnil v průměru (medián) o <span class="n" data-k="hpChg"></span>.</p>
     <div class="verify">K ověření: doplňte, jak často se aktualizují data na vašem webu.</div></div></div>
@@ -80,7 +80,7 @@
   <h2>Cena ZEC a BTC</h2>
   <div class="qa"><h3>Jak ovlivňuje cena můj výnos? Co když ZEC nebo Bitcoin klesne nebo vyroste?</h3><div class="a"><p>Hodnotu výnosu v USD určuje cena <b>ZEC</b>: stroj těží ZEC a pool ho prodá za BTC. Když ZEC vyroste o 10 %, čistý denní zisk vzroste z <span class="n" data-k="netDay"></span> na <span class="n" data-k="netUp10"></span>. Když o 10 % klesne, spadne na <span class="n" data-k="netDn10"></span>.</p>
     <p>Cena <b>BTC</b> určuje, kolik BTC za to dostanete. Když BTC vyroste o 10 % a ZEC ne, dostanete o 9 % méně BTC, ale stejnou hodnotu v USD. Při držení BTC pak záleží hlavně na tom, kolik bude BTC stát v době prodeje.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Čistý zisk za den dnes</span><span><i style="background:var(--s2)"></i>Po halvingu 2028 (s růstem sítě)</span><span><i class="dash"></i>Nula</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Výsledek před cenou stroje za den dnes</span><span><i style="background:var(--s2)"></i>Po halvingu 2028 (s růstem sítě)</span><span><i class="dash"></i>Nula</span></div>
     <div class="chart small"><canvas id="cPrice" aria-label="Čistý denní zisk podle ceny ZEC"></canvas></div>
     <p><b>Při držení BTC:</b> aby se za 5 let vrátil stroj i elektřina, musí BTC v té době stát aspoň <span class="n" data-k="costPerBtc"></span> (ve scénáři <b data-k="scName"></b>). Výsledek po 5 letech podle ceny BTC:</p>
     <div class="legend"><span><i style="background:var(--s3)"></i>Hodnota stacku − všechno zaplacené, po 5 letech</span><span><i class="dash"></i>Nula</span></div>
@@ -114,10 +114,10 @@
 
 <section class="group" id="vsbtc">
   <h2>Těžit, nebo koupit BTC?</h2>
-  <div class="qa"><h3>Má větší smysl těžit, nebo rovnou koupit BTC?</h3><div class="a"><p>Za 5 let vyplatí stroj koupený dnes ve scénáři <b data-k="scName"></b> asi <span class="n" data-k="btc5y"></span>. Celkem to stojí <span class="n" data-k="cost5y"></span> (stroj + elektřina), takže jeden BTC z těžby vás vyjde na <span class="n" data-k="costPerBtc"></span>. Dnes BTC stojí <span class="n" data-k="btc"></span>. Kdybyste celou částku utratili za BTC hned, měli byste <span class="n" data-k="lump5y"></span>. V týdenních nákupech po dobu 5 let <span class="n" data-k="dca5y"></span>.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Těžba</span><span><i style="background:var(--s2)"></i>Jednorázový nákup dnes</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
+  <div class="qa"><h3>Má větší smysl těžit, nebo rovnou koupit BTC?</h3><div class="a"><p>Za 5 let vyplatí stroj koupený dnes ve scénáři <b data-k="scName"></b> asi <span class="n" data-k="btc5y"></span>. Celkem to stojí <span class="n" data-k="cost5y"></span> (stroj + elektřina), takže jeden BTC z těžby vás vyjde na <span class="n" data-k="costPerBtc"></span>. Dnes BTC stojí <span class="n" data-k="btc"></span>. Při nákupu BTC ve stejných dnech ročních vkladů byste měli <span class="n" data-k="lump5y"></span>. V týdenních nákupech po dobu 5 let <span class="n" data-k="dca5y"></span>.</p>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Těžba</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
     <div class="chart"><canvas id="cVs" aria-label="Stack BTC: těžba vs. nákup"></canvas></div>
-    <p>V hodnotě po 5 letech (BTC <span class="n" data-k="price5y"></span>): těžba <span class="n" data-k="valMine"></span>, jednorázový nákup <span class="n" data-k="valLump"></span>, DCA <span class="n" data-k="valDca"></span>. Všechny tři strategie stojí stejně.</p></div></div>
+    <p>V hodnotě po 5 letech (BTC <span class="n" data-k="price5y"></span>): těžba <span class="n" data-k="valMine"></span>, spot při ročních vkladech <span class="n" data-k="valLump"></span>, DCA <span class="n" data-k="valDca"></span>. Všechny tři strategie stojí stejně.</p></div></div>
   <div class="qa"><h3>Proč bych měl investovat do mineru místo Bitcoinu?</h3><div class="a"><p>Z15 Pro je sázka na Zcash: dokud je ZEC drahý vůči BTC, získáváte BTC levněji než nákupem. Ve zvoleném scénáři vás jeden BTC z těžby vyjde na <span class="n" data-k="costPerBtc"></span> proti dnešní ceně <span class="n" data-k="btc"></span>. Rizikem je, že ZEC po prudkém růstu zlevní a výplata v BTC klesne. Těžba navíc dává pravidelný přísun BTC, takže nenakupujete všechno najednou.</p></div></div>
   <div class="qa"><h3>Kolik BTC může stroj vytěžit za celou životnost?</h3><div class="a"><p>Při životnosti 5 let záleží hlavně na ceně ZEC: <span class="n" data-k="life0"></span> při propadu, <span class="n" data-k="life1"></span> při stagnaci, <span class="n" data-k="life2"></span> při korekci a <span class="n" data-k="life3"></span> při růstu ZEC (vše při růstu BTC o <span class="n" data-k="btcR"></span> ročně).</p></div></div>
 </section>
@@ -125,7 +125,7 @@
 <section class="group" id="historie">
   <h2>Historie</h2>
   <div class="qa"><h3>Můžu vidět, jak stroj vydělával posledních 6 nebo 12 měsíců?</h3><div class="a"><p>Bereme dnešek a jdeme 12 a 6 měsíců zpět, nic se neodhaduje dopředu. Za posledních 12 měsíců by Z15 Pro s dnešními parametry vyplatil <span class="n" data-k="btc12"></span> a čistě vydělal <span class="n" data-k="net12"></span>. Za posledních 6 měsíců <span class="n" data-k="btc6"></span> a <span class="n" data-k="net6"></span>.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za den</span><span><i style="background:var(--s2)"></i>Elektřina za den</span><span><i style="background:var(--s3)"></i>Čistý zisk za den</span><span><i class="box"></i>Data doplněná z grafů (po 23. 5. 2026)</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za den</span><span><i style="background:var(--s2)"></i>Elektřina za den</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje za den</span><span><i class="box"></i>Odhady, pokud jsou v datech označené</span></div>
     <div class="chart small"><canvas id="cHist" aria-label="Denní výnos za posledních 12 měsíců"></canvas></div>
     <div class="tbl"><table id="tHist"></table></div></div></div>
   <div class="qa"><h3>Máte historické výsledky? Můžu vidět reálné výsledky jiných strojů?</h3><div class="a"><p>Čísla výše jsou výpočet z dat celé sítě, ne výpisy z konkrétních strojů. Reálný stroj se od výpočtu liší hlavně uptime, štěstím poolu a kurzem, za který pool převádí ZEC na BTC.</p>
@@ -133,15 +133,15 @@
 </section>
 
 <section class="group" id="nejhorsi">
-  <h2>Nejhorší scénáře</h2>
-  <div class="qa"><h3>Jaké jsou nejhorší scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC minus zaplacená elektřina, po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
+  <h2>Pesimistické scénáře</h2>
+  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC minus zaplacená elektřina, po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
     <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC −70 % (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce −40 %, pak +10 %</span><span><i style="background:var(--s3)"></i>Růst +30 %, pak +20 %</span><span><i class="dash"></i>Cena stroje</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
-    <p>V nejhorším scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
+    <p>V pesimistickém scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
 </section>
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě do 23. 5. 2026 z Coin Metrics (ceny ZEC a BTC, hashrate a odměny), potom cena ZEC z CoinMarketCap, cena BTC z grafu a hashrate Zcash z grafu 2Miners.{{LIVE_SENT}} Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash roste zadaným tempem a sleduje cenu ZEC, halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
+  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě a ceny: Coin Metrics Community API, uzavřené dny UTC do {{LAST}}. Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash roste zadaným tempem a sleduje cenu ZEC, halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
 </section>
 </div>

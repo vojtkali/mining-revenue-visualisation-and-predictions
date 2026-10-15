@@ -1,52 +1,66 @@
 # Výnosnost těžebních strojů: S21 XP, Z15 Pro, L9
 
-Statický web s grafy a odpověďmi na časté otázky o výnosu, návratnosti a rizicích tří ASIC strojů:
+Statický web v `docs/` pro GitHub Pages (`main` / `docs`). Výpočty běží v prohlížeči.
 
-| Stroj | Algoritmus | Co těží | Výplata |
+| Stroj | Výkon / příkon | Těžba | Model výplaty |
 |---|---|---|---|
-| Antminer S21 XP (270 TH/s, 3 645 W) | SHA-256 | Bitcoin | BTC |
-| Antminer Z15 Pro (840 kSol/s, 2 780 W) | Equihash | Zcash | BTC (převod ZEC → BTC poolem) |
-| Antminer L9 (16,2 GH/s, 3 260 W) | Scrypt | Dogecoin + Litecoin (merge mining) | BTC |
+| S21 XP | 270 TH/s / 3 645 W | BTC | BTC |
+| Z15 Pro | 840 kSol/s / 2 780 W | ZEC | denní převod do BTC |
+| L9 | 16,2 GH/s / 3 260 W | LTC + DOGE | denní převod do BTC |
 
-Web je ve složce [`docs/`](docs/) a je určený pro GitHub Pages (Settings → Pages → Deploy from a branch → `main` / `docs`).
+## Peněžní toky a srovnání
 
-## Stránky
+Společný modul `src/economics.js` zajišťuje stejný harmonogram vkladů všech čtyř strategií:
 
-- `index.html` – Těžba v kostce: stručné srovnání všech tří strojů
-- `<stroj>.html` – historie od uvedení stroje na trh + projekce do zvoleného data (prodej vs. držení BTC, jednorázový nákup a DCA, scénáře)
-- `<stroj>-faq.html` – odpovědi na časté otázky pro stroj koupený dnes, s grafy a nastavitelnými parametry
-- `<stroj>-nakup.html` – těžba proti jednorázovému nákupu BTC v různé dny (načasování)
+- Den dodání: cena stroje + energie na 365 dní. Další platba energie vždy po 365 dnech, opět na celý rok dopředu.
+- Energie = kW × 24 × 365 × plánovaný uptime × USD/kWh. Zadaná sazba je fixní v předplaceném roce; další roky používají stejnou sazbu. Odchylky skutečné spotřeby a jejich smluvní vyúčtování nejsou modelované.
+- Těžba + držení: všechny výplaty zůstávají v BTC, energie se platí z vnějších vkladů.
+- Těžba + prodej: výplaty se denně prodávají a hromadí v USD. Energie se financuje stejnými vnějšími vklady. Prodejní výnos tedy není podruhé použitý jako nový vklad.
+- Spot: nákup BTC za počáteční vklad a za další vklady ve dnech ročních plateb energie. **Neinvestuje budoucí pětiletý rozpočet první den.**
+- DCA: každý roční vklad se rozdělí do 53 nákupů v jeho dnech 0, 7, …, 364. Nevyužitá hotovost se započítává do celkové hodnoty, bez úroku.
+- Poslední necelý rok také vyžaduje celou roční platbu. Nevyčerpaná energie je zobrazena odděleně a nepředpokládá se její vrácení. Prodejní hodnota ASICu je 0; servis, daně ani obchodní poplatky nákupů BTC nejsou modelované.
+- Výsledek = BTC × aktuální cena + hotovost − všechny vklady. ROI všech vkladů používá všechny dosavadní platby; samostatně je uveden poměr výsledku k ceně stroje. Není to anualizovaný výnos.
+- Návratnost při držení je první překročení vložené částky tržní hodnotou BTC, nikoli realizovaný příjem ani trvalá návratnost. Obnovení roční energie může výsledek znovu snížit.
 
-Všechny parametry (cena elektřiny, poplatek poolu, uptime, cena stroje, scénáře cen a růst sítě) jdou na stránkách změnit; výpočet běží v prohlížeči.
+Při srovnání konečných hodnot mají všechny strategie totožné vklady. Kumulativní grafy energie ukazují **platby předem**, denní/měsíční provozní grafy ukazují spotřebu.
 
-## Model
+## Historie a scénáře
 
-- Denní výnos = odměna sítě za den × výkon stroje ÷ výkon sítě × uptime × (1 − poplatek poolu), převedeno na BTC denním kurzem.
-- Zcash: těžaři dostávají 80 % odměny (20 % jde do fondů do halvingu 2028). L9: součet výnosu z LTC a DOGE.
-- Elektřina se platí v USD; vytěžené BTC se nikdy nekrátí o elektřinu („držení“ = hodnota stacku − zaplacená elektřina − cena stroje).
-- Projekce: ceny se mění o zadané procento ročně, výkon sítě roste zadaným tempem (u Zcash a Scrypt navíc sleduje cenu mince), halvingy BTC 4/2028, LTC 7/2027, ZEC 11/2028. Stroj běží nepřetržitě.
+- `index.html`: souhrn tří strojů s výchozími parametry.
+- `<stroj>.html`: historická simulace od zvoleného začátku plus scénáře.
+- `<stroj>-faq.html`: pětiletá simulace stroje pořízeného k datu posledních dat.
+- `<stroj>-nakup.html`: čistý historický backtest; každý den vstupu má vlastní těžbu i nákup se stejnými vklady, konec je vždy datum posledních pozorování. Žádné budoucí předpoklady neovlivňují historické skóre. Vstupy mají různé délky držení; podíl výher není pravděpodobností budoucího úspěchu. Používá se zadaná konstantní cena stroje a energie, nikoli archiv nabídek ASICů. Před skutečným dodáním stroje je simulace hypotetická.
 
-## Data
+BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimistická varianta modelu, nikoli dolní mez možného výsledku. Samostatný růst hashratu je na všech projekčních stránkách: BTC výchozích 30 %, ZEC 10 %, Scrypt 15 % ročně. Jsou to upravitelné předpoklady, nikoli tvrzení o historickém průměru. U ZEC/Scrypt je zvlášť citlivost hashratu na cenu mince (výchozí 0,3).
 
-- `data/derived/*.json` – denní datasety použité na stránkách (cena, hashrate sítě, odměny, hashvalue).
-- Do 23. 5. 2026 [Coin Metrics Community Data](https://github.com/coinmetrics/data); poté ceny BTC odečtené z denního grafu, ceny ZEC z exportu CoinMarketCap (`data/manual/`), hashrate Zcash z grafu 2Miners a pro LTC/DOGE body z veřejných zdrojů. Úsek 24. 5. – 13. 10. 2026 je na stránkách podbarvený jako odhad.
-- Od 14. 10. 2026 se data doplňují denně z veřejných API (`scripts/update_live.py`): ceny CoinGecko (záložně Coinbase, Blockchair), hashrate a odměny BTC z mempool.space, hashrate LTC z litecoinspace.org, ZEC a DOGE z Blockchair, kurz USD/CZK z ČNB (`data/derived/meta.json`).
-- `data/derived/harvest.json` – čísla přečtená z vypočtených FAQ stránek (`scripts/harvest.js`), z nich se skládá souhrn `index.html`.
+Halvingy jsou přibližná kalendářní data, skutečně závisí na výšce bloků. Projekce půlí pouze dotaci, zachovává transakční poplatky a normalizuje odměnu vůči datu posledních dat, takže už proběhlý halving neaplikuje podruhé. U ZEC je modelovaný podíl těžařů 80 % dotace; případná budoucí změna protokolu vyžaduje aktualizaci tohoto předpokladu.
 
-## Automatická aktualizace
+## Data a reprodukovatelnost
 
-GitHub Action `.github/workflows/update.yml` běží každý den v 6:17 UTC (a ručně přes *Run workflow*): stáhne aktuální data, sestaví stránky, přečte čísla pro souhrn, sestaví souhrn a změny commitne do `main`. GitHub Pages je pak zveřejní. Když chybí některá cena, běh skončí chybou a nic se nezapíše.
+Zdrojem je [Coin Metrics Community API](https://community-api.coinmetrics.io/v4/timeseries/asset-metrics), metriky `PriceUSD`, `HashRate`, `IssTotNtv`, `FeeTotNtv` pro BTC, ZEC, LTC a DOGE, frekvence `1d`. Jednotky hashratu: BTC/LTC/DOGE TH/s, ZEC GSol/s. [Dokumentace metrik](https://docs.coinmetrics.io/network-data/network-data-overview/mining/hash-rate).
 
-## Sestavení
+- `data/source/coinmetrics.json`: úplný zdrojový snímek včetně URL, času stažení a původních čísel. Obsahuje i chybějící úsek 24. 5. – 14. 10. 2026; dřívější interpolace jsou nahrazeny denními pozorováními API.
+- `data/derived/*.json`: denní ceny UTC a zpětné sedmidenní průměry síťového hashratu a odměn. Hashrate je odhad sítě z blockchainu, nikoli přímo měřený součet strojů. Výtěžnost je model, nikoli přesná historická výplata poolu.
+- Aktualizace zahrnuje jen uzavřené UTC dny do včerejška. Chybějící den nebo veličina ukončí aktualizaci; neinterpoluje se a nepřenášejí se staré hodnoty jako nová pozorování.
+- `data/derived/meta.json`: stav dat a datovaný kurz ČNB; pokud kurz nelze obnovit, zůstane předchozí **s původním datem**.
+- `data/manual/`: archiv původního ručního exportu, už není používán k výpočtu.
+- `data/derived/harvest.json`: souhrn skutečných výsledků vykreslených stránek pro `index.html`.
+
+## Sestavení a ověření
 
 ```bash
-python3 scripts/update_live.py   # doplní data do dneška z veřejných API
-python3 scripts/build_site.py    # sestaví docs/ z src/ a data/derived/
-npm i --no-save playwright@1.64.0 chart.js@4.4.1 && npx playwright install chromium
-node scripts/harvest.js          # přečte čísla z FAQ stránek pro souhrn
-python3 scripts/build_site.py    # znovu, aby souhrn použil nová čísla
-scripts/rebuild_data.sh          # přepočet z Coin Metrics od začátku (data končí 13. 10. 2026,
-                                 # denní řádky z API by se nahradily interpolací; spusťte pak update_live.py)
+npm i --no-save playwright@1.64.0 chart.js@4.4.1
+npx playwright install chromium
+python3 scripts/update_live.py             # API: kompletní uzavřená historie
+# nebo: python3 scripts/update_live.py --offline
+node --test tests/economics.test.cjs
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/build_site.py --pages-only # první sestavení bez starého souhrnu
+node scripts/harvest.js
+python3 scripts/build_site.py
+node tests/browser.cjs                    # všechny stránky a změny parametrů
 ```
 
-Výpočty jsou modelové scénáře, ne investiční doporučení ani záruka výnosu.
+`CHROMIUM=/cesta/k/chromium` umožňuje použít vlastní prohlížeč. `scripts/rebuild_data.sh --offline` zopakuje kompletní sestavení z verzovaného snímku; bez přepínače obnoví data z API.
+
+GitHub Action běží denně v 6:17 UTC, validuje data a výpočty, sestaví stránky, přepočítá souhrn a změny uloží. Staré generátory založené na neaktualizovaném CSV archivu byly nahrazeny společným aktualizátorem.

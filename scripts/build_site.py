@@ -65,18 +65,47 @@ def fill(text, values, where):
     return out
 
 
+EMBED_DROP = ('source', 'observedAt')   # provenance stays in data/derived, the pages don't use it
+
+
+def embedded_data(name):
+    """Dataset for a page: per-row provenance dropped, floats to 6 significant digits
+    (well below the precision of the inputs) - roughly halves the page size."""
+    def r(x):
+        return float(f'{x:.6g}') if isinstance(x, float) else x
+    d = json.loads((DATA / f'{name}.json').read_text(encoding='utf-8'))
+    d['rows'] = [{k: r(v) for k, v in row.items() if k not in EMBED_DROP} for row in d['rows']]
+    return json.dumps(d, separators=(',', ':'), ensure_ascii=False)
+
+
 def page_html(head, body, data, app):
-    parts = [read(head + '.html'), read(body + '.html'), CHART]
+    body_text = read(body + '.html')
     if data:
-        parts.append('<script>const DATA=' + (DATA / f'{data}.json').read_text(encoding='utf-8').strip() + ';')
+        panel = """<section class="card"><h2>Čtyři strategie při stejných vkladech</h2>
+<p>Platba energie při dodání a každých 365 dní na celý rok předem. Zadaná cena za kWh je fixovaná v každém předplaceném roce; pro další roky model předpokládá stejnou sazbu. Rozpočet energie odpovídá zadanému příkonu a plánovanému uptime, bez modelovaného vyúčtování odchylek.</p>
+<p>Spot nakupuje při ročních vkladech. DCA rozkládá každý roční vklad do 53 nákupů. Neinvestovaná hotovost zůstává bez úroku. U těžby + prodeje se výplaty hromadí v hotovosti; roční energii financují stejné vnější vklady jako u ostatních strategií.</p>
+<div class="tbl"><table id="strategyTable"></table></div>
+<p>Výsledek = BTC + hotovost − všechny vklady. Nevyčerpané předplatné energie je uvedeno zvlášť, bez předpokládaného vrácení. Hodnota použitého stroje je konzervativně 0; servis, daně a obchodní poplatky nákupů BTC zde nejsou započtené. ROI všech vkladů není anualizované. Sloupec vůči ceně stroje používá jiný jmenovatel.</p>
+<p>„Návratnost při držení“ znamená první ocenění BTC nad všemi dosavadními platbami; nejde o realizovaný příjem ani záruku trvalé návratnosti. Další roční platba může výsledek opět snížit.</p></section>"""
+        body_text = body_text.rsplit('</div>', 1)[0] + panel + '</div>'
+    body_text += '<div class="site-foot">Data k {{LAST}}: uzavřené denní ceny UTC z Coin Metrics Community API. Hashrate a síťové odměny: zpětný sedmidenní průměr. Modelový výnos, nikoli výpis konkrétního poolu. <a href="https://github.com/vojtkali/mining-revenue-visualisation-and-predictions/blob/main/data/source/coinmetrics.json">Zdrojový snímek dat</a>.</div>'
+    parts = [read(head + '.html'), '''<style>
+.wrap{grid-template-columns:minmax(0,1fr)}
+.wrap>*{min-width:0}
+.qa .a,.notes,.lead,.site-foot{overflow-wrap:anywhere}
+@media(max-width:520px){.n{white-space:normal}}
+</style>''', body_text, CHART]
+    if data:
+        parts.append('<script>' + read('economics.js') + '</script>')
+    if data:
+        parts.append('<script>const DATA=' + embedded_data(data) + ';')
         parts.append(read(app + '.js') + '</script>')
     else:
         parts.append('<script>' + read(app + '.js') + '</script>')
-    return fill('\n'.join(parts), summary_values() if body == 'sumbody' else page_values(), body)
+    return '\n'.join(line.rstrip() for line in fill('\n'.join(parts), summary_values() if body == 'sumbody' else page_values(), body).splitlines())
 
 
 # ---------- values derived from the datasets ----------
-EST_END = '2026-10-13'   # last day of the hand-collected estimates (yellow zone); later rows come from public APIs
 D = dt.date.fromisoformat
 
 
@@ -93,8 +122,6 @@ def page_values():
     rows = {k: json.loads((DATA / f'{k}.json').read_text(encoding='utf-8'))['rows'] for k in ('btc', 'zec', 'l9')}
     last = rows['btc'][-1]['d']
     assert all(r[-1]['d'] == last for r in rows.values()), 'datasets end on different days'
-    live = last > EST_END
-    first_live = cz_date(D(EST_END) + dt.timedelta(1))
     return {
         'LAST': cz_date(last),
         'NEXT': cz_date(D(last) + dt.timedelta(1)),
@@ -103,12 +130,7 @@ def page_values():
         'P_ZEC': round(rows['zec'][-1]['z']),
         'P_LTC': round(rows['l9'][-1]['l'], 2),
         'P_DOGE': round(rows['l9'][-1]['g'], 4),
-        'LIVE_NOTE': (f'<div><b>{first_live} – {cz_date(last)}:</b> denní aktualizace z veřejných API: ceny z CoinGecko '
-                      '(záložně Coinbase a Blockchair), hashrate a odměny BTC z mempool.space, hashrate Litecoinu z litecoinspace.org, '
-                      'Zcash a Dogecoinu z Blockchair (24h odhad vyhlazený). Odměny ZEC, LTC a DOGE za den zůstávají na poslední známé '
-                      'hodnotě, při halvingu se půlí.</div>') if live else '',
-        'LIVE_SENT': f' Od {first_live} denní data z veřejných API (CoinGecko, mempool.space, Blockchair).' if live else '',
-        'LIVE_SHORT': f' od {first_live} denní data z veřejných API,' if live else '',
+        'LIVE_NOTE': '', 'LIVE_SENT': '', 'LIVE_SHORT': '',
     }
 
 
@@ -171,9 +193,9 @@ def summary_values():
     m = meta()
     rate = float(m['czk'])
     live = page_values()['LIVE_SHORT']
-    out = {'today': h['s21']['v']['today'], 'rate': f'{rate:.2f}'.replace('.', ','), 'rateSrc': m['czkSource'],
+    out = {'LAST': page_values()['LAST'], 'today': h['s21']['v']['today'], 'rate': f'{rate:.2f}'.replace('.', ','), 'rateSrc': m['czkSource'],
            'liveShort': ',' + live.rstrip(',') if live else ''}
-    chart, mine, lump, dca = [], [], [], []
+    chart, mine, lump, dca, sells = [], [], [], [], []
     for k in ('s21', 'z15', 'l9'):
         v, pay = h[k]['v'], h[k]['pay']
         head = [c.lower() for c in pay[0]]
@@ -223,14 +245,14 @@ def summary_values():
         out.update({f'{k}.{a}': b for a, b in x.items()})
         out.setdefault('rowDay', ''); out['rowDay'] += money_cell(v['netDay'], rate, 1)
         out.setdefault('rowMonth', ''); out['rowMonth'] += money_cell(v['netMonth'], rate, 10)
-        mine.append(num(v['btc5y'])); lump.append(num(v['lump5y'])); dca.append(num(v['dca5y']))
-    cols = list(zip(mine, lump, dca))
-    for key, vals, i in (('rowMine', mine, 0), ('rowLump', lump, 1), ('rowDca', dca, 2)):
+        mine.append(num(v['valMine'])); lump.append(num(v['valLump'])); dca.append(num(v['valDca'])); sells.append(num(v['valSell']))
+    cols = list(zip(mine, lump, dca, sells))
+    for key, vals, i in (('rowMine', mine, 0), ('rowLump', lump, 1), ('rowDca', dca, 2), ('rowSell', sells, 3)):
         out[key] = ''.join(
-            (f'<td><b><span class="n">{f"{x:.3f}".replace(".", ",")}</span></b></td>' if x == max(cols[j])
-             else f'<td><span class="n">{f"{x:.3f}".replace(".", ",")}</span></td>') for j, x in enumerate(vals))
+            (f'<td><b><span class="n">{usd(x)}</span></b></td>' if x == max(cols[j])
+             else f'<td><span class="n">{usd(x)}</span></td>') for j, x in enumerate(vals))
     names = ['S21 XP', 'Z15 Pro', 'L9']
-    win = [names[j] for j, c in enumerate(cols) if c[0] == max(c)]
+    win = [names[j] for j, c in enumerate(cols) if max(c[0],c[3]) == max(c)]
     out['winners'] = ('Těžba nevyhrává u žádného stroje.' if not win else
                       f'Těžba vyhrává u {" a ".join(win)}.' if len(win) < 3 else 'Těžba vyhrává u všech tří strojů.')
     out['CHART'] = json.dumps(chart)
@@ -266,6 +288,8 @@ def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / '.nojekyll').write_text('')
     for out, head, body, data, app, label in PAGES:
+        if '--pages-only' in sys.argv and data is None:
+            continue
         (DOCS / out).write_text(public(out, page_html(head, body, data, app), label), encoding='utf-8')
         print('built', out)
 

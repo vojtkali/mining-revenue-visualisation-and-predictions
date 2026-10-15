@@ -1,7 +1,7 @@
 <div class="wrap">
 <header>
   <h1>Těžba v kostce: S21 XP, Z15 Pro a L9</h1>
-  <p>Stručné odpovědi na nejčastější otázky pro tři stroje vedle sebe. Stav k {{today}}; elektřina $0,07/kWh, poplatek poolu 20 %, uptime 95 %, výplata v BTC. Ceny strojů: S21 XP $7 180, Z15 Pro $10 000, L9 $7 100. Projekce je pro stroj koupený dnes na 5 let; BTC roste o 20 % ročně, v nejhorším scénáři o 10 % ročně. Přepočet na koruny kurzem {{rate}} Kč/USD ({{rateSrc}}).</p>
+  <p>Stručné odpovědi na nejčastější otázky pro tři stroje vedle sebe. Stav k {{today}}; elektřina $0,07/kWh, poplatek poolu 20 %, uptime 95 %, výplata v BTC. Ceny strojů: S21 XP $7 180, Z15 Pro $10 000, L9 $7 100. Projekce je pro stroj koupený dnes na 5 let; BTC roste o 20 % ročně, v pesimistickém scénáři o 10 % ročně. Přepočet na koruny kurzem {{rate}} Kč/USD ({{rateSrc}}).</p>
 </header>
 
 <section class="group" id="kostka">
@@ -21,16 +21,16 @@
       <tr><th>Hlavní riziko</th><td>růst sítě a halving 2028</td><td>pád ceny ZEC po prudkém růstu</td><td>cena DOGE ({{l9.dogeShare}} výnosu)</td></tr>
     </tbody>
   </table></div>
-  <div class="legend" style="margin-top:12px"><span><i style="background:var(--s2)"></i>Nejhorší scénář</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Nejlepší</span></div>
+  <div class="legend" style="margin-top:12px"><span><i style="background:var(--s2)"></i>Pesimistický scénář</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
   <div class="chart small"><canvas id="cSum" aria-label="Hodnota BTC minus všechno zaplacené za 5 let"></canvas></div>
   <p class="lead">Hodnota vytěžených BTC za 5 let minus cena stroje a elektřina. Co přesně jednotlivé scénáře předpokládají:</p>
   <div class="tbl"><table class="cmp">
     <thead><tr><th>Scénář</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead>
     <tbody>
-      <tr><th><span class="sw" style="background:var(--s2)"></span>Nejhorší</th><td>BTC +10 % ročně</td><td>ZEC první rok −70 %, pak beze změny; BTC +10 % ročně</td><td>DOGE a LTC −30 % ročně; BTC +10 % ročně</td></tr>
+      <tr><th><span class="sw" style="background:var(--s2)"></span>Pesimistický</th><td>BTC +10 % ročně</td><td>ZEC první rok −70 %, pak beze změny; BTC +10 % ročně</td><td>DOGE a LTC −30 % ročně; BTC +10 % ročně</td></tr>
       <tr><th><span class="sw" style="background:var(--s1)"></span>Základní</th><td>BTC +20 % ročně</td><td>ZEC první rok −40 %, pak +10 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +10 % ročně; BTC +20 % ročně</td></tr>
-      <tr><th><span class="sw" style="background:var(--s3)"></span>Nejlepší</th><td>BTC +40 % ročně</td><td>ZEC první rok +30 %, pak +20 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +30 % ročně; BTC +20 % ročně</td></tr>
-      <tr><th>Výkon sítě (všechny scénáře)</th><td>+35 % ročně</td><td>+10 % ročně a navíc sleduje cenu ZEC (při 10× vyšší ceně 2× vyšší výkon)</td><td>+15 % ročně a navíc sleduje ceny DOGE a LTC (stejně jako u Z15 Pro)</td></tr>
+      <tr><th><span class="sw" style="background:var(--s3)"></span>Optimistický</th><td>BTC +40 % ročně</td><td>ZEC první rok +30 %, pak +20 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +30 % ročně; BTC +20 % ročně</td></tr>
+      <tr><th>Výkon sítě (všechny scénáře)</th><td>+30 % ročně</td><td>+10 % ročně a navíc sleduje cenu ZEC (při 10× vyšší ceně 2× vyšší výkon)</td><td>+15 % ročně a navíc sleduje ceny DOGE a LTC (stejně jako u Z15 Pro)</td></tr>
       <tr><th>Halving</th><td>duben 2028, odměna na polovinu</td><td>listopad 2028, odměna na polovinu</td><td>jen Litecoin, červenec 2027 (výnos −{{l9.ltcHalf}})</td></tr>
       <tr><th>Společné</th><td colspan="3">Stroj koupený dnes a běží nepřetržitě 5 let, i ve ztrátě. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Ceny se mění plynule (složeně), poplatky v blocích zůstávají na dnešní úrovni.</td></tr>
     </tbody>
@@ -51,9 +51,9 @@
     <div class="tbl"><table class="cmp"><thead><tr><th>Zaplacení při držení BTC</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
       <tr><th>Nejlepší scénář</th><td>{{s21.payBest}}</td><td>{{z15.payBest}}</td><td>{{l9.payBest}}</td></tr>
       <tr><th>Základní</th><td>{{s21.payBase}}</td><td>{{z15.payBase}}</td><td>{{l9.payBase}}</td></tr>
-      <tr><th>Nejhorší</th><td>{{s21.payWorst}}</td><td>{{z15.payWorst}}</td><td>{{l9.payWorst}}</td></tr>
+      <tr><th>Pesimistický</th><td>{{s21.payWorst}}</td><td>{{z15.payWorst}}</td><td>{{l9.payWorst}}</td></tr>
     </tbody></table></div></div></div>
-  <div class="qa"><h3>Jaké je ROI a kolik procent ročně čekat?</h3><div class="a"><p>První rok při dnešních podmínkách: S21 XP <span class="n">{{s21.roiY}}</span>, Z15 Pro <span class="n">{{z15.roiY}}</span>, L9 <span class="n">{{l9.roiY}}</span> z ceny stroje. Dál méně. Pevné roční procento u těžby neexistuje; ROI za 5 let v základním scénáři je {{s21.roi5}}, {{z15.roi5}} a {{l9.roi5}}.</p></div></div>
+  <div class="qa"><h3>Jaké je ROI a kolik procent ročně čekat?</h3><div class="a"><p>První rok při dnešních podmínkách: S21 XP <span class="n">{{s21.roiY}}</span>, Z15 Pro <span class="n">{{z15.roiY}}</span>, L9 <span class="n">{{l9.roiY}}</span> z ceny stroje. Dál méně. Pevné roční procento u těžby neexistuje; ROI všech vkladů za 5 let v základním scénáři je {{s21.roi5}}, {{z15.roi5}} a {{l9.roi5}}.</p></div></div>
   <div class="qa"><h3>Je výnos, návratnost nebo množství BTC garantované?</h3><div class="a"><p>Ne. Výnos závisí na ceně mince, výkonu sítě a halvingu, které nikdo neovlivní. Kalkulace jsou scénáře, ne slib.</p><div class="verify">K ověření: odpověď musí odpovídat vašim obchodním podmínkám (např. garance uptime).</div></div></div>
 </section>
 
@@ -68,24 +68,25 @@
   <div class="qa"><h3>Co když cena klesne nebo vyroste?</h3><div class="a"><p>Elektřina stojí pořád stejně, takže zisk reaguje na cenu silněji než výnos. Pokles ceny mince o 10 %: S21 XP čistě {{s21.drop10}}, Z15 Pro {{z15.drop10}}, L9 {{l9.drop10}}. U Z15 Pro a L9 cena BTC mění jen to, kolik BTC dostanete, ne hodnotu v USD.</p></div></div>
   <div class="qa"><h3>Co udělá halving?</h3><div class="a"><p>Sníží odměnu na polovinu. S21 XP (duben 2028): bod zvratu stoupne z {{s21.be}} asi na {{s21.beH}} za BTC{{s21.halvingTail}}. Z15 Pro (listopad 2028): bod zvratu z {{z15.be}} asi na {{z15.beH}} za ZEC{{z15.halvingTail}}. L9: halving má jen Litecoin (červenec 2027), výnos klesne asi o {{l9.ltcHalf}}.</p></div></div>
   <div class="qa"><h3>Může být stroj ve ztrátě? Dá se vypnout?</h3><div class="a"><p>Ano, když výnos klesne pod cenu elektřiny. Stroj jde kdykoli vypnout a zapnout; vypnutý nespotřebuje ani nevydělá. Každý stroj těží jen svůj algoritmus (SHA-256, Equihash, Scrypt). Pokud stroj ve ztrátě běží dál, každý vytěžený BTC stojí víc, než kdybyste ho koupili.</p><div class="verify">K ověření: podmínky vypnutí v hostingové smlouvě.</div></div></div>
-  <div class="qa"><h3>Jaký je nejhorší scénář?</h3><div class="a"><p>Ve všech třech BTC roste jen o 10 % ročně. S21 XP: {{s21.worstLoss}}, za 5 let {{s21.worstEnd}} proti všemu zaplacenému. Z15 Pro: ZEC navíc −70 %, {{z15.worstPay}}, {{z15.worstLoss}} a za 5 let {{z15.worstEnd}}. L9: DOGE a LTC −30 % ročně, {{l9.worstLoss}}, za 5 let {{l9.worstEnd}}.</p></div></div>
+  <div class="qa"><h3>Jaký je pesimistický scénář?</h3><div class="a"><p>Ve všech třech BTC roste jen o 10 % ročně. S21 XP: {{s21.worstLoss}}, za 5 let {{s21.worstEnd}} proti všemu zaplacenému. Z15 Pro: ZEC navíc −70 %, {{z15.worstPay}}, {{z15.worstLoss}} a za 5 let {{z15.worstEnd}}. L9: DOGE a LTC −30 % ročně, {{l9.worstLoss}}, za 5 let {{l9.worstEnd}}.</p></div></div>
 </section>
 
 <section class="group" id="vsbtc">
   <h2>Těžit, nebo koupit BTC?</h2>
-  <div class="qa"><h3>Co vyjde lépe za stejné peníze?</h3><div class="a"><p>Za stejnou částku (stroj + elektřina na 5 let), základní scénář:</p>
-    <div class="tbl"><table class="cmp"><thead><tr><th>BTC za 5 let</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
-      <tr><th>Těžba</th>{{rowMine}}</tr>
-      <tr><th>Jednorázový nákup dnes</th>{{rowLump}}</tr>
+  <div class="qa"><h3>Co vyjde lépe za stejné peníze?</h3><div class="a"><p>Stejné vklady v totožných dnech: stroj + první rok energie na začátku, další energie každých 365 dní. Základní scénář:</p>
+    <div class="tbl"><table class="cmp"><thead><tr><th>BTC + hotovost v USD za 5 let</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
+      <tr><th>Těžba + držení</th>{{rowMine}}</tr>
+      <tr><th>Těžba + prodej</th>{{rowSell}}</tr>
+      <tr><th>Spot při ročních vkladech</th>{{rowLump}}</tr>
       <tr><th>Týdenní DCA</th>{{rowDca}}</tr>
     </tbody></table></div>
-    <p>{{winners}} Historicky (od uvedení stroje) by jednorázový nákup BTC porazil těžbu v {{s21.beat}} dní u S21 XP, v {{l9.beat}} u L9 a v {{z15.beat}} u Z15 Pro.</p></div></div>
+    <p>{{winners}} V historických backtestech končících datem dat porazil spot těžbu u {{s21.beat}} vstupních dnů u S21 XP, v {{l9.beat}} u L9 a v {{z15.beat}} u Z15 Pro.</p></div></div>
   <div class="qa"><h3>Proč tedy těžit?</h3><div class="a"><p>Pravidelný přísun BTC bez nákupu najednou a možnost získat BTC pod tržní cenou, pokud je elektřina levná nebo mince stroje silná. Proti tomu: stroj ztrácí hodnotu a výnos klesá s růstem sítě a s halvingem.</p></div></div>
 </section>
 
 <section class="notes">
   <h3>Podrobné stránky</h3>
   <div class="links"><a href="https://claude.ai/artifact/RtP8nzjRPr9e7Q89cg5jAj">FAQ S21 XP</a><a href="https://claude.ai/artifact/74FSLByEiRZa5nBhMBaYUr">FAQ Z15 Pro</a><a href="https://claude.ai/artifact/KxU5277ukCrrYiWaKArC2G">FAQ L9</a><a href="https://claude.ai/artifact/DiNVfn1d7mGmYRQYYaENSj">S21 XP grafy</a><a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro grafy</a><a href="https://claude.ai/artifact/EV6kP3pBeG4WnoPVSpGfAv">L9 grafy</a></div>
-  <div>Data: Coin Metrics (do 23. 5. 2026), potom vaše grafy a exporty a body z vyhledávání{{liveShort}}; nejméně přesná jsou data L9 od června 2026. Na podrobných stránkách lze všechny parametry změnit.</div>
+  <div>Data: denní pozorování Coin Metrics Community API do {{LAST}}. Síťové veličiny jsou vyhlazené zpětným sedmidenním průměrem.</div>
 </section>
 </div>

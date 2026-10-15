@@ -32,34 +32,34 @@
 </form>
 <p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. ZEC je po růstu z ~$50 na ~$1 200 za rok ve velmi přehřátém trhu, proto má cena ZEC zvlášť změnu v prvním roce (možný zlom) a zvlášť roční tempo potom. Cena BTC se mění o zadané procento ročně. Hashrate Zcash roste základním tempem a navíc sleduje cenu ZEC: citlivost 0,3 znamená, že při 10× vyšší ceně je hashrate 2× vyšší (z dat 2023–2026 vychází 0,26). Halving Zcash kolem 20. 11. 2028 sníží odměnu na polovinu. Stroj běží nepřetržitě.</p>
 
-<div class="kpis" id="kpis"></div>
+<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Čistý zisk je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Elektřina celkem</span><span><i style="background:var(--s3)"></i>Čistý zisk</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (hashrate z grafu 2Miners)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Výsledek před cenou stroje je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (hashrate z grafu 2Miners)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 
 <section class="card">
   <h2>2 · Těžím a držím: hodnota natěženého stacku v USD</h2>
   <p class="sub">Vyplacené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je součet všech denních výplat v BTC krát cena BTC v daném dni. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Elektřina celkem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Vyplaceno celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
 </section>
 
 <section class="card">
-  <h2>3 · Těžba vs. jednorázový nákup BTC</h2>
-  <p class="sub">Stack v BTC od začátku těžby do <span class="endLabel"></span>. Jednorázový nákup utratí první den těžby celou částku, kterou těžba za celé období stojí: <span id="budget"></span>. Nákup v jiné dny porovnává <a id="lsLink" href="https://claude.ai/artifact/6qcYsFDWNQVQgeYCScfatd" style="color:var(--s1)">samostatná stránka</a>.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Jednorázový nákup</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
-  <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. jednorázový nákup"></canvas></div>
+  <h2>3 · Těžba vs. spot při ročních vkladech</h2>
+  <p class="sub">Stejné vklady ve stejných dnech: <span id="budget"></span> Spot nakoupí BTC při každém vkladu. Graf ukazuje BTC; úplná hodnota včetně hotovosti a všech nákladů je ve srovnávací tabulce.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. spot při ročních vkladech"></canvas></div>
 </section>
 
 <section class="card">
   <h2>4 · Těžba vs. týdenní DCA</h2>
-  <p class="sub">Stejná celková částka rozdělená na stejné týdenní nákupy BTC od začátku těžby do <span class="endLabel"></span> (<span id="dcaInfo"></span>). Budoucí nákupy probíhají za cenu BTC ze zvoleného scénáře.</p>
+  <p class="sub"><span id="dcaInfo"></span> Budoucí nákupy používají cenu zvoleného scénáře.</p>
   <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c8" aria-label="Stack BTC: těžba vs. týdenní DCA"></canvas></div>
   <div class="tbl"><table id="ctab"></table></div>
@@ -89,8 +89,8 @@
   <h3>Data a metodika</h3>
   <div><b>Stroj:</b> Antminer Z15 Pro, 840 kSol/s, Equihash. Uvedení květen 2023, dodávky od června 2023 (<a href="https://miningboard.com/es/rigs/antminer-z15-pro">MiningBoard</a>, <a href="https://asicminervalue.com/miners/bitmain/antminer-z15-pro">ASIC Miner Value</a>). Příkon uvádějí zdroje mezi 2 560 a 2 780 W, výchozí je 2 780 W.</div>
   <div><b>Výplata v BTC:</b> denní výnos v ZEC = (80 % nových ZEC + poplatky) × výkon stroje / hashrate sítě. Zbylých 20 % odměny jde do fondů Zcash (8 % Zcash Community Grants, 12 % fond řízený držiteli ZEC) podle současných pravidel do halvingu v roce 2028. Projekce počítá s 80 % i po něm. Výnos se převádí na BTC podle denního kurzu ZEC/BTC a poté se odečte poplatek poolu. Výchozí poplatek poolu je 20 % jako u S21 XP.</div>
-  <div><b>Do 23. 5. 2026:</b> denní data <a href="https://github.com/coinmetrics/data">Coin Metrics Community</a> pro ZEC a BTC (cena, <code>HashRate</code> v GSol/s s 7denním průměrem, <code>IssTotNtv + FeeTotNtv</code>). Halving Zcash v listopadu 2024 snížil odměnu z 3,125 na 1,5625 ZEC/blok.</div>
-  <div><b>24. 5. – 13. 10. 2026 (žlutě podbarveno):</b> denní cena ZEC z vašeho exportu z CoinMarketCap. Řádek s časem 02:00 odpovídá uzavírací ceně předchozího dne; po tomto posunu se export s Coin Metrics shoduje s mediánovou odchylkou 0,16 %. Hashrate sítě Zcash je odečtená z vašeho grafu 2Miners (zhruba po 2 týdnech, lineárně mezi body, s přesností asi ±5 dní a ±0,5 GSol/s) a přenásobená 0,96, protože 2Miners vychází v překryvu asi o 4 % výš než Coin Metrics. Růst: ~16 GSol/s koncem května, ~24 v červenci, ~29 v září, 30,6 dnes. Cena BTC je stejná jako na stránce S21 XP.</div>
+
+
   {{LIVE_NOTE}}
   <div><b>Projekce:</b> poplatky v blocích Zcash jsou zanedbatelné (pod 0,5 % odměny), proto varianta s rostoucími poplatky jako u S21 XP tady není.</div>
   <div><b>Nezahrnuto:</b> chlazení, hosting, daně, odpisy, pokles výkonu stroje a výkyvy kurzu během dne.</div>

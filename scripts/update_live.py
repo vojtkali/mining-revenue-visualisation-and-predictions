@@ -1,117 +1,118 @@
 #!/usr/bin/env python3
-"""Extend data/derived/{btc,zec,l9}.json up to today from public APIs.
+"""Refresh closed UTC daily observations; never interpolate or silently carry values.
 
-Run daily (GitHub Actions). For every day between the last stored row and today it
-appends a row: today's values come from the APIs, days in between are interpolated.
-A row for today that was written by an earlier run on the same day is replaced.
-
-Sources (first one that answers wins):
-  prices    CoinGecko simple/price, Coinbase spot, Blockchair stats
-  BTC       mempool.space hashrate (7-day mean of daily averages) and reward stats
-            (subsidy + fees per block over the last 1008 blocks); Blockchair 24h hashrate
-  LTC       litecoinspace.org hashrate; Blockchair 24h hashrate
-  ZEC, DOGE Blockchair 24h hashrate (smoothed, see EMA)
-  USD/CZK   ČNB daily fixing
-
-Rewards per day of ZEC, LTC and DOGE stay at the last stored value and are halved at
-the scheduled halvings. A hashrate that can't be fetched, or that is more than 2x away
-from the last stored value, keeps the last value. A missing price aborts the run, so
-no stale price is ever written as a new day.
+Coin Metrics Community API (not its discontinued CSV mirror) provides all four
+chains. Fetch a complete snapshot before writing anything. Raw observations and
+provenance are versioned so every derived result can be reproduced offline.
 """
-import json, math, sys, urllib.request, datetime as dt
+import datetime as dt
+import json
+import math
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DER = ROOT / 'data' / 'derived'
-D = dt.date.fromisoformat
-EMA = 0.3          # weight of today's 24h hashrate estimate (noisy) vs the stored value
-UA = {'User-Agent': 'mining-revenue-visualisation (github actions)', 'Accept': 'application/json'}
-
-
-def log(*a):
-    print(*a, file=sys.stderr)
+SOURCE = ROOT / 'data' / 'source' / 'coinmetrics.json'
+ASSETS = ('btc', 'zec', 'ltc', 'doge')
+METRICS = ('PriceUSD', 'HashRate', 'IssTotNtv', 'FeeTotNtv')
+START = '2023-05-25'  # includes a trailing week before the earliest chart
+API = 'https://community-api.coinmetrics.io/v4/timeseries/asset-metrics'
 
 
 def get(url, raw=False):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        body = r.read().decode('utf-8')
-    return body if raw else json.loads(body)
+    req = urllib.request.Request(url, headers={'User-Agent': 'mining-revenue-visualisation/2', 'Accept': 'application/json'})
+    with urllib.request.urlopen(req, timeout=60) as response:
+        text = response.read().decode('utf-8')
+    return text if raw else json.loads(text)
 
 
-def first(name, *fns):
-    for fn in fns:
-        try:
-            v = fn()
-            if v is not None and v > 0 and math.isfinite(v):
-                log(f'{name}: {v:g} ({fn.__name__})')
-                return v
-        except Exception as e:  # noqa: BLE001 - any failure means "try the next source"
-            log(f'{name}: {fn.__name__} failed: {e}')
-    log(f'{name}: no source answered')
-    return None
+def download(end):
+    url = API + '?' + urllib.parse.urlencode(dict(assets=','.join(ASSETS), metrics=','.join(METRICS), frequency='1d', start_time=START, end_time=end, page_size=10000))
+    first_url, rows = url, []
+    while url:
+        if not url.startswith(API + '?'):
+            raise ValueError('Unexpected pagination URL')
+        result = get(url)
+        rows.extend(result['data'])
+        url = result.get('next_page_url')
+    return dict(source='Coin Metrics Community API', url=first_url,
+                fetchedAt=dt.datetime.now(dt.timezone.utc).isoformat(),
+                frequency='1d', timezone='UTC', end=end, data=rows)
 
 
-# ---------- prices ----------
-CG = {'btc': 'bitcoin', 'zec': 'zcash', 'ltc': 'litecoin', 'doge': 'dogecoin'}
-BC = {'btc': 'bitcoin', 'zec': 'zcash', 'ltc': 'litecoin', 'doge': 'dogecoin'}
-_cg = {}
+def validate(snapshot):
+    end = snapshot['end']
+    expected = (dt.date.fromisoformat(end) - dt.date.fromisoformat(START)).days + 1
+    by_asset = {a: {} for a in ASSETS}
+    for row in snapshot['data']:
+        asset, date = row['asset'], row['time'][:10]
+        if asset not in by_asset or date < START or date > end:
+            raise ValueError('Unexpected asset/date')
+        if date in by_asset[asset]:
+            raise ValueError(f'Duplicate {asset} {date}')
+        for key in METRICS:
+            val = float(row[key])
+            if not math.isfinite(val) or val < 0 or (key != 'FeeTotNtv' and val == 0):
+                raise ValueError(f'Invalid {asset} {date} {key}')
+        by_asset[asset][date] = {key: float(row[key]) for key in METRICS}
+    for asset, rows in by_asset.items():
+        if len(rows) != expected or min(rows) != START or max(rows) != end:
+            raise ValueError(f'Incomplete daily history: {asset}; nothing published')
+    return by_asset
 
 
-def price(sym):
-    def coingecko():
-        if not _cg:
-            _cg.update(get('https://api.coingecko.com/api/v3/simple/price?ids=' + ','.join(CG.values()) + '&vs_currencies=usd'))
-        return float(_cg[CG[sym]]['usd'])
-
-    def coinbase():
-        return float(get(f'https://api.coinbase.com/v2/prices/{sym.upper()}-USD/spot')['data']['amount'])
-
-    def blockchair():
-        return float(get(f'https://api.blockchair.com/{BC[sym]}/stats')['data']['market_price_usd'])
-    return first(f'price {sym}', coingecko, coinbase, blockchair)
+MAX_LAG_DAYS = 3  # a short Coin Metrics delay is fine; a longer one means something is broken
 
 
-# ---------- network hashrate (returned in H/s or Sol/s) ----------
-def mempool_hashrate(base):
-    def f():
-        hs = get(base + '/api/v1/mining/hashrate/1m')['hashrates'][-7:]
-        return sum(float(h['avgHashrate']) for h in hs) / len(hs)
-    f.__name__ = base.split('//')[1]
-    return f
+def complete(row):
+    try:
+        vals = {k: float(row[k]) for k in METRICS}
+    except (KeyError, TypeError, ValueError):
+        return False
+    return all(math.isfinite(v) and v >= 0 for v in vals.values()) and all(vals[k] > 0 for k in METRICS if k != 'FeeTotNtv')
 
 
-def blockchair_hashrate(chain):
-    def f():
-        return float(get(f'https://api.blockchair.com/{chain}/stats')['data']['hashrate_24h'])
-    f.__name__ = 'blockchair'
-    f.noisy = True
-    return f
+def trim_to_complete(snapshot):
+    """Cut the snapshot at the last day that is complete for every asset. Days that
+    Coin Metrics hasn't finished yet are left for a later run; gaps before that
+    day still fail in validate()."""
+    days = {a: {r['time'][:10] for r in snapshot['data'] if r.get('asset') == a and complete(r)} for a in ASSETS}
+    common = set.intersection(*days.values())
+    if not common:
+        raise ValueError('No day is complete for all assets')
+    end = max(common)
+    return {**snapshot, 'end': end, 'data': [r for r in snapshot['data'] if r['time'][:10] <= end]}
 
 
-def fetch_hashrate(name, last, *fns):
-    """Hashrate in the unit of `last`: the API unit is detected as the power of 1000
-    that lands closest to the stored value. Noisy 24h estimates are smoothed."""
-    for fn in fns:
-        v = first(f'hashrate {name}', fn)
-        if v is None:
-            continue
-        k = round(math.log(last / v, 1000))
-        x = v * 1000 ** k
-        if not 0.5 < x / last < 2:
-            log(f'hashrate {name}: {x:g} too far from last {last:g}, ignored')
-            continue
-        return last + EMA * (x - last) if getattr(fn, 'noisy', False) else x
-    log(f'hashrate {name}: keeping last value {last:g}')
-    return last
-
-
-def btc_reward_day():
-    def mempool():
-        s = get('https://mempool.space/api/v1/mining/reward-stats/1008')
-        n = int(s['endBlock']) - int(s['startBlock']) + 1
-        return float(s['totalReward']) / n * 144 / 1e8
-    return first('BTC reward per day', mempool)
+def derive(snapshot):
+    db = validate(snapshot)
+    dates = sorted(db['btc'])
+    result = {name: dict(cmEnd=snapshot['end'], source=snapshot['source'], fetchedAt=snapshot['fetchedAt'], rows=[]) for name in ('btc', 'zec', 'l9')}
+    for i, d in enumerate(dates):
+        window = dates[max(0, i-6):i+1]
+        def avg(a, key): return sum(db[a][day][key] for day in window) / len(window)
+        def price(a): return db[a][d]['PriceUSD']
+        common = dict(d=d, p=price('btc'), e=0, source='coinmetrics', observedAt=d+'T23:59:59Z')
+        if d >= '2024-06-01':
+            h = avg('btc', 'HashRate')  # TH/s
+            reward = avg('btc', 'IssTotNtv') + avg('btc', 'FeeTotNtv')
+            def subsidy(day): return 6.25 if day < '2024-04-20' else 3.125 if day < '2028-04-10' else 1.5625
+            blocks = sum(db['btc'][day]['IssTotNtv'] / subsidy(day) for day in window)
+            fee = sum(db['btc'][day]['FeeTotNtv'] for day in window) / blocks
+            result['btc']['rows'].append(dict(**common, hr=h/1e6, hv=reward/h, fee=fee))
+        if d >= '2023-06-01':
+            h, fees = avg('zec', 'HashRate'), avg('zec', 'FeeTotNtv')  # GSol/s
+            mz = .8*avg('zec', 'IssTotNtv') + fees
+            result['zec']['rows'].append(dict(**common, z=price('zec'), hr=h, mz=mz, fees=fees, hv=mz/(h*1e6)*price('zec')/price('btc')))
+        if d >= '2024-05-01':
+            hl, hg = avg('ltc', 'HashRate'), avg('doge', 'HashRate')  # TH/s
+            fl, fg = avg('ltc', 'FeeTotNtv'), avg('doge', 'FeeTotNtv')
+            ml, mg = avg('ltc', 'IssTotNtv')+fl, avg('doge', 'IssTotNtv')+fg
+            vl, vg = ml/(hl*1e3)*price('ltc'), mg/(hg*1e3)*price('doge')
+            result['l9']['rows'].append(dict(**common, l=price('ltc'), g=price('doge'), hl=hl, hg=hg, ml=ml, mg=mg, fl=fl, fg=fg, hv=(vl+vg)/price('btc'), sd=vg/(vl+vg)))
+    return result
 
 
 def czk_rate():
@@ -121,97 +122,41 @@ def czk_rate():
         for line in txt.splitlines():
             p = line.split('|')
             if len(p) == 5 and p[3] == 'USD':
-                return round(float(p[4].replace(',', '.')) / float(p[2]), 3), date
-    except Exception as e:  # noqa: BLE001
-        log('CZK rate failed:', e)
+                return float(p[4].replace(',', '.'))/float(p[2]), date
+    except Exception as exc:
+        print('CZK refresh failed; previous dated fixing retained:', exc)
     return None, None
 
 
-# ---------- halvings ----------
-def subsidy_btc(d): return 3.125 if d < '2028-04-10' else 1.5625
-def subsidy_ltc(d): return 6.25 if d < '2027-07-30' else 3.125
-def subsidy_zec(d): return 1.5625 if d < '2028-11-20' else 0.78125
-
-
-# ---------- dataset update ----------
-def load(name):
-    return json.loads((DER / f'{name}.json').read_text())
-
-
-def save(name, obj):
-    (DER / f'{name}.json').write_text(json.dumps(obj, separators=(',', ':'), ensure_ascii=False))
-
-
-def days_to_fill(rows, today, live_from):
-    """Drop a same-day row from an earlier live run, return (anchor row, list of new dates)."""
-    while rows and rows[-1]['d'] >= today and rows[-1]['d'] >= live_from:
-        rows.pop()
-    a = rows[-1]
-    n = (D(today) - D(a['d'])).days
-    return a, [(D(a['d']) + dt.timedelta(i)).isoformat() for i in range(1, n + 1)]
-
-
-def lerp(a, b, t): return a + (b - a) * t
-
-
-def main():
-    today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+def main(offline=False):
+    end = (dt.datetime.now(dt.timezone.utc).date()-dt.timedelta(days=1)).isoformat()
+    if offline:
+        snapshot = json.loads(SOURCE.read_text())
+    else:
+        snapshot = trim_to_complete(download(end))
+        lag = (dt.date.fromisoformat(end) - dt.date.fromisoformat(snapshot['end'])).days
+        if lag > MAX_LAG_DAYS:
+            raise SystemExit(f'Coin Metrics data end at {snapshot["end"]}, {lag} days behind {end}; nothing published')
+        if SOURCE.exists() and json.loads(SOURCE.read_text())['end'] >= snapshot['end']:
+            print(f'No new complete day yet (last {snapshot["end"]}, wanted {end}); nothing changed')
+            return
+    derived = derive(snapshot)  # fail before any writes on gaps or bad input
     meta_path = DER / 'meta.json'
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
-    btc, zec, l9 = load('btc'), load('zec'), load('l9')
-    live_from = meta.get('liveFrom') or (D(btc['rows'][-1]['d']) + dt.timedelta(1)).isoformat()
-
-    P = {s: price(s) for s in ('btc', 'zec', 'ltc', 'doge')}
-    if None in P.values():
-        sys.exit('price missing, nothing written')
-
-    # --- BTC ---
-    a, dates = days_to_fill(btc['rows'], today, live_from)
-    if not dates:
-        log('data already up to date'); return
-    hr = fetch_hashrate('btc', a['hr'] * 1e18, mempool_hashrate('https://mempool.space'), blockchair_hashrate('bitcoin')) / 1e18
-    rew_a = a['hv'] * a['hr'] * 1e6
-    fee_a = max(0.0, rew_a - 144 * subsidy_btc(a['d']))
-    rew = btc_reward_day() or 144 * subsidy_btc(today) + fee_a
-    for i, d in enumerate(dates, 1):
-        t = i / len(dates)
-        h = lerp(a['hr'], hr, t)
-        r = lerp(rew_a, rew, t) if subsidy_btc(d) == subsidy_btc(today) else 144 * subsidy_btc(d) + fee_a
-        btc['rows'].append(dict(d=d, p=round(lerp(a['p'], P['btc'], t), 2), hr=round(h, 1), hv=round(r / (h * 1e6), 10), e=0))
-    bp = {r['d']: r['p'] for r in btc['rows']}
-
-    # --- ZEC (hr in GSol/s, mz = miner ZEC per day) ---
-    a, dates = days_to_fill(zec['rows'], today, live_from)
-    hr = fetch_hashrate('zec', a['hr'] * 1e9, blockchair_hashrate('zcash')) / 1e9
-    for i, d in enumerate(dates, 1):
-        t = i / len(dates)
-        h, z, p = lerp(a['hr'], hr, t), lerp(a['z'], P['zec'], t), bp[d]
-        mz = a['mz'] * subsidy_zec(d) / subsidy_zec(a['d'])
-        zec['rows'].append(dict(d=d, p=p, z=round(z, 3), hr=round(h, 3), mz=round(mz, 1), e=0, hv=round(mz / (h * 1e6) * z / p, 12)))
-
-    # --- L9 (hl, hg in TH/s; ml LTC/day, mg DOGE/day; sd = DOGE share of revenue) ---
-    a, dates = days_to_fill(l9['rows'], today, live_from)
-    hl = fetch_hashrate('ltc', a['hl'] * 1e12, mempool_hashrate('https://litecoinspace.org'), blockchair_hashrate('litecoin')) / 1e12
-    hg = fetch_hashrate('doge', a['hg'] * 1e12, blockchair_hashrate('dogecoin')) / 1e12
-    for i, d in enumerate(dates, 1):
-        t = i / len(dates)
-        l, g, p = lerp(a['l'], P['ltc'], t), lerp(a['g'], P['doge'], t), bp[d]
-        h1, h2 = lerp(a['hl'], hl, t), lerp(a['hg'], hg, t)
-        ml, mg = a['ml'] * subsidy_ltc(d) / subsidy_ltc(a['d']), a['mg']
-        vl, vg = ml / (h1 * 1e3) * l, mg / (h2 * 1e3) * g
-        l9['rows'].append(dict(d=d, p=p, l=round(l, 3), g=round(g, 5), hl=round(h1, 1), hg=round(h2, 1), ml=round(ml, 2), mg=mg,
-                               e=0, hv=round((vl + vg) / p, 12), sd=round(vg / (vl + vg), 4)))
-
-    for name, obj in (('btc', btc), ('zec', zec), ('l9', l9)):
-        assert obj['rows'][-1]['d'] == today, name
-        save(name, obj)
-    rate, rate_date = czk_rate()
-    meta.update(liveFrom=live_from, updated=today)
+    rate, date = (None, None) if offline else czk_rate()
     if rate:
-        meta.update(czk=rate, czkSource='ČNB, ' + D(rate_date).strftime('%-d. %-m. %Y'))
-    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=1) + '\n')
-    log('updated to', today)
+        meta.update(czk=rate, czkSource='ČNB, '+date)
+    meta.update(updated=snapshot['end'], fetchedAt=snapshot['fetchedAt'], dataSource=snapshot['source'], priceConvention='UTC daily close; network reward and hashrate trailing 7-day mean')
+    meta.pop('liveFrom', None)
+    SOURCE.parent.mkdir(parents=True, exist_ok=True)
+    if not offline:
+        SOURCE.write_text(json.dumps(snapshot, separators=(',', ':'), ensure_ascii=False)+'\n')
+    for name, data in derived.items():
+        (DER/(name+'.json')).write_text(json.dumps(data, separators=(',', ':'), ensure_ascii=False)+'\n')
+    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2)+'\n')
+    print('Validated closed daily observations through', snapshot['end'])
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main('--offline' in sys.argv)
