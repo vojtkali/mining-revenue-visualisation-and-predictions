@@ -134,7 +134,7 @@ def build(key):
   <div class="sg"><h3>Náklady</h3>
   {field('Elektřina', mi['kwh'], 'USD/kWh')}
   {field('Cena stroje', mi[M['hw']], 'USD')}
-  {field('Začátek těžby', mi['start'], '', 'Od kdy počítat historii a srovnání')}
+  {field('Začátek těžby', mi['start'] + '<button type="button" class="today" id="startToday" title="Nejbližší možný den: jen projekce bez historie">Dnes</button>', '', 'Od kdy počítat historii a srovnání. „Dnes“ nastaví nejbližší možný den, výpočet je pak čistá projekce.')}
   </div>
   <details class="sg adv" id="adv"><summary>Pokročilé</summary>
   {field('Poplatek poolu', mi['poolFee'], '%')}
@@ -338,6 +338,7 @@ document.querySelectorAll('.scen').forEach(c => {
   c.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === c) { e.preventDefault(); pickScen(c.dataset.sc); } });
 });
 SIDE.forEach(i => i.addEventListener('input', sync));
+$('startToday').addEventListener('click', () => { $('start').value = $('start').max; fire($('start')); });
 $('resetParams').addEventListener('click', () => {
   SIDE.forEach(i => { if (i.id in DEFAULTS) i.value = DEFAULTS[i.id]; });
   markScen(); fire($('kwh')); fire($('end'));

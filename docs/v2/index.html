@@ -78,9 +78,11 @@ button{font:inherit;color:inherit}
 .fi{display:flex;align-items:center;background:var(--raise);border:1px solid var(--line);border-radius:9px;transition:border-color .15s,box-shadow .15s}
 .fi:hover{border-color:color-mix(in srgb,var(--fg2) 35%,var(--line))}
 .fi:focus-within{border-color:var(--s1);box-shadow:0 0 0 3px color-mix(in srgb,var(--s1) 18%,transparent);background:var(--panel)}
-.fi input,.fi select{flex:1;min-width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
+.fi input,.fi select{flex:1;min-width:0;width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
 .fi .u{font-size:12.5px;color:var(--muted);padding-right:10px;white-space:nowrap}
 .fi .u:empty{display:none}
+.fi .today{flex:none;margin:4px;border:0;border-radius:7px;background:var(--panel);box-shadow:var(--shadow);padding:4px 10px;font-size:12.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.fi .today:hover{color:var(--s1)}
 .hint{font-size:12.5px;color:var(--muted);margin:0;line-height:1.45}
 .scens{display:grid;gap:8px}
 .scen{display:grid;gap:6px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;background:var(--panel);transition:border-color .15s,background .15s}
