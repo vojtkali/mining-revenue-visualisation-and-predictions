@@ -47,6 +47,9 @@ button{font:inherit;color:inherit}
 .machines .m.on{background:var(--panel);color:var(--fg);box-shadow:var(--shadow)}
 .machines a.m:hover,.machines a.m:focus-visible{color:var(--fg)}
 .machines .m.off{color:var(--muted)}
+.startinfo{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);white-space:nowrap}
+.startinfo b{color:var(--fg);font-weight:600}
+.startinfo+.asof{margin-left:0}
 .asof{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:7px}
 .asof::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 20%,transparent)}
 .theme{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:0;border-radius:10px;padding:6px 12px 6px 10px;font-size:13.5px;font-weight:500;color:var(--fg2);cursor:pointer}
@@ -210,7 +213,7 @@ details.qa .a p{margin:0 0 8px}
 @media (max-width:900px){
   :root{--hdr:0px}
   .top{position:static}
-  .asof{margin-left:0}
+  .asof,.startinfo{margin-left:0}
   .top-in,.tabs-in,.layout,.overview{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .layout{grid-template-columns:minmax(0,1fr);gap:18px;padding-block:18px 56px}
   .side{position:static;max-height:none;padding:0}
@@ -233,6 +236,7 @@ details.qa .a p{margin:0 0 8px}
 <header class="top"><div class="top-in">
   <div class="brand"><a href="index.html">Těžba</a><span class="sep">/</span><span>Antminer S21 XP</span></div>
   <nav class="machines" aria-label="Stroj"><span class="m on" aria-current="page">S21 XP</span><a class="m" href="z15.html">Z15 Pro</a><a class="m" href="l9.html">L9</a></nav>
+  <span class="startinfo">Začátek těžby <b id="startLbl"></b></span>
   <span class="asof">Data k 14. 10. 2026</span>
   <button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><span class="tl"></span></button>
 </div>
@@ -1310,12 +1314,15 @@ SIDE.forEach(i => i.addEventListener('input', sync));
 $('startToday').addEventListener('click', () => { $('start').value = $('start').max; fire($('start')); });
 $('resetParams').addEventListener('click', () => {
   SIDE.forEach(i => { if (i.id in DEFAULTS) i.value = DEFAULTS[i.id]; });
-  markScen(); fire($('kwh')); fire($('end'));
+  markScen(); fire($('kwh')); fire($('end')); startLbl();
 });
 // restore remembered parameters
 const saved = store.get(KEY);
 if (saved) { SIDE.forEach(i => { if (saved[i.id] !== undefined) i.value = saved[i.id]; }); fire($('kwh')); fire($('end')); }
-markScen(); sync();
+// top bar: show from when the mining is counted
+const startLbl = () => { const v = $('start').value; if (v) $('startLbl').textContent = `${+v.slice(8,10)}. ${+v.slice(5,7)}. ${v.slice(0,4)}`; };
+$('start').addEventListener('input', startLbl); $('start').addEventListener('change', startLbl);
+markScen(); sync(); startLbl();
 
 const hdr = () => document.documentElement.style.setProperty('--hdr', document.querySelector('.top').offsetHeight + 'px');
 hdr(); window.addEventListener('resize', hdr);

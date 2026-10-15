@@ -204,6 +204,7 @@ def build(key):
 <header class="top"><div class="top-in">
   <div class="brand">{brand}<span class="sep">/</span><span>{M["title"]}</span></div>
   <nav class="machines" aria-label="Stroj">{machines}</nav>
+  <span class="startinfo">Začátek těžby <b id="startLbl"></b></span>
   <span class="asof">Data k {vals["LAST"]}</span>
   {THEME_BTN}
 </div>
@@ -259,6 +260,7 @@ def build_index():
 <header class="top"><div class="top-in">
   <div class="brand"><b>Těžba</b><span class="sep">/</span><span>Přehled strojů</span></div>
   <nav class="machines" aria-label="Stroj">{machines}</nav>
+  <span class="startinfo" title="Karty počítají se strojem koupeným v poslední den dat">Začátek těžby <b>{vals["LAST"]}</b></span>
   <span class="asof">Data k {vals["LAST"]}</span>
   {THEME_BTN}
 </div></header>
@@ -374,12 +376,15 @@ SIDE.forEach(i => i.addEventListener('input', sync));
 $('startToday').addEventListener('click', () => { $('start').value = $('start').max; fire($('start')); });
 $('resetParams').addEventListener('click', () => {
   SIDE.forEach(i => { if (i.id in DEFAULTS) i.value = DEFAULTS[i.id]; });
-  markScen(); fire($('kwh')); fire($('end'));
+  markScen(); fire($('kwh')); fire($('end')); startLbl();
 });
 // restore remembered parameters
 const saved = store.get(KEY);
 if (saved) { SIDE.forEach(i => { if (saved[i.id] !== undefined) i.value = saved[i.id]; }); fire($('kwh')); fire($('end')); }
-markScen(); sync();
+// top bar: show from when the mining is counted
+const startLbl = () => { const v = $('start').value; if (v) $('startLbl').textContent = `${+v.slice(8,10)}. ${+v.slice(5,7)}. ${v.slice(0,4)}`; };
+$('start').addEventListener('input', startLbl); $('start').addEventListener('change', startLbl);
+markScen(); sync(); startLbl();
 
 const hdr = () => document.documentElement.style.setProperty('--hdr', document.querySelector('.top').offsetHeight + 'px');
 hdr(); window.addEventListener('resize', hdr);
