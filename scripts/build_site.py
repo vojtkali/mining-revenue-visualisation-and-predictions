@@ -76,7 +76,12 @@ def page_html(head, body, data, app):
 <p>„Návratnost při držení“ znamená první ocenění BTC nad všemi dosavadními platbami; nejde o realizovaný příjem ani záruku trvalé návratnosti. Další roční platba může výsledek opět snížit.</p></section>"""
         body_text = body_text.rsplit('</div>', 1)[0] + panel + '</div>'
     body_text += '<div class="site-foot">Data k {{LAST}}: uzavřené denní ceny UTC z Coin Metrics Community API. Hashrate a síťové odměny: zpětný sedmidenní průměr. Modelový výnos, nikoli výpis konkrétního poolu. <a href="https://github.com/vojtkali/mining-revenue-visualisation-and-predictions/blob/main/data/source/coinmetrics.json">Zdrojový snímek dat</a>.</div>'
-    parts = [read(head + '.html'), body_text, CHART]
+    parts = [read(head + '.html'), '''<style>
+.wrap{grid-template-columns:minmax(0,1fr)}
+.wrap>*{min-width:0}
+.qa .a,.notes,.lead,.site-foot{overflow-wrap:anywhere}
+@media(max-width:520px){.n{white-space:normal}}
+</style>''', body_text, CHART]
     if data:
         parts.append('<script>' + read('economics.js') + '</script>')
     if data:

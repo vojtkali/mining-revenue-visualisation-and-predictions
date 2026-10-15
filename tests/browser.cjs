@@ -30,7 +30,10 @@ const ROOT=path.resolve(__dirname,'..'),chart=fs.readFileSync(path.join(path.dir
    const hw=page.locator('#hwS,#fHwS,#hwz,#zHw,#hwL,#qHwL');await hw.fill('0');await check();
    // No viewport-wide overflow on a phone; tables should scroll within their containers.
    await page.setViewportSize({width:390,height:844});
-   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),file+' mobile overflow');
+   await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,{},{timeout:3000}).catch(async()=>{
+    const overflow=await page.locator('body *').evaluateAll(els=>els.filter(e=>e.getBoundingClientRect().right>innerWidth+2 && getComputedStyle(e.parentElement).overflowX!=='auto').slice(0,12).map(e=>({tag:e.tagName,cls:e.className,width:e.getBoundingClientRect().width,text:e.textContent.slice(0,80)})));
+    throw new Error(file+' mobile overflow: '+JSON.stringify(overflow));
+   });
   }
   if(process.env.SCREENSHOT_DIR && file==='z15pro-faq.html'){
    await page.setViewportSize({width:1280,height:900});await page.locator('#strategyTable').screenshot({path:path.join(process.env.SCREENSHOT_DIR,'strategies.png')});

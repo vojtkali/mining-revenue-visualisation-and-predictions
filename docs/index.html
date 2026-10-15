@@ -91,6 +91,12 @@ code{font-family:var(--f-mono);font-size:12.5px}
 .money .czk{font:400 12.5px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
 </style>
 
+<style>
+.wrap{grid-template-columns:minmax(0,1fr)}
+.wrap>*{min-width:0}
+.qa .a,.notes,.lead,.site-foot{overflow-wrap:anywhere}
+@media(max-width:520px){.n{white-space:normal}}
+</style>
 <div class="wrap">
 <header>
   <h1>Těžba v kostce: S21 XP, Z15 Pro a L9</h1>
