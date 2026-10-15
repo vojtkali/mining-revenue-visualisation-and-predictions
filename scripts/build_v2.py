@@ -65,6 +65,15 @@ def rename_ids(html, js, ids, prefix, extra_js=()):
     return html, js
 
 
+FONT_SWAP = [('IBM Plex Mono', 'Geist Mono'), ('IBM Plex Sans', 'Geist')]
+
+
+def v2_fonts(js):
+    for a, b in FONT_SWAP:
+        js = js.replace(a, b)
+    return js
+
+
 def scoped(js, mute_strategy=False):
     head = 'const renderStrategyTable=()=>{};\n' if mute_strategy else ''
     return '(()=>{\n' + head + js + '\n})();'
@@ -205,9 +214,9 @@ def build(key):
 <script>{B.read("economics.js")}</script>
 <script>const DATA={B.embedded_data(M["data"])};
 {GLOBAL_FMT}
-{scoped(main_js)}
-{scoped(faq_js, mute_strategy=True)}
-{scoped(lump_js, mute_strategy=True)}
+{v2_fonts(scoped(main_js))}
+{v2_fonts(scoped(faq_js, mute_strategy=True))}
+{v2_fonts(scoped(lump_js, mute_strategy=True))}
 </script>
 <script>{V2_POST.replace('__CFG__', json.dumps(cfg))}</script>'''
     return page
@@ -257,11 +266,43 @@ def build_index():
 </div>
 {B.CHART}
 <script>{V2_PRE}</script>
-<script>{B.fill(B.read('sumapp.js'), sv, 'v2 index')}</script>'''
+<script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>'''
 
 
 # runs before the apps: Q&A blocks become collapsible (open), tab switching
 V2_PRE = r'''
+// chart look for the calculators: every chart the apps create gets the same quiet styling
+(() => {
+  const Base = window.Chart, tok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const hexA = (h, a) => { const m = /^#([0-9a-f]{6})$/i.exec(h); if (!m) return h; const n = parseInt(m[1], 16);
+    return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; };
+  function polish(cfg){
+    const o = cfg.options || (cfg.options = {});
+    o.layout = {padding:{top:8, right:6}};
+    const tt = o.plugins && o.plugins.tooltip;
+    if (tt){ Object.assign(tt, {cornerRadius:10, padding:12, caretSize:0, boxWidth:8, boxHeight:8, boxPadding:6, titleMarginBottom:8, bodySpacing:5,
+      backgroundColor:tok('--panel'), borderColor:tok('--line'), borderWidth:1});
+      tt.titleFont = {...(tt.titleFont||{}), family:'Geist', weight:'600', size:12.5};
+      tt.bodyFont = {...(tt.bodyFont||{}), family:'Geist Mono', size:12.5}; }
+    Object.values(o.scales || {}).forEach(sc => {
+      sc.border = {...(sc.border||{}), display:false};
+      if (sc.grid && sc.grid.display !== false) Object.assign(sc.grid, {color:tok('--grid'), drawTicks:false, lineWidth:1});
+      if (sc.ticks) Object.assign(sc.ticks, {padding:8, color:tok('--muted'), font:{...(sc.ticks.font||{}), size:11.5}});
+    });
+    ((cfg.data && cfg.data.datasets) || []).forEach(d => {
+      const t = d.type || cfg.type;
+      if (t === 'line' && !d.borderDash){
+        d.borderWidth = Math.max(d.borderWidth || 2, 2.25); d.borderCapStyle = 'round'; d.borderJoinStyle = 'round';
+        if (d.pointHoverRadius !== 0) d.pointHoverRadius = 5;
+        const col = d.borderColor;
+        if (d.fill && typeof col === 'string' && col[0] === '#') d.backgroundColor = c => { const a = c.chart.chartArea; if (!a) return hexA(col, .15);
+          const g = c.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, hexA(col, .24)); g.addColorStop(1, hexA(col, 0)); return g; };
+      }
+      if (t === 'bar'){ d.borderRadius = d.borderRadius ?? 6; d.borderSkipped = false; }
+    });
+  }
+  if (Base) window.Chart = class extends Base { constructor(item, cfg){ try { polish(cfg); } catch (e) {} super(item, cfg); } };
+})();
 document.querySelectorAll('.qa').forEach(q => {
   const h = q.querySelector(':scope > h3'); if (!h) return;
   const d = document.createElement('details'); d.className = q.className; d.open = true;
