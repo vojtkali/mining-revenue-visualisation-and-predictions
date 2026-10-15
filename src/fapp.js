@@ -211,12 +211,15 @@ function render(){
   const nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
   const SCN = scnNow(), sc = SCN.map(([name,r,col]) => ({name,r,col,...proj(p,r)}));
+  // payback after the 5-year window: same scenario run up to 15 years, so the tables show an exact date or "ani do <rok>"
+  const LONG = 15, longY = +L0.d.slice(0,4) + LONG;
+  sc.forEach(x => { if (x.payH && x.payS) return; const q = proj(p, x.r, LONG); x.payH = x.payH || q.payH; x.payS = x.payS || q.payS; });
   const si = +($('fScen3').value||1), base = sc[si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
   const dcaS = comparison.map(o=>o.dca), lumpS = comparison.map(o=>o.spot);
   renderStrategyTable(base.out,p,base.elec);
-  const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
+  const fmtPay = x => x ? fmtDate(x) : `ani do ${longY}`;
   const p10 = proj(p, base.r, 10);
   const V = {
     btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
@@ -230,7 +233,7 @@ function render(){
     netUp10: usd(revDay*1.1-elecDay,2), netDn10: usd(revDay*0.9-elecDay,2), netDiff10: usd(revDay/1.1-elecDay,2),
     hrGrowth12: (L0.hr/hr12.hr-1>=0?'+':'')+pct(L0.hr/hr12.hr-1), hr12: `${Math.round(hr12.hr).toLocaleString('cs-CZ')} EH/s`, btcDrop1y: pct(1-btcDay1y/btcDay),
     bePrice: usd(bePrice), bePriceH: usd(bePriceH), beMargin: pct(1-bePrice/p.price),
-    payBull: fmtPay(sc[2].payH), payBase: fmtPay(sc[1].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : 'se do 5 let nezaplatí',
+    payBull: fmtPay(sc[2].payH), payBase: fmtPay(sc[1].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
     scName: SCN[si][0].toLowerCase(), monthVal5y: usd(btcDay*M*base.end.pr), stack5y: usd(base.end.stack), hodl5y: usd(base.end.hodl), hodl5yHw: usd(base.end.hodl-p.hw), el5y: usd(base.el),

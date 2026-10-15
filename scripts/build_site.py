@@ -176,9 +176,9 @@ def parse_cz(s):
     return (int(m.group(3)), int(m.group(2))) if m else None
 
 
-def month_year(s, none='do 5 let ne'):
+def month_year(s):
     ym = parse_cz(s)
-    return f'{MONTHS[ym[1] - 1]} {ym[0]}' if ym else none
+    return f'{MONTHS[ym[1] - 1]} {ym[0]}' if ym else s
 
 
 def since(s):
@@ -235,7 +235,7 @@ def summary_values():
             'beat': f'{round(h[k]["lumpBeat"][0] / h[k]["lumpBeat"][1] * 100)} %',
         }
         if k == 'z15':
-            x['worstPay'] = f'stroj se přesto zaplatí ({month_year(worst[c_hold])})' if parse_cz(worst[c_hold]) else 'stroj se do 5 let nezaplatí'
+            x['worstPay'] = f'stroj se přesto zaplatí ({month_year(worst[c_hold])})' if parse_cz(worst[c_hold]) else f'stroj se nezaplatí {worst[c_hold]}'
             x['worstLoss'] = f'{loss_worst} je ve ztrátě' if loss_worst else 'do ztráty nespadne'
         if k == 'l9':
             x['ltcHalf'] = v['ltcShareHalf']; x['dogeShare'] = v['dogeShare']

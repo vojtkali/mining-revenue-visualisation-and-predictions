@@ -1020,6 +1020,9 @@ function render(){
   const hps = hist.map(x=>x.hp), chg = hist.slice(1).map((x,i)=>Math.abs(x.hp/hist[i].hp-1)).sort((a,b)=>a-b), nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
   const SCN = scnNow(), sc = SCN.map(([name,z1,z2,col,br]) => { const pp = br===undefined?p:{...p,br}; return {name,z1,z2,col,pp,...proj(pp,z1,z2)}; });
+  // payback after the 5-year window: same scenario run up to 15 years, so the tables show an exact date or "ani do <rok>"
+  const LONG = 15, longY = +L0.d.slice(0,4) + LONG;
+  sc.forEach(x => { if (x.payH && x.payS) return; const q = proj(x.pp, x.z1, x.z2, x.pp.g, LONG); x.payH = x.payH || q.payH; x.payS = x.payS || q.payS; });
   const base = sc[p.si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
@@ -1027,7 +1030,7 @@ function render(){
   renderStrategyTable(base.out,p,base.elec);
   renderEdgeZ(p, base);
   const p10 = proj(base.pp, base.z1, base.z2, base.pp.g, 10);
-  const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
+  const fmtPay = x => x ? fmtDate(x) : `ani do ${longY}`;
   const V = {
     dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
     today: fmtDate(TODAY), zec: usd(p.zec), btc: usd(p.btc), hw: usd(p.hw), fee: pct(p.fee), up: pct(p.up), btcR: (p.br>=0?'+':'')+pct(p.br),
@@ -1039,7 +1042,7 @@ function render(){
     hpMin: usd(Math.min(...hps),2), hpMax: usd(Math.max(...hps),2), netMin: usd(Math.min(...nets),2), netMax: usd(Math.max(...nets),2), hpChg: pct(chg[Math.floor(chg.length/2)],1),
     netUp10: usd(revDay*1.1-elecDay,2), netDn10: usd(revDay*0.9-elecDay,2), netDiff10: usd(revDay/1.1-elecDay,2),
     bePrice: usd(bePrice), bePriceH: usd(bePriceH), beMargin: pct(1-bePrice/p.zec),
-    payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : 'se do 5 let nezaplatí',
+    payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
     price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(comparison.at(-1).dcaValue),
