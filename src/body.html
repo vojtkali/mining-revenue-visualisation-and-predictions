@@ -30,15 +30,15 @@
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Výsledek před cenou stroje je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (odečtená cena, hashrate z obtížnosti)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Výsledek před cenou stroje je tržba minus elektřina. Z USD získaných prodejem se jednou ročně předem zaplatí elektřina na celý další rok, proto křivka v den platby spadne a pak zase plynule roste. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 
 <section class="card">
   <h2>2 · Těžím a držím: hodnota natěženého stacku v USD</h2>
-  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
+  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Elektřina se platí předem vždy za celý rok (v den dodání a pak každých 365 dní), proto oranžová křivka a s ní i čisté hodnoty dělají schody. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: kumulativní tržba z průběžného prodeje BTC v USD, ze které se jednou ročně zaplatí elektřina na další rok. Nad ní se držení vyplatilo víc než průběžný prodej.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej po roční platbě elektřiny (graf 1)</span><span><i class="dash"></i>Cena stroje</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Natěženo celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
@@ -48,14 +48,14 @@
   <h2>3 · Těžba vs. spot při ročních vkladech</h2>
   <p class="sub">Stejné vklady ve stejných dnech: <span id="budget"></span> Spot nakoupí BTC při každém vkladu. Graf ukazuje BTC; úplná hodnota včetně hotovosti a všech nákladů je ve srovnávací tabulce.</p>
   <p class="sub" style="margin-top:10px"><b>Poplatky konstantní:</b> transakční poplatky v BTC za blok zůstávají na dnešní úrovni. <b>Poplatky rostou:</b> po halvingu v roce 2028 poplatky během 12 měsíců postupně vzrostou o zadané procento a pak na této úrovni zůstanou. Výchozích +33 % je medián z posledních tří cyklů: průměrné poplatky v BTC za blok v nejsilnějším čtvrtletí bull marketu proti půlroku po halvingu (2017: +514 %, 2021: +33 %, 2024: −49 %). <span id="feeInfo"></span></p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba, poplatky konstantní</span><span><i style="background:var(--s4)"></i>Těžba, poplatky rostou</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="box"></i>Odhad</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba, poplatky konstantní</span><span><i style="background:var(--s4)"></i>Těžba, poplatky rostou</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span></div>
   <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. spot při ročních vkladech"></canvas></div>
 </section>
 
 <section class="card">
   <h2>4 · Těžba vs. týdenní DCA</h2>
   <p class="sub"><span id="dcaInfo"></span> Budoucí nákupy používají cenu zvoleného scénáře.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba, poplatky konstantní</span><span><i style="background:var(--s4)"></i>Těžba, poplatky rostou</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="box"></i>Odhad</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba, poplatky konstantní</span><span><i style="background:var(--s4)"></i>Těžba, poplatky rostou</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
   <div class="chart"><canvas id="c8" aria-label="Stack BTC: těžba vs. týdenní DCA"></canvas></div>
   <div class="tbl"><table id="ctab"></table></div>
 </section>
@@ -63,7 +63,7 @@
 <section class="card">
   <h2>5 · Scénáře: těžím a držím</h2>
   <p class="sub">Čistá hodnota stacku (natěžené BTC × cena − veškerá elektřina) za poslední rok a v projekci do <span class="endLabel"></span> pro všechny tři scénáře ceny. Sloupec „Dnů ve ztrátě“ udává, kolik dní v projekci má denní výnos menší hodnotu než elektřina; stroj přesto běží a natěží víc BTC.</p>
-  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i><span id="lg_bear">Pesimistický</span></span><span><i style="background:var(--s1)"></i><span id="lg_base">Základní</span></span><span><i style="background:var(--s3)"></i><span id="lg_bull">Optimistický</span></span><span><i class="dash"></i>Cena stroje</span></div>
   <div class="chart"><canvas id="c5" aria-label="Projekce čisté hodnoty při držení"></canvas></div>
   <div class="tbl"><table id="ptab"></table></div>
   <p class="sub" style="margin-top:10px">Scénáře nejsou předpověď. Ukazují, jak citlivý je výsledek na cenu BTC a na růst sítě. Čistá hodnota = natěžené BTC × cena v daném dni − veškerá elektřina zaplacená od začátku.</p>
@@ -72,7 +72,7 @@
 <section class="card">
   <h2>Hashprice sítě a váš bod zvratu</h2>
   <p class="sub">Hashprice v USD za PH/s za den (7denní průměr hashrate, v projekci zvolený scénář s konstantními poplatky). Čárkovaná čára je hashprice, pod kterou stroj při zadané ceně elektřiny prodělává.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hashprice, USD/PH/den</span><span><i class="dash"></i>Bod zvratu pro elektřinu</span><span><i class="box"></i>Odhad</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hashprice, USD/PH/den</span><span><i class="dash"></i>Bod zvratu pro elektřinu</span></div>
   <div class="chart small"><canvas id="c4" aria-label="Hashprice"></canvas></div>
 </section>
 

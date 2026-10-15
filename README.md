@@ -58,8 +58,13 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_site.py --pages-only # první sestavení bez starého souhrnu
 node scripts/harvest.js
 python3 scripts/build_site.py
+python3 scripts/build_v2.py --public docs/v2   # nové kalkulačky (úvod + S21 XP, Z15 Pro, L9)
 node tests/browser.cjs                    # všechny stránky a změny parametrů
 ```
+
+## Nové kalkulačky (docs/v2)
+
+`scripts/build_v2.py` skládá pro každý stroj jednu stránku se záložkami (Přehled, Návratnost, Těžba vs. nákup, Otázky, Metodika) a panelem parametrů vlevo; k tomu úvod se srovnáním strojů. Výpočty jsou stejné jako na stránkách v `docs/` (hlavní stránka, FAQ a srovnání podle dne vstupu stroje běží beze změny, panel jim synchronizuje parametry). `python3 scripts/build_v2.py OUT_DIR` vytvoří totéž ve formátu artefaktů claude.ai (odkazy mezi publikovanými artefakty jsou v `LINKS`).
 
 `CHROMIUM=/cesta/k/chromium` umožňuje použít vlastní prohlížeč. `scripts/rebuild_data.sh --offline` zopakuje kompletní sestavení z verzovaného snímku; bez přepínače obnoví data z API.
 

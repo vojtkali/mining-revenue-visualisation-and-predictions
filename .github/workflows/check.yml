@@ -24,6 +24,7 @@ jobs:
       - run: python3 scripts/build_site.py --pages-only
       - run: node scripts/harvest.js
       - run: python3 scripts/build_site.py
+      - run: python3 scripts/build_v2.py --public docs/v2
       - run: node tests/browser.cjs
       - name: Check generated artifacts are reproducible
         run: git diff --exit-code -- docs data/derived/harvest.json

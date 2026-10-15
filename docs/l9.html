@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Antminer L9 ziskovost</title><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><nav class="site-nav" aria-label="Stránky"><a href="index.html">Těžba v kostce</a><a href="s21xp.html">S21 XP</a><a href="s21xp-faq.html">S21 XP FAQ</a><a href="s21xp-nakup.html">S21 XP vs. nákup</a><a href="z15pro.html">Z15 Pro</a><a href="z15pro-faq.html">Z15 Pro FAQ</a><a href="z15pro-nakup.html">Z15 Pro vs. nákup</a><a href="l9.html" aria-current=page>L9</a><a href="l9-faq.html">L9 FAQ</a><a href="l9-nakup.html">L9 vs. nákup</a></nav>
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Antminer L9 ziskovost</title><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><nav class="site-nav" aria-label="Stránky"><a href="index.html">Těžba v kostce</a><a href="s21xp.html">S21 XP</a><a href="s21xp-faq.html">S21 XP FAQ</a><a href="s21xp-nakup.html">S21 XP vs. nákup</a><a href="z15pro.html">Z15 Pro</a><a href="z15pro-faq.html">Z15 Pro FAQ</a><a href="z15pro-nakup.html">Z15 Pro vs. nákup</a><a href="l9.html" aria-current=page>L9</a><a href="l9-faq.html">L9 FAQ</a><a href="l9-nakup.html">L9 vs. nákup</a><a href="v2/index.html">Nové kalkulačky</a></nav>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wght@600;700&display=swap">
 <style>
@@ -89,14 +89,14 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
   <label for="sc">Scénář pro grafy 1–4<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
   <label for="lbB">Pesimistický: BTC, % ročně<input id="lbB" type="number" step="1" min="-90" max="500" value="10"></label>
-  <label for="llB">Pesimistický: LTC, % ročně<input id="llB" type="number" step="5" min="-90" max="500" value="-20"></label>
-  <label for="ldB">Pesimistický: DOGE, % ročně<input id="ldB" type="number" step="5" min="-90" max="500" value="-20"></label>
+  <label for="llB">Pesimistický: LTC, % ročně<input id="llB" type="number" step="5" min="-90" max="500" value="-30"></label>
+  <label for="ldB">Pesimistický: DOGE, % ročně<input id="ldB" type="number" step="5" min="-90" max="500" value="-30"></label>
   <label for="lbM">Základní: BTC, % ročně<input id="lbM" type="number" step="1" min="-90" max="500" value="20"></label>
   <label for="llM">Základní: LTC, % ročně<input id="llM" type="number" step="5" min="-90" max="500" value="10"></label>
   <label for="ldM">Základní: DOGE, % ročně<input id="ldM" type="number" step="5" min="-90" max="500" value="10"></label>
-  <label for="lbU">Optimistický: BTC, % ročně<input id="lbU" type="number" step="1" min="-90" max="500" value="40"></label>
+  <label for="lbU">Optimistický: BTC, % ročně<input id="lbU" type="number" step="1" min="-90" max="500" value="20"></label>
   <label for="llU">Optimistický: LTC, % ročně<input id="llU" type="number" step="5" min="-90" max="500" value="30"></label>
-  <label for="ldU">Optimistický: DOGE, % ročně<input id="ldU" type="number" step="5" min="-90" max="500" value="40"></label>
+  <label for="ldU">Optimistický: DOGE, % ročně<input id="ldU" type="number" step="5" min="-90" max="500" value="30"></label>
   <label for="lhg">Růst hashrate Scrypt, % ročně<input id="lhg" type="number" step="5" min="-50" max="300" value="15"></label>
   <label for="lk">Citlivost hashrate na ceny LTC/DOGE<input id="lk" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
@@ -106,15 +106,15 @@ code{font-family:var(--f-mono);font-size:12.5px}
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Výsledek před cenou stroje je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (řídká data z vyhledávání)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Výsledek před cenou stroje je tržba minus elektřina. Z USD získaných prodejem se jednou ročně předem zaplatí elektřina na celý další rok, proto křivka v den platby spadne a pak zase plynule roste. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 
 <section class="card">
   <h2>2 · Těžím a držím: hodnota natěženého stacku v USD</h2>
-  <p class="sub">Vyplacené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je součet všech denních výplat v BTC krát cena BTC v daném dni. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
+  <p class="sub">Vyplacené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je součet všech denních výplat v BTC krát cena BTC v daném dni. Elektřina se platí předem vždy za celý rok (v den dodání a pak každých 365 dní), proto oranžová křivka a s ní i čisté hodnoty dělají schody. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: kumulativní tržba z průběžného prodeje BTC v USD, ze které se jednou ročně zaplatí elektřina na další rok. Nad ní se držení vyplatilo víc než průběžný prodej.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej po roční platbě elektřiny (graf 1)</span><span><i class="dash"></i>Cena stroje</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Vyplaceno celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
@@ -123,14 +123,14 @@ code{font-family:var(--f-mono);font-size:12.5px}
 <section class="card">
   <h2>3 · Těžba vs. spot při ročních vkladech</h2>
   <p class="sub">Stejné vklady ve stejných dnech: <span id="budget"></span> Spot nakoupí BTC při každém vkladu. Graf ukazuje BTC; úplná hodnota včetně hotovosti a všech nákladů je ve srovnávací tabulce.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. spot při ročních vkladech"></canvas></div>
 </section>
 
 <section class="card">
   <h2>4 · Těžba vs. týdenní DCA</h2>
   <p class="sub"><span id="dcaInfo"></span> Budoucí nákupy používají cenu zvoleného scénáře.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c8" aria-label="Stack BTC: těžba vs. týdenní DCA"></canvas></div>
   <div class="tbl"><table id="ctab"></table></div>
 </section>
@@ -138,7 +138,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
 <section class="card">
   <h2>5 · Scénáře: těžím a držím</h2>
   <p class="sub">Čistá hodnota stacku (natěžené BTC × cena − veškerá elektřina) za poslední rok a v projekci do <span class="endLabel"></span> pro všechny tři scénáře ceny. Sloupec „Dnů ve ztrátě“ udává, kolik dní v projekci má denní výnos menší hodnotu než elektřina; stroj přesto běží a natěží víc BTC.</p>
-  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i><span id="lg_bear">Pesimistický</span></span><span><i style="background:var(--s1)"></i><span id="lg_base">Základní</span></span><span><i style="background:var(--s3)"></i><span id="lg_bull">Optimistický</span></span><span><i class="dash"></i>Cena stroje</span></div>
   <div class="chart"><canvas id="c5" aria-label="Projekce čisté hodnoty při držení"></canvas></div>
   <div class="tbl"><table id="ptab"></table></div>
   <p class="sub" style="margin-top:10px">Scénáře nejsou předpověď. Ukazují, jak citlivý je výsledek na cenu BTC a na růst sítě. Čistá hodnota = natěžené BTC × cena v daném dni − veškerá elektřina zaplacená od začátku.</p>
@@ -414,9 +414,12 @@ function renderProj(p, s, iT){
   const res = Object.keys(SC).map(k => { const r = compute(p, k), e = r[r.length-1];
     return {k, name:SC[k][0], col:SC[k][1], r, e, off:r.slice(iT+1).filter(x=>x.loss).length,
             pay:r.find(x=>x.d>TODAY && x.hodl>=p.hw), held:r.slice(iT).every(x=>x.hodl>=p.hw)}; });
+  const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
+  res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))}, BTC ${sgp(pctv(b))} / rok)`;
+    x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
   const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
     .concat([ref('Cena stroje', L.map(()=>p.hw))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));

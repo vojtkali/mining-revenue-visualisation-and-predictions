@@ -1,4 +1,4 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>L9: výnos a návratnost</title><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><nav class="site-nav" aria-label="Stránky"><a href="index.html">Těžba v kostce</a><a href="s21xp.html">S21 XP</a><a href="s21xp-faq.html">S21 XP FAQ</a><a href="s21xp-nakup.html">S21 XP vs. nákup</a><a href="z15pro.html">Z15 Pro</a><a href="z15pro-faq.html">Z15 Pro FAQ</a><a href="z15pro-nakup.html">Z15 Pro vs. nákup</a><a href="l9.html">L9</a><a href="l9-faq.html" aria-current=page>L9 FAQ</a><a href="l9-nakup.html">L9 vs. nákup</a></nav>
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>L9: výnos a návratnost</title><style>:root{color-scheme:light}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><nav class="site-nav" aria-label="Stránky"><a href="index.html">Těžba v kostce</a><a href="s21xp.html">S21 XP</a><a href="s21xp-faq.html">S21 XP FAQ</a><a href="s21xp-nakup.html">S21 XP vs. nákup</a><a href="z15pro.html">Z15 Pro</a><a href="z15pro-faq.html">Z15 Pro FAQ</a><a href="z15pro-nakup.html">Z15 Pro vs. nákup</a><a href="l9.html">L9</a><a href="l9-faq.html" aria-current=page>L9 FAQ</a><a href="l9-nakup.html">L9 vs. nákup</a><a href="v2/index.html">Nové kalkulačky</a></nav>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wght@600;700&display=swap">
@@ -154,7 +154,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <div class="qa"><h3>Je na webu výnos před elektřinou, nebo po elektřině?</h3><div class="a"><p>Na této stránce vidíte oboje: výnos (po poplatku poolu) a čistý výnos po elektřině.</p></div></div>
   <div class="qa"><h3>Jsou ve výpočtu zahrnuté všechny poplatky?</h3><div class="a"><p>Zahrnutý je poplatek poolu (<span class="n" data-k="fee"></span>), který u výplaty v BTC obsahuje i převod LTC a DOGE na BTC, a elektřina. Nezahrnuté jsou daně, případné opravy a postupný pokles výkonu stroje.</p></div></div>
   <div class="qa"><h3>Jak moc se může výnos měnit?</h3><div class="a"><p>Hodně. Za posledních 12 měsíců byl výnos mezi <span class="n" data-k="hpMin"></span> a <span class="n" data-k="hpMax"></span> za GH/s za den. Pro tento stroj to znamená čistý výnos od <span class="n" data-k="netMin"></span> do <span class="n" data-k="netMax"></span> denně (při dnešní ceně elektřiny a poplatku).</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos, USD za GH/s za den</span><span><i class="dash"></i>Bod zvratu při zadané ceně elektřiny</span><span><i class="box"></i>Odhady, pokud jsou v datech označené</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos, USD za GH/s za den</span><span><i class="dash"></i>Bod zvratu při zadané ceně elektřiny</span></div>
     <div class="chart small"><canvas id="cVar" aria-label="Výnos za 12 měsíců"></canvas></div></div></div>
   <div class="qa"><h3>Jak často se výnos přepočítává? Proč dnes kalkulačka ukazuje jiné číslo než včera?</h3><div class="a"><p>Výnos se mění neustále: ceny DOGE, LTC a BTC se hýbou každou minutu. Litecoin upravuje obtížnost každých 2 016 bloků (asi 3,5 dne), Dogecoin po každém bloku. Za posledních 12 měsíců se výnos ze dne na den měnil v průměru (medián) o <span class="n" data-k="hpChg"></span>.</p></div></div>
 </section>
@@ -200,14 +200,15 @@ code{font-family:var(--f-mono);font-size:12.5px}
     <div class="legend"><span><i style="background:var(--s1)"></i>Těžba</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
     <div class="chart"><canvas id="cVs" aria-label="Stack BTC: těžba vs. nákup"></canvas></div>
     <p>V hodnotě po 5 letech (BTC <span class="n" data-k="price5y"></span>): těžba <span class="n" data-k="valMine"></span>, spot při ročních vkladech <span class="n" data-k="valLump"></span>, DCA <span class="n" data-k="valDca"></span>. Všechny tři strategie stojí stejně.</p></div></div>
-  <div class="qa"><h3>Proč bych měl investovat do mineru místo Bitcoinu?</h3><div class="a"><p>L9 je hlavně sázka na Dogecoin: dokud je DOGE dost drahý, získáváte BTC za cenu nižší, než kolik byste zaplatili nákupem. Rizikem je pokles DOGE a LTC a růst sítě. Těžba navíc dává pravidelný přísun BTC, takže nenakupujete všechno najednou.</p></div></div>
-  <div class="qa"><h3>Kolik BTC může stroj vytěžit za celou životnost?</h3><div class="a"><p>Při životnosti 5 let záleží hlavně na cenách DOGE a LTC: <span class="n" data-k="life0"></span> při propadu, <span class="n" data-k="life1"></span> při stagnaci, <span class="n" data-k="life2"></span> v základním scénáři a <span class="n" data-k="life3"></span> při růstu (vše při růstu BTC o <span class="n" data-k="btcR"></span> ročně).</p></div></div>
+  <div class="qa"><h3>Co by se muselo stát, aby byla těžba výhodnější než spot nebo DCA?</h3><div class="a" id="edge"></div></div>
+  <div class="qa"><h3>Proč bych měl investovat do mineru místo Bitcoinu?</h3><div class="a"><p>L9 je hlavně sázka na Dogecoin: dokud je DOGE dost drahý, získáváte BTC za cenu nižší, než kolik byste zaplatili nákupem. Rizikem je pokles DOGE a LTC a růst sítě. Těžba navíc dává pravidelný přísun BTC, takže nenakupujete všechno najednou.</p><p><b>Disciplína, kterou si koupíte se strojem.</b> Srovnání se spotem a DCA na této stránce předpokládá dokonalého investora: koupí najednou a pak pět let nic neprodá, nebo nakupuje každý týden bez výjimky. V praxi to dokáže málokdo. Mnoho lidí prodá už při poklesu o 20 %, a BTC v minulosti opakovaně padl o 70–80 % z vrcholu (2018, 2022). Pravidelné DCA lidé často přeruší právě v propadu, kdy je nákup nejvýhodnější. Koupí stroje se do strategie „zamknete“: peníze jsou v hardwaru, stroj těží automaticky každý den bez ohledu na náladu na trhu a prodat ho v panice je složitější než kliknout na burze. Pro investora, který sám sebe zná, to může být skutečná výhoda. Pro poctivost: vyplacené BTC jdou prodat stejně snadno jako koupené, takže zámek platí hlavně pro vloženou částku, a stejná závaznost znamená, že v nepříznivém trhu z investice nevystoupíte bez ztráty.</p><p><b>Stroj je i aktivum, které jde prodat.</b> Výpočty na této stránce počítají se zbytkovou hodnotou stroje nula. Ve skutečnosti jde stroj prodat a jeho cena sleduje výnosnost těžby: v bull marketu se použité stroje prodávají i za násobek nákupní ceny, v medvědím trhu za zlomek. Na cenu stroje se tedy dá spekulovat, s rizikem v obou směrech. Kolik by musel prodej vynést, aby těžba předehnala spot nebo DCA, ukazují varianty „Prodej stroje“ v otázce výše.</p></div></div>
+  <div class="qa"><h3>Kolik BTC může stroj vytěžit za celou životnost?</h3><div class="a"><p><b>Proč 5 let:</b> nejde o fyzickou životnost. Stroje mohou běžet i 10 let, pokud výnos pokryje elektřinu. 5 let je zvolený výpočetní horizont, běžný i pro účetní odpisy těžebního hardwaru. Pozdější roky už výsledek mění málo: v roce 2027 a 2031 přijde halving Litecoinu (Dogecoin halving nemá), síť mezitím roste a stroj přestane v efektivitě stačit novým generacím. Ve zvoleném scénáři vyplatí stroj za 10 let celkem <span class="n" data-k="btc10y"></span>, tedy za roky 6–10 jen <span class="n" data-k="btc6to10"></span> navíc, za elektřinu <span class="n" data-k="el6to10"></span>. Zda se vyplatí nechat ho běžet déle, rozhoduje cena elektřiny proti hodnotě vyplacených BTC, ne opotřebení.</p><p>Při výpočetním horizontu 5 let záleží hlavně na cenách DOGE a LTC: <span class="n" data-k="life0"></span> při propadu, <span class="n" data-k="life1"></span> při stagnaci, <span class="n" data-k="life2"></span> v základním scénáři a <span class="n" data-k="life3"></span> při růstu (vše při růstu BTC o <span class="n" data-k="btcR"></span> ročně).</p></div></div>
 </section>
 
 <section class="group" id="historie">
   <h2>Historie</h2>
   <div class="qa"><h3>Můžu vidět, jak stroj vydělával posledních 6 nebo 12 měsíců?</h3><div class="a"><p>Bereme dnešek a jdeme 12 a 6 měsíců zpět, nic se neodhaduje dopředu. Za posledních 12 měsíců by L9 s dnešními parametry vyplatil <span class="n" data-k="btc12"></span> a čistě vydělal <span class="n" data-k="net12"></span>. Za posledních 6 měsíců <span class="n" data-k="btc6"></span> a <span class="n" data-k="net6"></span>.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za den</span><span><i style="background:var(--s2)"></i>Elektřina za den</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje za den</span><span><i class="box"></i>Odhady, pokud jsou v datech označené</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za den</span><span><i style="background:var(--s2)"></i>Elektřina za den</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje za den</span></div>
     <div class="chart small"><canvas id="cHist" aria-label="Denní výnos za posledních 12 měsíců"></canvas></div>
     <div class="tbl"><table id="tHist"></table></div></div></div>
   <div class="qa"><h3>Máte historické výsledky? Můžu vidět reálné výsledky jiných strojů?</h3><div class="a"><p>Čísla výše jsou výpočet z dat celé sítě, ne výpisy z konkrétních strojů. Reálný stroj se od výpočtu liší hlavně uptime, štěstím poolu a kurzy, za které pool převádí LTC a DOGE na BTC.</p></div></div>
@@ -315,7 +316,18 @@ const pct = (v, d=0) => v===null ? '—' : (v*100).toLocaleString('cs-CZ',{maxim
 const sats = v => Math.round(v*1e8).toLocaleString('cs-CZ') + ' sats';
 const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsíců` : `${y.toLocaleString('cs-CZ',{minimumFractionDigits:1,maximumFractionDigits:1})} roku`; };
 const GH = 16.2, W = 3260;
-const SCN = [['Propad −30 % ročně; BTC +10 %',-.30,'--s2',.10],['Stagnace 0 %',0,'--fg2'],['Základní +10 % ročně',.10,'--s1'],['Růst +30 % ročně',.30,'--s3']];
+const SCN_DEF = [['Propad −30 % ročně; BTC +10 %',-.30,'--s2',.10],['Stagnace 0 %',0,'--fg2'],['Základní +10 % ročně',.10,'--s1'],['Růst +30 % ročně',.30,'--s3']];
+// with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, LTC, DOGE]
+const SCN_IN = [['Pesimistický','lbB','llB','ldB'], null, ['Základní','lbM','llM','ldM'], ['Optimistický','lbU','llU','ldU']];
+const pcs = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100))} %`;
+function scnNow(){
+  const v = id => Math.max(-.9, (parseFloat(document.getElementById(id)?.value) || 0)/100);
+  if (!document.getElementById('lbM')) return SCN_DEF;
+  return SCN_DEF.map((s,i) => { const m = SCN_IN[i];
+    if (!m) { const br = v('lbM'); return [`Stagnace LTC a DOGE 0 %; BTC ${pcs(br)} ročně`, 0, s[2], br, 0]; }
+    const br = v(m[1]), rl = v(m[2]), rd = v(m[3]);
+    return [`${m[0]}: LTC ${pcs(rl)}, DOGE ${pcs(rd)} ročně; BTC ${pcs(br)}`, rl, s[2], br, rd]; });
+}
 
 function P(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
@@ -325,24 +337,174 @@ function P(){
 // coins per GH/s per day today
 const ltcPerGH = L0.ml/(L0.hl*1e3), dogePerGH = L0.mg/(L0.hg*1e3);
 // machine bought today, 5 years: LTC and DOGE change r a year, BTC br a year; Scrypt hashrate = today x (1+g)^t x (price ratio)^k
-function proj(p, r, g=p.g, years=5){
+function proj(p, r, g=p.g, years=5, rd=r){
   const N = Math.round(365*years), eff = GH*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
   let b=0, el=0, rev=0, firstLoss=null, payS=null, payH=null, btcPreH=0;
   for (let t=0; t<N; t++){
-    const d = addDays(TODAY, t), f = Math.pow(1+r, t/365), bp = p.btc*Math.pow(1+p.br, t/365);
-    const hrF = Math.pow(1+g, t/365)*Math.pow(f, p.k);
-    const usdDay = (((L0.ml-(L0.fl||0))*ltcSub(d)/ltcSub(TODAY)+(L0.fl||0))/(L0.hl*1e3)*p.ltc*f + dogePerGH*p.doge*f)/hrF*eff, m = usdDay/bp;
+    // LTC changes r a year, DOGE rd a year; Scrypt hashrate follows the revenue-weighted price index
+    const d = addDays(TODAY, t), f = Math.pow(1+r, t/365), fd = Math.pow(1+rd, t/365), bp = p.btc*Math.pow(1+p.br, t/365);
+    const hrF = Math.pow(1+g, t/365)*Math.pow(rd===r ? f : L0.sd*fd+(1-L0.sd)*f, p.k);
+    const usdDay = (((L0.ml-(L0.fl||0))*ltcSub(d)/ltcSub(TODAY)+(L0.fl||0))/(L0.hl*1e3)*p.ltc*f + dogePerGH*p.doge*fd)/hrF*eff, m = usdDay/bp;
     b += m; el += elec; rev += usdDay; if (d < NEXT_HALVING) btcPreH = b;
     if (firstLoss===null && usdDay < elec) firstLoss = d;
     if (payS===null && rev-el >= p.hw) payS = d;
     if (payH===null && b*bp-el >= p.hw) payH = d;
-    out.push({d, f, bp, usd:usdDay, m, btc:b, el, stack:b*bp, hodl:b*bp-el, sell:rev-el});
+    out.push({d, f, fd, bp, usd:usdDay, m, btc:b, el, stack:b*bp, hodl:b*bp-el, sell:rev-el});
   }
   const accounted = Economics.account(out,{hw:p.hw,elecDay:elec,energyGrowth:energyGrowth()});
   firstLoss = accounted.find(o => o.m*o.price < o.elecDay)?.d ?? null;
   payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
+}
+
+/* "What would have to happen for mining to beat spot / DCA" (FAQ, Z15 Pro and L9).
+ * Included into a FAQ app's scope; uses its Chart helpers (opts, line, ref, crosshair, zones, charts,
+ * css, usd, btc, kfmt, yUsd). Each condition is moved on its own, everything else stays as set on the left;
+ * the result is the value after 5 years of the same deposits: mining + holding, spot, weekly DCA.
+ *
+ * S = {sim(o) -> {mine, spot, dca, btcM, btcS, btcD, out, cmp}, o0, scLabel,
+ *      LV: {key: {n, cur, set(o,x), min, max, step, dir:'nad'|'pod' (direction that helps mining), fx, ax, fx2?}},
+ *      VAR: [{t, key, base, m}], combo: {t, base, text}}
+ */
+let EDGE_S = null, EDGE_T = 0;
+function edgeSchedule(S){
+  EDGE_S = S;
+  const host = document.getElementById('edge'); if (!host) return;
+  const panel = host.closest?.('[role=tabpanel]');
+  host.dataset.dirty = '1';
+  if (panel && panel.hidden) return;   // heavy: computed only when its tab is visible
+  clearTimeout(EDGE_T); EDGE_T = setTimeout(() => edgeRender(EDGE_S), 250);
+}
+(() => { const h = document.getElementById('edge'), pn = h?.closest?.('[role=tabpanel]');
+  if (!pn || typeof MutationObserver === 'undefined') return;
+  new MutationObserver(() => { if (!pn.hidden && h.dataset.dirty === '1' && EDGE_S) edgeSchedule(EDGE_S); }).observe(pn, {attributes:true, attributeFilter:['hidden']}); })();
+
+function edgeRender(S){
+  const host = document.getElementById('edge'); if (!host) return;
+  host.dataset.dirty = '';
+  const {sim, o0, LV, VAR, combo, scLabel} = S;
+  const run = (base, L, x) => { const o = {...o0, ...base}; if (L) L.set(o, x); return sim(o); };
+  // threshold of one condition against spot or DCA: search from today's value in the direction that
+  // changes the leader (expanding steps, then bisection); null when the range ends first
+  const cross = (L, base, k) => {
+    const f = x => { const r = run(base, L, x); return r.mine - r[k]; };
+    const lead = f(L.cur) >= 0, up = (L.dir === 'nad') !== lead, end = up ? L.max : L.min;
+    let a = L.cur, b = a, step = L.step;
+    for (let i = 0; i < 60; i++){
+      b = up ? Math.min(end, a + step) : Math.max(end, a - step);
+      if ((f(b) >= 0) !== lead) break;
+      if (b === end) return {x:null, lead, lim:end};
+      a = b; step *= 1.6;
+    }
+    for (let i = 0; i < 30; i++){ const m = (a + b)/2; if ((f(m) >= 0) === lead) a = m; else b = m; }
+    return {x:(a + b)/2, lead};
+  };
+  const low = t => t.charAt(0).toLowerCase() + t.slice(1), over = {spot:'spotem', DCA:'DCA'};
+  const verdict = (L, c, who) => {
+    if (c.x === null) return c.lead ? `těžba vede nad ${over[who]} v celém rozsahu (do ${L.fx(c.lim)})` : `těžba ${who} nepředstihne ani při ${L.fx(c.lim)}`;
+    const v = `<b class="n">${L.fx(c.x)}</b>${L.fx2 ? L.fx2(c.x) : ''}`;
+    return c.lead ? `těžba vede nad ${over[who]}, dokud ${low(L.n)} nebude ${L.dir === 'nad' ? 'pod' : 'nad'} ${v}`
+                  : `těžba ${who} předstihne ${L.dir} ${v}`;
+  };
+  const sweep = (key, base) => {
+    const L = LV[key], cs = cross(L, base, 'spot'), cd = cross(L, base, 'dca');
+    const pts = [L.cur, cs.x, cd.x].filter(x => x !== null);
+    let lo = Math.min(...pts), hi = Math.max(...pts);
+    if (hi - lo < L.step*4){ lo -= L.step*2; hi += L.step*2; }
+    const pad = (hi - lo)*.2; lo = Math.max(L.min, lo - pad); hi = Math.min(L.max, hi + pad);
+    const xs = Array.from({length:17}, (_, i) => lo + (hi - lo)*i/16);
+    return {L, cs, cd, xs, ys:xs.map(x => run(base, L, x))};
+  };
+  const now = sim(o0);
+  const lead = now.mine >= Math.max(now.spot, now.dca);
+  let html = `<p>Výchozí stav (scénář <b>${scLabel}</b>, stroj koupený dnes, 5 let, stejné vklady ve stejných dnech): těžba <span class="n">${usd(now.mine)}</span> (${btc(now.btcM)}), spot <span class="n">${usd(now.spot)}</span> (${btc(now.btcS)}), DCA <span class="n">${usd(now.dca)}</span> (${btc(now.btcD)}). ${lead ? 'Těžba už teď vede; tabulka proto ukazuje i to, kdy by vést přestala.' : 'Těžba zatím prohrává; tabulka ukazuje, co by se muselo změnit.'}</p>
+  <p><b>Jedna podmínka sama o sobě.</b> Ostatní parametry zůstávají podle panelu vlevo:</p>`;
+  const singles = Object.keys(LV).map(k => ({L:LV[k], cs:cross(LV[k], {}, 'spot'), cd:cross(LV[k], {}, 'dca')}));
+  html += '<div class="tbl"><table><thead><tr><th>Podmínka</th><th>Dnes</th><th>Těžba vs. spot</th><th>Těžba vs. DCA</th></tr></thead><tbody>' +
+    singles.map(s => `<tr><td>${s.L.n}</td><td>${s.L.fx(s.L.cur)}</td><td style="white-space:normal">${verdict(s.L, s.cs, 'spot')}</td><td style="white-space:normal">${verdict(s.L, s.cd, 'DCA')}</td></tr>`).join('') +
+    '</tbody></table></div><p style="margin-top:10px">Níže varianty, ve kterých se několik podmínek sejde najednou. U každé je dopočtená hranice jedné podmínky a graf: hodnota po 5 letech pro těžbu, spot a DCA podle této podmínky, svislá čárkovaná čára je dnešní hodnota. Zbytková hodnota stroje po 5 letech se nepočítá, pokud to varianta neuvádí.</p>';
+  const desc = b => Object.entries(b).map(([k, x]) => LV[k] ? `${low(LV[k].n)} ${LV[k].fx(x)}` : '').filter(Boolean).join(', ');
+  const vres = VAR.map(v => ({v, s:sweep(v.key, v.base)}));
+  vres.forEach(({v, s}, i) => {
+    html += `<p style="margin-top:16px"><b>${i+1}. ${v.t}</b></p>
+      <p>${Object.keys(v.base).length ? `Předpoklady: ${desc(v.base)}; ostatní podle panelu. ` : ''}Podmínka (${low(s.L.n)}): ${verdict(s.L, s.cs, 'spot')}; ${verdict(s.L, s.cd, 'DCA')}. Dnes: ${s.L.fx(s.L.cur)}.</p>
+      <p>Co by se na trhu muselo dít: ${v.m}</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Těžba + držení</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="dash"></i>Dnes</span><span><i class="box" style="background:color-mix(in srgb, var(--good) 18%, transparent)!important"></i>Zelená zóna: těžba vede nad spotem</span></div>
+      <div class="chart small"><canvas id="edge${i}" aria-label="${v.t}: hodnota po 5 letech"></canvas></div>`;
+  });
+  const cb = sim({...o0, ...combo.base});
+  const best = cb.mine >= Math.max(cb.spot, cb.dca) ? 'těžba' : cb.spot >= cb.dca ? 'spot' : 'DCA';
+  html += `<p style="margin-top:16px"><b>${VAR.length+1}. ${combo.t}</b></p>
+    <p>Předpoklady: ${desc(combo.base)}, cena BTC podle scénáře <b>${scLabel}</b>. Po 5 letech: těžba <span class="n">${usd(cb.mine)}</span> (${btc(cb.btcM)}), spot <span class="n">${usd(cb.spot)}</span> (${btc(cb.btcS)}), DCA <span class="n">${usd(cb.dca)}</span> (${btc(cb.btcD)}). Vychází nejlépe: <b>${best}</b>.</p>
+    <p>${combo.text} Graf ukazuje počet BTC v čase.</p>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Těžba</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
+    <div class="chart small"><canvas id="edgeC" aria-label="${combo.t}: BTC v čase"></canvas></div>`;
+  host.innerHTML = html;
+
+  vres.forEach(({s}, i) => {
+    const L = s.L, o = opts(yUsd, x => usd(x)), all = s.ys.flatMap(y => [y.mine, y.spot, y.dca]), lo = Math.min(...all), hi = Math.max(...all);
+    o.scales.x = {type:'linear', min:s.xs[0], max:s.xs.at(-1), grid:{display:false}, border:{color:css('--line')}, ticks:{color:css('--fg2'), maxTicksLimit:8, font:{family:'IBM Plex Mono', size:11}, callback:x => L.ax(x)}};
+    o.plugins.tooltip.callbacks.title = it => `${L.n}: ${L.fx(it[0].parsed.x)}`;
+    o.plugins.tooltip.filter = it => it.dataset.label !== 'Dnes';
+    const pts = k => s.xs.map((x, j) => ({x, y:s.ys[j][k]}));
+    // shade where mining beats spot, mark both thresholds
+    const zone = {id:'edgeZone', beforeDatasetsDraw(c){
+      const {ctx, chartArea:a, scales:{x}} = c, help = L.dir === 'nad'; ctx.save();
+      s.ys.forEach((y, j) => { if (y.mine < y.spot) return;
+        const x0 = x.getPixelForValue(j ? (s.xs[j-1] + s.xs[j])/2 : s.xs[0]), x1 = x.getPixelForValue(j < s.xs.length-1 ? (s.xs[j] + s.xs[j+1])/2 : s.xs[j]);
+        ctx.fillStyle = css('--good'); ctx.globalAlpha = .08; ctx.fillRect(x0, a.top, x1 - x0, a.bottom - a.top); });
+      ctx.globalAlpha = 1; ctx.font = '600 11px "IBM Plex Sans", sans-serif'; ctx.fillStyle = css('--good'); ctx.strokeStyle = css('--good'); ctx.setLineDash([2,3]);
+      [[s.cs.x, 'těžba = spot', 14], [s.cd.x, 'těžba = DCA', 28]].forEach(([v, t, dy]) => { if (v === null) return; const px = x.getPixelForValue(v); if (px < a.left-1 || px > a.right+1) return;
+        ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+        const w = ctx.measureText(t).width, tx = help ? px + 5 : px - w - 5; ctx.fillText(t, Math.max(a.left+2, Math.min(a.right-w-2, tx)), a.top + dy); });
+      ctx.restore(); }};
+    charts.push(new Chart(document.getElementById('edge' + i), {type:'line', plugins:[crosshair, zone], options:o, data:{datasets:[
+      line('Těžba', pts('mine'), css('--s1')), line('Spot', pts('spot'), css('--s2')), line('DCA', pts('dca'), css('--s3')),
+      ref('Dnes', [{x:L.cur, y:lo}, {x:L.cur, y:hi}])]}}));
+  });
+  charts.push(new Chart(document.getElementById('edgeC'), {type:'line', plugins:[zones, crosshair], options:opts(v => v.toLocaleString('cs-CZ', {maximumFractionDigits:3}), v => btc(v)), data:{labels:cb.out.map(o => o.d), datasets:[
+    line('Těžba', cb.out.map(o => o.btc), css('--s1')), line('Spot', cb.cmp.map(o => o.spot), css('--s2')), line('DCA', cb.cmp.map(o => o.dca), css('--s3'))]}}));
+}
+
+// "what would have to happen" for L9: o = proj params + r (LTC), rd (DOGE) and rs (resale share of hardware price)
+function edgeSimL(o){
+  const {r, rd, rs=0, ...pp} = o, pr = proj(pp, r, pp.g, 5, rd);
+  const cmp = Economics.compare(pr.out, {hw:pp.hw, elecDay:pr.elec, energyGrowth:energyGrowth()}), c = cmp.at(-1);
+  return {mine:pr.end.stack+rs*pp.hw, spot:c.spotValue, dca:c.dcaValue, btcM:pr.btc, btcS:c.spot, btcD:c.dca, out:pr.out, cmp};
+}
+function renderEdgeL(p, base){
+  const n1 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:1}), n3 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:3}), n4 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:4});
+  const sgn = v => (v<0?'−':'+')+n1(Math.abs(v)), money = x => '$'+Math.round(x).toLocaleString('cs-CZ');
+  const o0 = {...base.pp, r:base.r, rd:base.rd};
+  const LV = {
+    kwh:  {n:'Cena elektřiny', cur:o0.kwh, set:(o,x)=>{o.kwh=x}, min:0, max:.5, step:.01, dir:'pod', fx:x=>n3(x)+' USD/kWh', ax:x=>n3(x)},
+    rd:   {n:'Růst ceny DOGE', cur:o0.rd*100, set:(o,x)=>{o.rd=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    r:    {n:'Růst ceny LTC', cur:o0.r*100, set:(o,x)=>{o.r=x/100}, min:-90, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    doge: {n:'Cena DOGE v den nákupu', cur:o0.doge, set:(o,x)=>{o.doge=x}, min:.001, max:o0.doge*50, step:Math.max(.005,o0.doge*.1), dir:'nad', fx:x=>'$'+n4(x), ax:x=>'$'+n3(x)},
+    br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
+    fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
+    rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},
+  };
+  const VAR = [
+    {t:'DOGE roste rychleji než BTC', key:'rd', base:{},
+     m:'DOGE dnes tvoří většinu výnosu L9. Silný memecoinový trh (2021: DOGE více než 10×) zvedne výplaty v BTC, protože pool převádí DOGE na BTC podle kurzu. Takové rally ale bývají krátké a síť Scrypt na ně rychle reaguje novými stroji.'},
+    {t:'Síť Scrypt přestane růst', key:'g', base:{},
+     m:'Výkon sítě Litecoin a Dogecoin sleduje ceny obou mincí. Kdyby ceny stagnovaly a slabší stroje (L7, starší L9) vypínaly, zbývající L9 dostanou větší podíl odměn.'},
+    {t:'BTC roste pomaleji než DOGE a LTC', key:'br', base:{},
+     m:'Výplata je v BTC podle kurzu DOGE/BTC a LTC/BTC. Pomalejší BTC znamená víc vyplacených BTC, kdežto spot a DCA nakupují jen podle ceny BTC.'},
+    {t:'Levná elektřina (0,03 USD/kWh) a pomalejší síť', key:'g', base:{kwh:.03},
+     m:'Hosting na levném zdroji (vlastní FVE s přebytky, hydro, Skandinávie, Paraguay, Etiopie) a k tomu období, kdy síť Scrypt roste pomalu.'},
+    {t:'Elektřina 0,05 USD/kWh, síť stagnuje a levnější stroj', key:'hw', base:{kwh:.05, g:0},
+     m:'Dostupná cena energie, síť přestane růst a stroj se koupí levněji, typicky v medvědím trhu, kdy ceny ASICů padají o 50–80 %.'},
+    {t:'Prodej stroje za vyšší cenu, než stál', key:'rs', base:{},
+     m:'Ceny použitých L9 sledují výnosnost těžby DOGE a LTC. V silném trhu se prodávají i nad původní cenou, v medvědím za zlomek. Halving Litecoinu v roce 2027 i 2031 výnos stroje snižuje.'},
+  ];
+  edgeSchedule({sim:edgeSimL, o0, LV, VAR, scLabel:base.name.charAt(0).toLowerCase()+base.name.slice(1),
+    combo:{t:'Souhra: levná energie, levnější stroj, stagnující síť', base:{kwh:.03, hw:Math.min(o0.hw,4000), g:0},
+      text:'Levný zdroj energie a cenu stroje lze ovlivnit. Stagnující síť Scrypt nastává hlavně v delším medvědím trhu, kdy slabší mineři vypínají.'}});
 }
 
 function render(){
@@ -356,12 +518,14 @@ function render(){
   const sum = (a,k) => a.reduce((s,x)=>s+x[k],0), h6 = hist.filter(x=>x.d>from6);
   const hps = hist.map(x=>x.hp), chg = hist.slice(1).map((x,i)=>Math.abs(x.hp/hist[i].hp-1)).sort((a,b)=>a-b), nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
-  const sc = SCN.map(([name,r,col,br]) => ({name,r,col,...proj(br===undefined?p:{...p,br},r)}));
+  const SCN = scnNow(), sc = SCN.map(([name,r,col,br,rd]) => { const pp = br===undefined?p:{...p,br}; return {name,r,rd:rd??r,col,pp,...proj(pp,r,pp.g,5,rd??r)}; });
   const base = sc[p.si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
   const dcaS = comparison.map(o=>o.dca), lumpS = comparison.map(o=>o.spot);
   renderStrategyTable(base.out,p,base.elec);
+  renderEdgeL(p, base);
+  const p10 = proj(base.pp, base.r, base.pp.g, 10, base.rd);
   const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
   const V = {
     dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
@@ -379,6 +543,7 @@ function render(){
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
     price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(comparison.at(-1).dcaValue),
+    btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
     bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl),
@@ -392,11 +557,11 @@ function render(){
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Scénář cen LTC a DOGE</th><th>DOGE za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
-    sc.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${usd(p.doge*x.end.f,4)}</td><td>${fmtPay(x.payS)}</td><td>${fmtPay(x.payH)}</td><td>${btc(x.btc)}</td><td>${usd(x.end.hodl-p.hw)}</td><td class="${x.end.hodl>=p.hw?'pos':'neg'}">${pct(Economics.roi(x.end.hodl-p.hw,p.hw+x.el))}</td><td>${x.firstLoss?fmtDate(x.firstLoss):'–'}</td></tr>`).join('')+'</tbody>';
+    sc.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${usd(p.doge*(x.end.fd??x.end.f),4)}</td><td>${fmtPay(x.payS)}</td><td>${fmtPay(x.payH)}</td><td>${btc(x.btc)}</td><td>${usd(x.end.hodl-p.hw)}</td><td class="${x.end.hodl>=p.hw?'pos':'neg'}">${pct(Economics.roi(x.end.hodl-p.hw,p.hw+x.el))}</td><td>${x.firstLoss?fmtDate(x.firstLoss):'–'}</td></tr>`).join('')+'</tbody>';
 
   const yrRows = []; for (let y=1; y<=5; y++){ const s0 = y===1?null:base.out[365*(y-1)-1], e = base.out[Math.min(base.out.length-1, 365*y-1)];
     const btcY = e.btc-(s0?s0.btc:0), elY = e.el-(s0?s0.el:0), sellY = e.sell-(s0?s0.sell:0);
-    yrRows.push(`<tr><td>${y}. rok <span class="s">do ${fmtDate(e.d)}</span></td><td>${btc(btcY)}</td><td>${btc(e.btc)}</td><td>${usd(p.doge*e.f,4)}</td><td>${usd(e.bp)}</td><td>${usd(e.stack)}</td><td>${usd(elY)}</td><td>${usd(p.hw+e.el)}</td><td class="${e.stack>=p.hw+e.el?'pos':'neg'}">${usd(e.stack-p.hw-e.el)}</td><td class="${sellY>=0?'pos':'neg'}">${usd(sellY)}</td></tr>`); }
+    yrRows.push(`<tr><td>${y}. rok <span class="s">do ${fmtDate(e.d)}</span></td><td>${btc(btcY)}</td><td>${btc(e.btc)}</td><td>${usd(p.doge*(e.fd??e.f),4)}</td><td>${usd(e.bp)}</td><td>${usd(e.stack)}</td><td>${usd(elY)}</td><td>${usd(p.hw+e.el)}</td><td class="${e.stack>=p.hw+e.el?'pos':'neg'}">${usd(e.stack-p.hw-e.el)}</td><td class="${sellY>=0?'pos':'neg'}">${usd(sellY)}</td></tr>`); }
   $('tYears').innerHTML = `<thead><tr><th>Rok</th><th>Vyplaceno v roce</th><th>Stack celkem</th><th>Cena DOGE</th><th>Cena BTC</th><th>Hodnota stacku</th><th>Elektřina v roce</th><th>Zaplaceno celkem (stroj + elektřina)</th><th>Hodnota stacku − zaplaceno</th><th>Pro srovnání: čistě v roce při prodeji</th></tr></thead><tbody>${yrRows.join('')}</tbody>`;
 
   const byM = {}; hist.forEach(x => { const k = x.d.slice(0,7); (byM[k] ||= {k, n:0, btc:0, rev:0, el:0}); const o=byM[k]; o.n++; o.btc+=x.btc; o.rev+=x.rev; o.el+=x.el; });
