@@ -65,6 +65,19 @@ def fill(text, values, where):
     return out
 
 
+EMBED_DROP = ('source', 'observedAt')   # provenance stays in data/derived, the pages don't use it
+
+
+def embedded_data(name):
+    """Dataset for a page: per-row provenance dropped, floats to 6 significant digits
+    (well below the precision of the inputs) - roughly halves the page size."""
+    def r(x):
+        return float(f'{x:.6g}') if isinstance(x, float) else x
+    d = json.loads((DATA / f'{name}.json').read_text(encoding='utf-8'))
+    d['rows'] = [{k: r(v) for k, v in row.items() if k not in EMBED_DROP} for row in d['rows']]
+    return json.dumps(d, separators=(',', ':'), ensure_ascii=False)
+
+
 def page_html(head, body, data, app):
     body_text = read(body + '.html')
     if data:
@@ -85,7 +98,7 @@ def page_html(head, body, data, app):
     if data:
         parts.append('<script>' + read('economics.js') + '</script>')
     if data:
-        parts.append('<script>const DATA=' + (DATA / f'{data}.json').read_text(encoding='utf-8').strip() + ';')
+        parts.append('<script>const DATA=' + embedded_data(data) + ';')
         parts.append(read(app + '.js') + '</script>')
     else:
         parts.append('<script>' + read(app + '.js') + '</script>')

@@ -63,6 +63,29 @@ def validate(snapshot):
     return by_asset
 
 
+MAX_LAG_DAYS = 3  # a short Coin Metrics delay is fine; a longer one means something is broken
+
+
+def complete(row):
+    try:
+        vals = {k: float(row[k]) for k in METRICS}
+    except (KeyError, TypeError, ValueError):
+        return False
+    return all(math.isfinite(v) and v >= 0 for v in vals.values()) and all(vals[k] > 0 for k in METRICS if k != 'FeeTotNtv')
+
+
+def trim_to_complete(snapshot):
+    """Cut the snapshot at the last day that is complete for every asset. Days that
+    Coin Metrics hasn't finished yet are left for a later run; gaps before that
+    day still fail in validate()."""
+    days = {a: {r['time'][:10] for r in snapshot['data'] if r.get('asset') == a and complete(r)} for a in ASSETS}
+    common = set.intersection(*days.values())
+    if not common:
+        raise ValueError('No day is complete for all assets')
+    end = max(common)
+    return {**snapshot, 'end': end, 'data': [r for r in snapshot['data'] if r['time'][:10] <= end]}
+
+
 def derive(snapshot):
     db = validate(snapshot)
     dates = sorted(db['btc'])
@@ -107,7 +130,16 @@ def czk_rate():
 
 def main(offline=False):
     end = (dt.datetime.now(dt.timezone.utc).date()-dt.timedelta(days=1)).isoformat()
-    snapshot = json.loads(SOURCE.read_text()) if offline else download(end)
+    if offline:
+        snapshot = json.loads(SOURCE.read_text())
+    else:
+        snapshot = trim_to_complete(download(end))
+        lag = (dt.date.fromisoformat(end) - dt.date.fromisoformat(snapshot['end'])).days
+        if lag > MAX_LAG_DAYS:
+            raise SystemExit(f'Coin Metrics data end at {snapshot["end"]}, {lag} days behind {end}; nothing published')
+        if SOURCE.exists() and json.loads(SOURCE.read_text())['end'] >= snapshot['end']:
+            print(f'No new complete day yet (last {snapshot["end"]}, wanted {end}); nothing changed')
+            return
     derived = derive(snapshot)  # fail before any writes on gaps or bad input
     meta_path = DER / 'meta.json'
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
