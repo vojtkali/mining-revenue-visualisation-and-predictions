@@ -49,6 +49,12 @@ button{font:inherit;color:inherit}
 .machines .m.off{color:var(--muted)}
 .asof{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:7px}
 .asof::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 20%,transparent)}
+.theme{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:0;border-radius:10px;padding:6px 12px 6px 10px;font-size:13.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.theme:hover{color:var(--fg)}
+.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.theme .moon{display:none}
+.theme[aria-pressed="true"] .moon{display:block}
+.theme[aria-pressed="true"] .sun{display:none}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:9px 4px 11px;margin-right:14px;font-weight:500;font-size:14.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
 .tabs [role=tab][aria-selected=true]{color:var(--fg);border-bottom-color:var(--fg)}

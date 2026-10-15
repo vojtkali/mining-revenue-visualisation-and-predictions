@@ -49,6 +49,12 @@ button{font:inherit;color:inherit}
 .machines .m.off{color:var(--muted)}
 .asof{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:7px}
 .asof::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 20%,transparent)}
+.theme{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:0;border-radius:10px;padding:6px 12px 6px 10px;font-size:13.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.theme:hover{color:var(--fg)}
+.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.theme .moon{display:none}
+.theme[aria-pressed="true"] .moon{display:block}
+.theme[aria-pressed="true"] .sun{display:none}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:9px 4px 11px;margin-right:14px;font-weight:500;font-size:14.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
 .tabs [role=tab][aria-selected=true]{color:var(--fg);border-bottom-color:var(--fg)}
@@ -228,6 +234,7 @@ details.qa .a p{margin:0 0 8px}
   <div class="brand"><a href="index.html">Těžba</a><span class="sep">/</span><span>Antminer L9</span></div>
   <nav class="machines" aria-label="Stroj"><a class="m" href="s21.html">S21 XP</a><a class="m" href="z15.html">Z15 Pro</a><span class="m on" aria-current="page">L9</span></nav>
   <span class="asof">Data k 14. 10. 2026</span>
+  <button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><span class="tl"></span></button>
 </div>
 <div class="tabs-in"><div class="tabs" role="tablist" aria-label="Části"><button type="button" role="tab" id="t-prehled" aria-controls="p-prehled" aria-selected="true" data-tab="prehled">Přehled</button><button type="button" role="tab" id="t-navratnost" aria-controls="p-navratnost" aria-selected="false" data-tab="navratnost">Návratnost</button><button type="button" role="tab" id="t-nakup" aria-controls="p-nakup" aria-selected="false" data-tab="nakup">Těžba vs. nákup</button><button type="button" role="tab" id="t-otazky" aria-controls="p-otazky" aria-selected="false" data-tab="otazky">Otázky</button><button type="button" role="tab" id="t-metodika" aria-controls="p-metodika" aria-selected="false" data-tab="metodika">Metodika</button></div></div></header>
 <div class="layout"><aside class="side" id="side">
@@ -456,6 +463,28 @@ details.qa .a p{margin:0 0 8px}
   <label for="L_w">Příkon, W<input id="L_w" type="number" step="5" min="1" value="3260"></label>
 </form></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(() => {
+  const root = document.documentElement, KEY = 'v2-theme';
+  const sys = () => matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch (e) {}
+  const current = () => root.getAttribute('data-theme') || sys();
+  function label(){ const b = document.getElementById('themeBtn'); if (!b) return;
+    const dark = current() === 'dark'; b.querySelector('.tl').textContent = dark ? 'Noční' : 'Denní';
+    b.setAttribute('aria-pressed', dark); b.title = dark ? 'Přepnout na denní režim' : 'Přepnout na noční režim'; }
+  if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+  document.addEventListener('DOMContentLoaded', label); label();
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#themeBtn')) return;
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); try { localStorage.setItem(KEY, next); } catch (err) {}
+    label();
+    // charts take their colours from the theme: redraw them (calculators re-render on an input event)
+    const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+})();
+</script>
 <script>
 // chart look for the calculators: every chart the apps create gets the same quiet styling
 (() => {

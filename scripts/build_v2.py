@@ -205,11 +205,13 @@ def build(key):
   <div class="brand">{brand}<span class="sep">/</span><span>{M["title"]}</span></div>
   <nav class="machines" aria-label="Stroj">{machines}</nav>
   <span class="asof">Data k {vals["LAST"]}</span>
+  {THEME_BTN}
 </div>
 <div class="tabs-in"><div class="tabs" role="tablist" aria-label="Části">{tabbar}</div></div></header>
 <div class="layout">{sidebar}<main class="main">{panels}</main></div>
 {engine}
 {B.CHART}
+<script>{THEME_JS}</script>
 <script>{V2_PRE}</script>
 <script>{B.read("economics.js")}</script>
 <script>const DATA={B.embedded_data(M["data"])};
@@ -258,6 +260,7 @@ def build_index():
   <div class="brand"><b>Těžba</b><span class="sep">/</span><span>Přehled strojů</span></div>
   <nav class="machines" aria-label="Stroj">{machines}</nav>
   <span class="asof">Data k {vals["LAST"]}</span>
+  {THEME_BTN}
 </div></header>
 <div class="overview">
 <div class="intro"><h2>Tři stroje vedle sebe</h2><p>Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %; základní scénář ceny. Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p></div>
@@ -265,8 +268,38 @@ def build_index():
 {body}
 </div>
 {B.CHART}
+<script>{THEME_JS}</script>
 <script>{V2_PRE}</script>
 <script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>'''
+
+
+# day / night switch in the top bar: remembered per viewer, default follows the system setting
+THEME_BTN = ('<button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim">'
+             '<svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>'
+             '<svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>'
+             '<span class="tl"></span></button>')
+THEME_JS = r"""
+(() => {
+  const root = document.documentElement, KEY = 'v2-theme';
+  const sys = () => matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch (e) {}
+  const current = () => root.getAttribute('data-theme') || sys();
+  function label(){ const b = document.getElementById('themeBtn'); if (!b) return;
+    const dark = current() === 'dark'; b.querySelector('.tl').textContent = dark ? 'Noční' : 'Denní';
+    b.setAttribute('aria-pressed', dark); b.title = dark ? 'Přepnout na denní režim' : 'Přepnout na noční režim'; }
+  if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+  document.addEventListener('DOMContentLoaded', label); label();
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#themeBtn')) return;
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); try { localStorage.setItem(KEY, next); } catch (err) {}
+    label();
+    // charts take their colours from the theme: redraw them (calculators re-render on an input event)
+    const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+})();
+"""
 
 
 # runs before the apps: Q&A blocks become collapsible (open), tab switching
