@@ -338,10 +338,40 @@ st.addEventListener('click', () => { const open = st.getAttribute('aria-expanded
 })();
 '''
 
+PUBLIC_LINKS = {'index': 'index.html', 's21': 's21.html', 'z15': 'z15.html', 'l9': 'l9.html'}
+
+
+def public_page(html):
+    """Standalone HTML document for the website: own skeleton, no internal notes, old artifact links -> old pages."""
+    html = re.sub(r'\s*<div class="verify">.*?</div>', '', html, flags=re.S)
+    for a, b in B.PUBLIC_TEXT:
+        html = html.replace(a, b)
+    for art, page in B.ARTIFACT_LINKS.items():
+        html = re.sub(r'https://claude\.ai/(code/)?artifact/' + art, '../' + page, html)
+    assert 'claude.ai/artifact' not in html, 'unmapped artifact link'
+    title = re.search(r'<title>.*?</title>', html).group(0)
+    html = html.replace(title, '', 1)
+    return ('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+            f'{title}<style>:root{{color-scheme:light}}body{{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}}'
+            'img{max-width:100%}[hidden]{display:none!important}</style></head><body>'
+            f'{html}</body></html>\n')
+
+
+def main():
+    """python3 scripts/build_v2.py OUT_DIR             claude.ai artifact files (links between the published artifacts)
+       python3 scripts/build_v2.py --public OUT_DIR    website pages (relative links), e.g. docs/v2"""
+    public = sys.argv[1] == '--public'
+    out = Path(sys.argv[-1]); out.mkdir(parents=True, exist_ok=True)
+    if public:
+        LINKS.update(PUBLIC_LINKS)
+    pages = {f'{key}.html': (lambda k=key: build(k)) for key in MACHINES}
+    pages['index.html'] = build_index
+    for name, make in pages.items():
+        html = make()
+        (out / name).write_text(public_page(html) if public else html, encoding='utf-8')
+        print('wrote', out / name)
+
+
 if __name__ == '__main__':
-    out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
-    for key in MACHINES:
-        (out / f'{key}.html').write_text(build(key), encoding='utf-8')
-        print('wrote', out / f'{key}.html')
-    (out / 'index.html').write_text(build_index(), encoding='utf-8')
-    print('wrote', out / 'index.html')
+    main()

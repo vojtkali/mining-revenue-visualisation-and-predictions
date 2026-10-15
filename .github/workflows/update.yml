@@ -39,6 +39,8 @@ jobs:
         run: node scripts/harvest.js
       - name: Rebuild summary page
         run: python3 scripts/build_site.py
+      - name: Build calculators (docs/v2)
+        run: python3 scripts/build_v2.py --public docs/v2
       - name: Validate rendered pages
         run: node tests/browser.cjs
       - name: Commit and push

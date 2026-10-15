@@ -272,7 +272,7 @@ def public(out, html, label):
     title = re.search(r'<title>.*?</title>', html).group(0)
     html = html.replace(title, '', 1)
     nav = '<nav class="site-nav" aria-label="Stránky">' + ''.join(
-        f'<a href="{p}"{" aria-current=page" if p == out else ""}>{l}</a>' for p, *_, l in PAGES) + '</nav>'
+        f'<a href="{p}"{" aria-current=page" if p == out else ""}>{l}</a>' for p, *_, l in PAGES) + '<a href="v2/index.html">Nové kalkulačky</a></nav>'
     foot = ('<footer class="site-foot">Výpočty jsou modelové scénáře z veřejných dat sítí a nejsou investičním doporučením ani '
             'zárukou výnosu. Zdroj dat: Coin Metrics Community Data a další uvedené zdroje.</footer>')
     return ('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
