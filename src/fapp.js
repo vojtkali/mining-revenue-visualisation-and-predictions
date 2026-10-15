@@ -45,7 +45,10 @@ function proj(p, r, years=5, g=p.g){
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
-const SCN = [['Pesimistický +10 % ročně',.10,'--s2'],['Základní +20 % ročně',.20,'--s1'],['Optimistický +40 % ročně',.40,'--s3']];
+// BTC price scenarios; rates come from the yBear/yBase/yBull inputs when the page has them
+const SCN_DEF = [['Pesimistický',.10,'--s2','yBear'],['Základní',.20,'--s1','yBase'],['Optimistický',.40,'--s3','yBull']];
+const scnNow = () => SCN_DEF.map(([n,r0,col,id]) => { const v = parseFloat(document.getElementById(id)?.value), r = Number.isFinite(v) ? Math.max(-.9, v/100) : r0;
+  return [`${n} ${r<0?'−':'+'}${Math.abs(Math.round(r*100))} % ročně`, r, col]; });
 
 function render(){
   const p = P(); charts.forEach(c=>c.destroy()); charts = [];
@@ -62,7 +65,7 @@ function render(){
   const hps = hist.map(x=>x.hp), chg = hist.slice(1).map((x,i)=>Math.abs(x.hp/hist[i].hp-1)).sort((a,b)=>a-b);
   const nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
-  const sc = SCN.map(([name,r,col]) => ({name,r,col,...proj(p,r)}));
+  const SCN = scnNow(), sc = SCN.map(([name,r,col]) => ({name,r,col,...proj(p,r)}));
   const si = +($('fScen3').value||1), base = sc[si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
