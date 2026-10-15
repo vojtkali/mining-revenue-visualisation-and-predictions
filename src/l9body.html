@@ -32,34 +32,34 @@
 </form>
 <p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Ceny BTC, LTC a DOGE se mění o zadané procento ročně. Hashrate sítě Scrypt roste základním tempem a navíc sleduje ceny LTC a DOGE (vážené podle podílu na výnosu): citlivost 0,3 znamená, že při 10× vyšších cenách je hashrate 2× vyšší. Halving Litecoinu kolem 30. 7. 2027 sníží odměnu LTC na polovinu; Dogecoin halving nemá (10 000 DOGE za blok napořád). Dnes tvoří DOGE asi 85 % výnosu, takže halving LTC výnos sníží jen asi o 8 %. Stroj běží nepřetržitě.</p>
 
-<div class="kpis" id="kpis"></div>
+<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Čistý zisk je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Elektřina celkem</span><span><i style="background:var(--s3)"></i>Čistý zisk</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (řídká data z vyhledávání)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <p class="sub">Každý den vyplacené BTC prodám za tehdejší cenu. Výsledek před cenou stroje je tržba minus elektřina. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad (řídká data z vyhledávání)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 
 <section class="card">
   <h2>2 · Těžím a držím: hodnota natěženého stacku v USD</h2>
   <p class="sub">Vyplacené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je součet všech denních výplat v BTC krát cena BTC v daném dni. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Elektřina celkem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej (graf 1)</span><span><i class="dash"></i>Cena stroje</span><span><i class="box"></i>Odhad</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Vyplaceno celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
 </section>
 
 <section class="card">
-  <h2>3 · Těžba vs. jednorázový nákup BTC</h2>
-  <p class="sub">Stack v BTC od začátku těžby do <span class="endLabel"></span>. Jednorázový nákup utratí první den těžby celou částku, kterou těžba za celé období stojí: <span id="budget"></span>. Nákup v jiné dny porovnává <a id="lsLink" href="https://claude.ai/artifact/U5PnzfysjR1pXZqD758Lj8" style="color:var(--s1)">samostatná stránka</a>.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Jednorázový nákup</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
-  <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. jednorázový nákup"></canvas></div>
+  <h2>3 · Těžba vs. spot při ročních vkladech</h2>
+  <p class="sub">Stejné vklady ve stejných dnech: <span id="budget"></span> Spot nakoupí BTC při každém vkladu. Graf ukazuje BTC; úplná hodnota včetně hotovosti a všech nákladů je ve srovnávací tabulce.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <div class="chart"><canvas id="c7" aria-label="Stack BTC: těžba vs. spot při ročních vkladech"></canvas></div>
 </section>
 
 <section class="card">
   <h2>4 · Těžba vs. týdenní DCA</h2>
-  <p class="sub">Stejná celková částka rozdělená na stejné týdenní nákupy BTC od začátku těžby do <span class="endLabel"></span> (<span id="dcaInfo"></span>). Budoucí nákupy probíhají za cenu BTC ze zvoleného scénáře.</p>
+  <p class="sub"><span id="dcaInfo"></span> Budoucí nákupy používají cenu zvoleného scénáře.</p>
   <div class="legend"><span><i style="background:var(--s1)"></i>Těžba (výplaty v BTC)</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span><span><i class="box"></i>Odhad</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c8" aria-label="Stack BTC: těžba vs. týdenní DCA"></canvas></div>
   <div class="tbl"><table id="ctab"></table></div>
@@ -93,8 +93,8 @@
   <h3>Data a metodika</h3>
   <div><b>Stroj:</b> Antminer L9, 16,2 GH/s, 3 260 W, algoritmus Scrypt. Uvedení květen 2024 (<a href="https://www.asicminervalue.com/miners/bitmain/antminer-l9-16-2gh">ASIC Miner Value</a>, <a href="https://miningboard.com/es/rigs/antminer-l9-16-2gh">MiningBoard</a>). Cena stroje je $7 100.</div>
   <div><b>Merge mining:</b> stroj těží Litecoin a současně se stejnou prací Dogecoin (a případně další menší mince, které tu nepočítáme). Denní výnos = LTC za den × podíl stroje na hashrate LTC × cena LTC + DOGE za den × podíl na hashrate DOGE × cena DOGE. Pool obojí převede na BTC podle denních kurzů a odečte poplatek.</div>
-  <div><b>Do 23. 5. 2026:</b> denní data <a href="https://github.com/coinmetrics/data">Coin Metrics Community</a> pro LTC, DOGE a BTC (ceny, <code>HashRate</code> v TH/s se 7denním průměrem, <code>IssTotNtv + FeeTotNtv</code>).</div>
-  <div><b>24. 5. – 13. 10. 2026 (žlutě podbarveno):</b> hrubý odhad. Ceny LTC a DOGE jsou lineárně dopočítané z několika bodů z vyhledávání (LTC ~$51 začátkem června, ~$44 v srpnu, $61 k 13. 10.; DOGE ~$0,10 v květnu, $0,084 k 13. 10.), hashrate Litecoinu z údaje 2,44 PH/s k 12. 10. 2026. Cena BTC je stejná jako na stránce S21 XP. Zpřesním, pokud dodáte exporty cen LTC a DOGE a hashrate Litecoinu za letošek.</div>
+
+
   {{LIVE_NOTE}}
   <div><b>Nezahrnuto:</b> chlazení, hosting, daně, odpisy, pokles výkonu stroje, další merge-mined mince a výkyvy kurzu během dne.</div>
 </section>

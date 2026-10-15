@@ -27,19 +27,25 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.64.0 chart.js@4.4.1
           npx playwright install --with-deps chromium
-      - name: Fetch today's prices and hashrates
+      - name: Fetch closed daily history
         run: python3 scripts/update_live.py
+      - name: Validate accounting and source data
+        run: |
+          node --test tests/economics.test.cjs
+          python3 -m unittest discover -s tests -p 'test_*.py'
       - name: Build pages
-        run: python3 scripts/build_site.py
+        run: python3 scripts/build_site.py --pages-only
       - name: Read numbers off the FAQ pages for the summary
         run: node scripts/harvest.js
       - name: Rebuild summary page
         run: python3 scripts/build_site.py
+      - name: Validate rendered pages
+        run: node tests/browser.cjs
       - name: Commit and push
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/derived docs
+          git add data/derived data/source docs
           if git diff --cached --quiet; then echo 'nothing changed'; exit 0; fi
           git commit -m "Denní aktualizace dat $(date -u +%F)"
           git push

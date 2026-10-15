@@ -25,12 +25,15 @@ const MACHINES = {s21: 's21xp', z15: 'z15pro', l9: 'l9'};
     out[k] = await p.evaluate(() => {
       const v = {};
       document.querySelectorAll('[data-k]').forEach(e => v[e.dataset.k] = e.textContent.replace(/\s/g, ' '));
-      const pay = [...document.querySelectorAll('#tPay tr')].map(r => [...r.children].map(c => c.innerText.replace(/\s+/g, ' ').trim()));
+      const pay = [...document.querySelectorAll('#tPay tr')].map(r => [...r.children].map(c => c.textContent.replace(/\s+/g, ' ').trim()));
+      const strategies = [...document.querySelectorAll('#strategyTable tbody tr')].map(r => [...r.children].map(c=>c.textContent));
+      if(strategies.length!==4) throw new Error('Missing strategy accounting');
+      v.sell5yHw=strategies[1][6];v.valSell=strategies[1][4];v.dcaCash=strategies[3][3];v.roiHw=strategies[0][8];
       return {v, pay};
     });
     await p.close();
     p = await open(`${base}-nakup.html`);
-    const m = (await p.evaluate(() => document.body.innerText)).match(/do dneška (\d+) z (\d+) dní/);
+    const m = (await p.evaluate(() => document.body.textContent)).match(/do dneška (\d+) z (\d+) dní/);
     if (!m) errors.push(`${base}-nakup.html: KPI "do dneška X z Y dní" not found`);
     else out[k].lumpBeat = [+m[1], +m[2]];
     await p.close();

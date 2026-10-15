@@ -9,7 +9,8 @@ let charts = [];
 
 
 const TODAY = ALL[ALL.length-1].d;
-const HALVINGS = ['2028-04-10','2032-04-10','2036-04-10','2040-04-10'];
+const HALVINGS = ['2028-04-10', '2032-04-10', '2036-04-10', '2040-04-10', '2044-04-10'];
+const NEXT_HALVING = HALVINGS.find(d=>d>TODAY);
 const subsidy = d => 3.125/Math.pow(2, HALVINGS.filter(h => d >= h).length);
 const SC = {bear:['Pesimistický','--s2','yBear'], base:['Základní','--s1','yBase'], bull:['Optimistický','--s3','yBull']};
 function addDays(s,n){ const d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
@@ -26,7 +27,7 @@ function params(){
 // halving-adjusted subsidy and fees per block (flat, or rising after the halving when bullFees).
 function future(p, scKey, bullFees){
   const L = ALL[ALL.length-1], r = Math.min(500, Math.max(-90, parseFloat($(SC[scKey][2]).value) || 0))/100;   // yearly price change
-  const fee0 = Math.max(0, L.hv*L.hr*1e6/144 - 3.125), N = daysBetween(L.d, p.end), out = [];
+  const fee0 = (L.fee ?? Math.max(0, L.hv*L.hr*1e6/144 - subsidy(L.d))), N = daysBetween(L.d, p.end), out = [];
   for (let t=1; t<=N; t++){
     const d = addDays(L.d, t), hr = L.hr*Math.pow(1+p.g, t/365);
     const ramp = Math.min(1, Math.max(0, daysBetween(HALVINGS[0], d)/365));
@@ -37,15 +38,17 @@ function future(p, scKey, bullFees){
 }
 
 function compute(p, scKey=p.sc, bullFees=false){
-  const rows = ALL.filter(r => r.d >= p.start).concat(future(p, scKey, bullFees));
+  const rows = ALL.concat(future(p, scKey, bullFees)).filter(r => r.d >= p.start && r.d <= p.end);
   const elecDay = p.w/1000*24*p.kwh*p.up;
   let b=0, rev=0, el=0;
-  return rows.map(r => {
+  const calculated = rows.map(r => {
     const mined = r.hv*p.th*p.up*(1-p.fee);
+    const operatingElec = Economics.daily(elecDay,energyGrowth(),rows[0].d,r.d);
     b += mined; rev += mined*r.p; el += elecDay;
-    return {d:r.d, e:r.e, price:r.p, btc:b, rev, el, net:rev-el, stack:b*r.p, hodl:b*r.p-el, mined, loss: mined*r.p < elecDay,
-            hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? elecDay/(p.th*p.up*(1-p.fee))*1000 : 0};
+    return {d:r.d, e:r.e, price:r.p, btc:b, rev, el, net:rev-el, stack:b*r.p, hodl:b*r.p-el, mined, loss: mined*r.p < operatingElec,
+            hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? operatingElec/(p.th*p.up*(1-p.fee))*1000 : 0};
   });
+  return Economics.account(calculated,{hw:p.hw,elecDay,energyGrowth:energyGrowth()});
 }
 
 // background zones (estimated data, projection) and halving markers
@@ -110,12 +113,12 @@ function render(){
   const hw = s.map(()=>p.hw), tip = v => usd(v), pl = [zones, crosshair];
   charts.push(new Chart($('c1'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Tržba celkem', s.map(r=>r.rev), css('--s1')),
-    line('Elektřina celkem', s.map(r=>r.el), css('--s2')),
+    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
     line('Čistý zisk', s.map(r=>r.net), css('--s3')),
     ref('Cena stroje', hw)]}}));
   charts.push(new Chart($('c2'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Hodnota stacku', s.map(r=>r.stack), css('--s1')),
-    line('Elektřina celkem', s.map(r=>r.el), css('--s2')),
+    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
     line('Čistá hodnota', s.map(r=>r.hodl), css('--s3')),
     line('Průběžný prodej', s.map(r=>r.net), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
     ref('Cena stroje', hw)]}}));
@@ -144,29 +147,21 @@ function render(){
   document.querySelectorAll('.endLabel').forEach(e => e.textContent = fmtDate(p.end));
 }
 
-function renderCompare(p, s, iT){
-  const sb = compute(p, p.sc, true), L = s.map(r=>r.d), n = L.length;
-  const mFlat = s.map(r=>r.btc), mBull = sb.map(r=>r.btc), prices = s.map(r=>r.price);
-  const budget = p.hw + s[n-1].el;
-  const lumpBtc = budget / prices[0];
-  const nBuys = Math.floor((n-1)/7)+1, per = budget/nBuys;
-  let dca=0; const dcaS = prices.map((pr,i)=>{ if(i%7===0) dca += per/pr; return dca; });
-  const yb = v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:3});
-  const mk = (id, other) => charts.push(new Chart($(id), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:L, datasets:[
-      line('Těžba, poplatky konstantní', mFlat, css('--s1')),
-      line('Těžba, poplatky rostou', mBull, css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-      other]}}));
-  mk('c7', line('Jednorázový nákup', L.map(()=>lumpBtc), css('--s2')));
-  mk('c8', line('Týdenní DCA', dcaS, css('--s3')));
-  const marks = [['Dnes', iT]];
-  HALVINGS.forEach(h => { const i = L.indexOf(h); if (i>0) marks.push(['Před halvingem', i-1]); });
-  marks.push(['Konec odhadu', n-1]);
-  $('ctab').innerHTML = `<thead><tr><th>Stack k datu</th><th>Těžba, poplatky konst.</th><th>Těžba, poplatky rostou</th><th>Jednorázový nákup</th><th>Týdenní DCA</th><th>Cena BTC</th></tr></thead><tbody>`+
-    marks.map(([t,i]) => `<tr><td>${t} <span class="s">${fmtDate(L[i])}</span></td>${[mFlat[i],mBull[i],lumpBtc,dcaS[i]].map(v=>`<td>${btc(v)}</td>`).join('')}<td>${usd(prices[i])}</td></tr>`).join('')+'</tbody>';
-  $('budget').textContent = `${usd(p.hw)} stroj + ${usd(s[n-1].el)} elektřina za ${n} dní = ${usd(budget)}`;
-  $('dcaInfo').textContent = `${nBuys} nákupů po ${usd(per)}`;
-  const Lr = ALL[ALL.length-1], fee0 = Math.max(0, Lr.hv*Lr.hr*1e6/144 - 3.125);
-  $('feeInfo').textContent = `Poplatky dnes ${fee0.toLocaleString('cs-CZ',{maximumFractionDigits:4})} BTC/blok (${(fee0/3.125*100).toLocaleString('cs-CZ',{maximumFractionDigits:1})} % dotace).`;
+function renderCompare(p,s,iT){
+  const elecDay=p.w/1000*24*p.kwh*p.up;
+  const comparison=Economics.compare(s,{hw:p.hw,elecDay,energyGrowth:energyGrowth()});
+  const L=s.map(r=>r.d), yb=v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:3});
+  const ds=[line('Těžba + držení',s.map(r=>r.btc),css('--s1')),
+    line('Těžba, poplatky rostou',compute(p,p.sc,true).map(r=>r.btc),css('--s4'),{borderDash:[6,4]})];
+  const latest=ALL.at(-1),fee0=latest.fee??Math.max(0,latest.hv*latest.hr*1e6/144-subsidy(latest.d));
+  $('feeInfo').textContent=`Poplatky k datu dat: ${fee0.toFixed(4)} BTC/blok. Tabulka čtyř strategií používá konstantní poplatky.`;
+  charts.push(new Chart($('c7'),{type:'line',plugins:[zones,crosshair],options:opts(yb,v=>btc(v)),data:{labels:L,datasets:ds.concat([line('Spot při ročních vkladech',comparison.map(r=>r.spot),css('--s2'))])}}));
+  charts.push(new Chart($('c8'),{type:'line',plugins:[zones,crosshair],options:opts(yb,v=>btc(v)),data:{labels:L,datasets:ds.concat([line('Týdenní DCA',comparison.map(r=>r.dca),css('--s3'))])}}));
+  const marks=[['K datu dat',iT],['Konec období',s.length-1]];
+  $('ctab').innerHTML='<thead><tr><th>Datum</th><th>Těžba BTC</th><th>Spot BTC</th><th>DCA BTC</th><th>DCA hotovost</th><th>Vloženo</th></tr></thead><tbody>'+marks.map(([label,i])=>`<tr><td>${label}: ${fmtDate(L[i])}</td><td>${btc(s[i].btc)}</td><td>${btc(comparison[i].spot)}</td><td>${btc(comparison[i].dca)}</td><td>${usd(comparison[i].cash)}</td><td>${usd(comparison[i].invested)}</td></tr>`).join('')+'</tbody>';
+  $('budget').textContent=`První vklad ${usd(p.hw+365*elecDay)} (stroj ${usd(p.hw)} + rok energie ${usd(365*elecDay)}); potom každých 365 dní ${usd(365*elecDay)}.`;
+  $('dcaInfo').textContent='Každý roční vklad se rozdělí do 53 nákupů: den 0, 7, …, 364 daného smluvního roku. Zbytek zůstává v hotovosti.';
+  renderStrategyTable(s,p,elecDay);
 }
 
 function renderProj(p, s, iT){
