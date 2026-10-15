@@ -47,8 +47,17 @@ button{font:inherit;color:inherit}
 .machines .m.on{background:var(--panel);color:var(--fg);box-shadow:var(--shadow)}
 .machines a.m:hover,.machines a.m:focus-visible{color:var(--fg)}
 .machines .m.off{color:var(--muted)}
+.startinfo{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);white-space:nowrap}
+.startinfo b{color:var(--fg);font-weight:600}
+.startinfo+.asof{margin-left:0}
 .asof{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:7px}
 .asof::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 20%,transparent)}
+.theme{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:0;border-radius:10px;padding:6px 12px 6px 10px;font-size:13.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.theme:hover{color:var(--fg)}
+.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.theme .moon{display:none}
+.theme[aria-pressed="true"] .moon{display:block}
+.theme[aria-pressed="true"] .sun{display:none}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:9px 4px 11px;margin-right:14px;font-weight:500;font-size:14.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
 .tabs [role=tab][aria-selected=true]{color:var(--fg);border-bottom-color:var(--fg)}
@@ -78,9 +87,11 @@ button{font:inherit;color:inherit}
 .fi{display:flex;align-items:center;background:var(--raise);border:1px solid var(--line);border-radius:9px;transition:border-color .15s,box-shadow .15s}
 .fi:hover{border-color:color-mix(in srgb,var(--fg2) 35%,var(--line))}
 .fi:focus-within{border-color:var(--s1);box-shadow:0 0 0 3px color-mix(in srgb,var(--s1) 18%,transparent);background:var(--panel)}
-.fi input,.fi select{flex:1;min-width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
+.fi input,.fi select{flex:1;min-width:0;width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
 .fi .u{font-size:12.5px;color:var(--muted);padding-right:10px;white-space:nowrap}
 .fi .u:empty{display:none}
+.fi .today{flex:none;margin:4px;border:0;border-radius:7px;background:var(--panel);box-shadow:var(--shadow);padding:4px 10px;font-size:12.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.fi .today:hover{color:var(--s1)}
 .hint{font-size:12.5px;color:var(--muted);margin:0;line-height:1.45}
 .scens{display:grid;gap:8px}
 .scen{display:grid;gap:6px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;background:var(--panel);transition:border-color .15s,background .15s}
@@ -202,7 +213,7 @@ details.qa .a p{margin:0 0 8px}
 @media (max-width:900px){
   :root{--hdr:0px}
   .top{position:static}
-  .asof{margin-left:0}
+  .asof,.startinfo{margin-left:0}
   .top-in,.tabs-in,.layout,.overview{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .layout{grid-template-columns:minmax(0,1fr);gap:18px;padding-block:18px 56px}
   .side{position:static;max-height:none;padding:0}
@@ -225,7 +236,9 @@ details.qa .a p{margin:0 0 8px}
 <header class="top"><div class="top-in">
   <div class="brand"><a href="index.html">Těžba</a><span class="sep">/</span><span>Antminer L9</span></div>
   <nav class="machines" aria-label="Stroj"><a class="m" href="s21.html">S21 XP</a><a class="m" href="z15.html">Z15 Pro</a><span class="m on" aria-current="page">L9</span></nav>
+  <span class="startinfo">Začátek těžby <b id="startLbl"></b></span>
   <span class="asof">Data k 14. 10. 2026</span>
+  <button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><span class="tl"></span></button>
 </div>
 <div class="tabs-in"><div class="tabs" role="tablist" aria-label="Části"><button type="button" role="tab" id="t-prehled" aria-controls="p-prehled" aria-selected="true" data-tab="prehled">Přehled</button><button type="button" role="tab" id="t-navratnost" aria-controls="p-navratnost" aria-selected="false" data-tab="navratnost">Návratnost</button><button type="button" role="tab" id="t-nakup" aria-controls="p-nakup" aria-selected="false" data-tab="nakup">Těžba vs. nákup</button><button type="button" role="tab" id="t-otazky" aria-controls="p-otazky" aria-selected="false" data-tab="otazky">Otázky</button><button type="button" role="tab" id="t-metodika" aria-controls="p-metodika" aria-selected="false" data-tab="metodika">Metodika</button></div></div></header>
 <div class="layout"><aside class="side" id="side">
@@ -238,7 +251,7 @@ details.qa .a p{margin:0 0 8px}
   <div class="sg"><h3>Náklady</h3>
   <label class="field"><span class="fl">Elektřina</span><span class="fi"><input id="kwh" type="number" step="0.005" min="0" value="0.07"><span class="u">USD/kWh</span></span></label>
   <label class="field"><span class="fl">Cena stroje</span><span class="fi"><input id="hwL" type="number" step="100" min="0" value="7100"><span class="u">USD</span></span></label>
-  <label class="field"><span class="fl">Začátek těžby</span><span class="fi"><input id="start" type="date" value="2024-05-15" min="2024-05-01" max="2026-10-13"><span class="u"></span></span><span class="hint">Od kdy počítat historii a srovnání</span></label>
+  <label class="field"><span class="fl">Začátek těžby</span><span class="fi"><input id="start" type="date" value="2024-05-15" min="2024-05-01" max="2026-10-13"><button type="button" class="today" id="startToday" title="Nejbližší možný den: jen projekce bez historie">Dnes</button><span class="u"></span></span><span class="hint">Od kdy počítat historii a srovnání. „Dnes“ nastaví nejbližší možný den, výpočet je pak čistá projekce.</span></label>
   </div>
   <details class="sg adv" id="adv"><summary>Pokročilé</summary>
   <label class="field"><span class="fl">Poplatek poolu</span><span class="fi"><input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"><span class="u">%</span></span></label>
@@ -249,7 +262,7 @@ details.qa .a p{margin:0 0 8px}
 </form>
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
-  <label class="field"><span class="fl">Odhad do</span><span class="fi"><input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"><span class="u"></span></span></label>
+  <label class="field"><span class="fl">Odhad do</span><span class="fi"><input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"><span class="u"></span></span><span class="hint">Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.</span></label>
   <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="lhg" type="number" step="5" min="-50" max="300" value="15"><span class="u">% / rok</span></span></label>
   <label class="field"><span class="fl">Citlivost hashrate na ceny LTC a DOGE</span><span class="fi"><input id="lk" type="number" step="0.05" min="0" max="1.5" value="0.3"><span class="u"></span></span></label>
   <span hidden><select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></span>
@@ -454,6 +467,28 @@ details.qa .a p{margin:0 0 8px}
   <label for="L_w">Příkon, W<input id="L_w" type="number" step="5" min="1" value="3260"></label>
 </form></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(() => {
+  const root = document.documentElement, KEY = 'v2-theme';
+  const sys = () => matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  let saved = null; try { saved = localStorage.getItem(KEY); } catch (e) {}
+  const current = () => root.getAttribute('data-theme') || sys();
+  function label(){ const b = document.getElementById('themeBtn'); if (!b) return;
+    const dark = current() === 'dark'; b.querySelector('.tl').textContent = dark ? 'Noční' : 'Denní';
+    b.setAttribute('aria-pressed', dark); b.title = dark ? 'Přepnout na denní režim' : 'Přepnout na noční režim'; }
+  if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+  document.addEventListener('DOMContentLoaded', label); label();
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#themeBtn')) return;
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); try { localStorage.setItem(KEY, next); } catch (err) {}
+    label();
+    // charts take their colours from the theme: redraw them (calculators re-render on an input event)
+    const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+})();
+</script>
 <script>
 // chart look for the calculators: every chart the apps create gets the same quiet styling
 (() => {
@@ -708,8 +743,8 @@ function render(){
   const maxNet = s.reduce((m,r)=>r.net>m.net?r:m, s[0]);
   const k = [
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
-    ['Průběžný prodej, čistě', usd(now.net), (now.net-p.hw>=0?'po odečtení stroje ':'stroji chybí ')+usd(Math.abs(now.net-p.hw)), now.net-p.hw],
-    ['Držení, čistá hodnota', usd(now.hodl), `stack ${usd(now.stack)} při ${usd(now.price)}/BTC`, now.hodl-p.hw],
+    ['Průběžný prodej: tržba − energie', usd(now.net), `tržba ${usd(now.rev)} − energie ${usd(now.el)} placená rok předem; `+(now.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(now.net-p.hw)), now.net-p.hw],
+    ['Držení: hodnota BTC − energie', usd(now.hodl), `BTC ${usd(now.stack)} při ${usd(now.price)}/BTC − energie ${usd(now.el)} placená rok předem; bez ceny stroje`, now.hodl-p.hw],
     [`Na konci odhadu, ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář: čistá hodnota ${usd(end.hodl)}`, end.hodl-p.hw],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
@@ -1000,6 +1035,9 @@ function render(){
   const hps = hist.map(x=>x.hp), chg = hist.slice(1).map((x,i)=>Math.abs(x.hp/hist[i].hp-1)).sort((a,b)=>a-b), nets = hist.map(x=>x.net);
   const hr12 = ALL.find(r=>r.d===from12) || ALL[0];
   const SCN = scnNow(), sc = SCN.map(([name,r,col,br,rd]) => { const pp = br===undefined?p:{...p,br}; return {name,r,rd:rd??r,col,pp,...proj(pp,r,pp.g,5,rd??r)}; });
+  // payback after the 5-year window: same scenario run up to 15 years, so the tables show an exact date or "ani do <rok>"
+  const LONG = 15, longY = +L0.d.slice(0,4) + LONG;
+  sc.forEach(x => { if (x.payH && x.payS) return; const q = proj(x.pp, x.r, x.pp.g, LONG, x.rd); x.payH = x.payH || q.payH; x.payS = x.payS || q.payS; });
   const base = sc[p.si];
   const comparison = Economics.compare(base.out,{hw:p.hw,elecDay:base.elec,energyGrowth:energyGrowth()});
   const lump = comparison.at(-1).spot, dcaAcc = comparison.at(-1).dca;
@@ -1007,7 +1045,7 @@ function render(){
   renderStrategyTable(base.out,p,base.elec);
   renderEdgeL(p, base);
   const p10 = proj(base.pp, base.r, base.pp.g, 10, base.rd);
-  const fmtPay = x => x ? fmtDate(x) : 'do 5 let ne';
+  const fmtPay = x => x ? fmtDate(x) : `ani do ${longY}`;
   const V = {
     dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
     today: fmtDate(TODAY), btc: usd(p.btc), hw: usd(p.hw), fee: pct(p.fee), up: pct(p.up), btcR: (p.br>=0?'+':'')+pct(p.br),
@@ -1020,7 +1058,7 @@ function render(){
     hpMin: usd(Math.min(...hps),3), hpMax: usd(Math.max(...hps),3), netMin: usd(Math.min(...nets),2), netMax: usd(Math.max(...nets),2), hpChg: pct(chg[Math.floor(chg.length/2)],1),
     netUp10: usd(revDay*1.1-elecDay,2), netDn10: usd(revDay*0.9-elecDay,2), netDiff10: usd(revDay/1.1-elecDay,2),
     bePrice: bePriceDoge>0 ? usd(bePriceDoge,4) : 'nulu (stroj nepokryje elektřinu ani ze samotného LTC)', beMargin: pct(beDrop),
-    payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : 'se do 5 let nezaplatí',
+    payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
     price5y: usd(base.end.bp), valMine: usd(base.end.stack), valLump: usd(lump*base.end.bp), valDca: usd(comparison.at(-1).dcaValue),
@@ -1320,14 +1358,29 @@ document.querySelectorAll('.scen').forEach(c => {
   c.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === c) { e.preventDefault(); pickScen(c.dataset.sc); } });
 });
 SIDE.forEach(i => i.addEventListener('input', sync));
+$('startToday').addEventListener('click', () => { $('start').value = $('start').max; fire($('start')); });
+// the projection ends 4.5 years after the mining start, so the next 4 years from the start stay in view;
+// changing the start moves the end, the end can still be edited by hand afterwards
+function endFromStart(){
+  const s = $('start').value; if (!s) return;
+  const d = new Date(s + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + 54);
+  let e = d.toISOString().slice(0, 10); const mn = $('end').min, mx = $('end').max;
+  if (mn && e < mn) e = mn; if (mx && e > mx) e = mx;
+  $('end').value = e;
+}
+$('start').addEventListener('input', () => { endFromStart(); fire($('end')); });
 $('resetParams').addEventListener('click', () => {
   SIDE.forEach(i => { if (i.id in DEFAULTS) i.value = DEFAULTS[i.id]; });
-  markScen(); fire($('kwh')); fire($('end'));
+  endFromStart(); markScen(); fire($('kwh')); fire($('end')); startLbl();
 });
-// restore remembered parameters
+// restore remembered parameters (the first visit derives the end from the default start)
 const saved = store.get(KEY);
 if (saved) { SIDE.forEach(i => { if (saved[i.id] !== undefined) i.value = saved[i.id]; }); fire($('kwh')); fire($('end')); }
-markScen(); sync();
+else { endFromStart(); fire($('end')); }
+// top bar: show from when the mining is counted
+const startLbl = () => { const v = $('start').value; if (v) $('startLbl').textContent = `${+v.slice(8,10)}. ${+v.slice(5,7)}. ${v.slice(0,4)}`; };
+$('start').addEventListener('input', startLbl); $('start').addEventListener('change', startLbl);
+markScen(); sync(); startLbl();
 
 const hdr = () => document.documentElement.style.setProperty('--hdr', document.querySelector('.top').offsetHeight + 'px');
 hdr(); window.addEventListener('resize', hdr);

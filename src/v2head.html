@@ -47,8 +47,17 @@ button{font:inherit;color:inherit}
 .machines .m.on{background:var(--panel);color:var(--fg);box-shadow:var(--shadow)}
 .machines a.m:hover,.machines a.m:focus-visible{color:var(--fg)}
 .machines .m.off{color:var(--muted)}
+.startinfo{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);white-space:nowrap}
+.startinfo b{color:var(--fg);font-weight:600}
+.startinfo+.asof{margin-left:0}
 .asof{margin-left:auto;font:500 13px var(--f-mono);color:var(--muted);display:flex;align-items:center;gap:7px}
 .asof::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 20%,transparent)}
+.theme{display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:0;border-radius:10px;padding:6px 12px 6px 10px;font-size:13.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.theme:hover{color:var(--fg)}
+.theme svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.theme .moon{display:none}
+.theme[aria-pressed="true"] .moon{display:block}
+.theme[aria-pressed="true"] .sun{display:none}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs [role=tab]{background:none;border:0;border-bottom:2px solid transparent;padding:9px 4px 11px;margin-right:14px;font-weight:500;font-size:14.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
 .tabs [role=tab][aria-selected=true]{color:var(--fg);border-bottom-color:var(--fg)}
@@ -78,9 +87,11 @@ button{font:inherit;color:inherit}
 .fi{display:flex;align-items:center;background:var(--raise);border:1px solid var(--line);border-radius:9px;transition:border-color .15s,box-shadow .15s}
 .fi:hover{border-color:color-mix(in srgb,var(--fg2) 35%,var(--line))}
 .fi:focus-within{border-color:var(--s1);box-shadow:0 0 0 3px color-mix(in srgb,var(--s1) 18%,transparent);background:var(--panel)}
-.fi input,.fi select{flex:1;min-width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
+.fi input,.fi select{flex:1;min-width:0;width:0;border:0;background:none;font:500 15px var(--f-mono);color:var(--fg);padding:8px 10px;outline:none}
 .fi .u{font-size:12.5px;color:var(--muted);padding-right:10px;white-space:nowrap}
 .fi .u:empty{display:none}
+.fi .today{flex:none;margin:4px;border:0;border-radius:7px;background:var(--panel);box-shadow:var(--shadow);padding:4px 10px;font-size:12.5px;font-weight:500;color:var(--fg2);cursor:pointer}
+.fi .today:hover{color:var(--s1)}
 .hint{font-size:12.5px;color:var(--muted);margin:0;line-height:1.45}
 .scens{display:grid;gap:8px}
 .scen{display:grid;gap:6px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;background:var(--panel);transition:border-color .15s,background .15s}
@@ -202,7 +213,7 @@ details.qa .a p{margin:0 0 8px}
 @media (max-width:900px){
   :root{--hdr:0px}
   .top{position:static}
-  .asof{margin-left:0}
+  .asof,.startinfo{margin-left:0}
   .top-in,.tabs-in,.layout,.overview{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .layout{grid-template-columns:minmax(0,1fr);gap:18px;padding-block:18px 56px}
   .side{position:static;max-height:none;padding:0}
