@@ -3,6 +3,7 @@ const fs=require('fs'),path=require('path'),assert=require('node:assert/strict')
 const ROOT=path.resolve(__dirname,'..'),chart=fs.readFileSync(path.join(path.dirname(require.resolve('chart.js')),'chart.umd.js'));
 (async()=>{
  const browser=await chromium.launch(process.env.CHROMIUM?{executablePath:process.env.CHROMIUM}:{}),errors=[];
+ try {
  for(const file of fs.readdirSync(path.join(ROOT,'docs')).filter(f=>f.endsWith('.html'))){
   const page=await browser.newPage({viewport:{width:1280,height:900}});
   page.on('pageerror',e=>errors.push(file+': '+e.message));
@@ -36,5 +37,6 @@ const ROOT=path.resolve(__dirname,'..'),chart=fs.readFileSync(path.join(path.dir
   }
   await page.close();console.log('checked',file);
  }
- await browser.close();assert.deepEqual(errors,[]);
+ assert.deepEqual(errors,[]);
+ } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
