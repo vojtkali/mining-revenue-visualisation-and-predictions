@@ -145,7 +145,7 @@ def build(key):
 </form>
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
-  {field('Odhad do', mi['end'])}
+  {field('Odhad do', mi['end'], '', 'Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.')}
   {field('Růst hashrate sítě', mi[M['hg']], '% / rok')}
   {''.join(field(lbl, mi[i], u) for lbl, i, u in M['proj_extra'])}
   <span hidden>{sel}</span>
@@ -374,13 +374,24 @@ document.querySelectorAll('.scen').forEach(c => {
 });
 SIDE.forEach(i => i.addEventListener('input', sync));
 $('startToday').addEventListener('click', () => { $('start').value = $('start').max; fire($('start')); });
+// the projection ends 4.5 years after the mining start, so the next 4 years from the start stay in view;
+// changing the start moves the end, the end can still be edited by hand afterwards
+function endFromStart(){
+  const s = $('start').value; if (!s) return;
+  const d = new Date(s + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() + 54);
+  let e = d.toISOString().slice(0, 10); const mn = $('end').min, mx = $('end').max;
+  if (mn && e < mn) e = mn; if (mx && e > mx) e = mx;
+  $('end').value = e;
+}
+$('start').addEventListener('input', () => { endFromStart(); fire($('end')); });
 $('resetParams').addEventListener('click', () => {
   SIDE.forEach(i => { if (i.id in DEFAULTS) i.value = DEFAULTS[i.id]; });
-  markScen(); fire($('kwh')); fire($('end')); startLbl();
+  endFromStart(); markScen(); fire($('kwh')); fire($('end')); startLbl();
 });
-// restore remembered parameters
+// restore remembered parameters (the first visit derives the end from the default start)
 const saved = store.get(KEY);
 if (saved) { SIDE.forEach(i => { if (saved[i.id] !== undefined) i.value = saved[i.id]; }); fire($('kwh')); fire($('end')); }
+else { endFromStart(); fire($('end')); }
 // top bar: show from when the mining is counted
 const startLbl = () => { const v = $('start').value; if (v) $('startLbl').textContent = `${+v.slice(8,10)}. ${+v.slice(5,7)}. ${v.slice(0,4)}`; };
 $('start').addEventListener('input', startLbl); $('start').addEventListener('change', startLbl);
