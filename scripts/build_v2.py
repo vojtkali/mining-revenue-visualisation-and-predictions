@@ -43,9 +43,9 @@ MACHINES = {
     proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
     mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Hashrate Scrypt reaguje na odchylku cen LTC a DOGE od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
 }
-# claude.ai links of the published calculators (None = not published yet)
-LINKS = {'index': 'https://claude.ai/artifact/GjajZXcYDdL5dyNdzHUf2M', 's21': 'https://claude.ai/artifact/6tEzys5PUCArXZCpfADioK',
-         'z15': 'https://claude.ai/artifact/Ka5NMmHAb96wUo8QGZ3wGX', 'l9': 'https://claude.ai/artifact/W9pPfWT5rML7CjGBtbPLpJ'}
+# links between the pages: in the claude.ai artifact all pages are files of one artifact (index.html is a shell
+# that shows them in frames and switches between them); the website build (--public) uses PUBLIC_LINKS
+LINKS = {'index': 'overview.html', 's21': 's21.html', 'z15': 'z15.html', 'l9': 'l9.html'}
 
 
 def sections(html):
@@ -225,8 +225,8 @@ def build(key):
     tabbar = ''.join(f'<button type="button" role="tab" id="t-{k}" aria-controls="p-{k}" aria-selected="{"true" if i == 0 else "false"}" data-tab="{k}">{n}</button>' for i, (k, n, _) in enumerate(tabs))
     panels = ''.join(f'<section class="panel" role="tabpanel" id="p-{k}" aria-labelledby="t-{k}"{"" if i == 0 else " hidden"}>{c}</section>' for i, (k, n, c) in enumerate(tabs))
     machines = ''.join(f'<span class="m on" aria-current="page">{m["name"]}</span>' if k == key else
-                       (f'<a class="m" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>') for k, m in MACHINES.items())
-    brand = f'<a href="{LINKS["index"]}">Těžba</a>' if LINKS['index'] else '<b>Těžba</b>'
+                       (f'<a class="m" data-m="{k}" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>') for k, m in MACHINES.items())
+    brand = f'<a data-m="index" href="{LINKS["index"]}">Těžba</a>' if LINKS['index'] else '<b>Těžba</b>'
     cfg = dict(KEY='v2-' + key, SYNC={**{k: v + ([f'L_{k}'] if k in ('kwh', 'poolFee', 'uptime', M['hw']) else []) for k, v in M['sync'].items()}, 'start': ['L_start']},
                SEL=M['faq_sel'], SI=M['faq_si'])
 
@@ -276,7 +276,7 @@ def build_index():
         k = lambda n: sv[f'{key}.{n}']
         czk = round(B.num(k('netMonth')) * rate / 10) * 10
         val5 = re.search(r'<td class="(pos|neg)"><span class="n">(.*?)</span>', k('cellBase'))
-        link = f'<a class="open" href="{LINKS[key]}">Otevřít kalkulačku</a>' if LINKS[key] else '<span class="open off">Kalkulačka se připravuje</span>'
+        link = f'<a class="open" data-m="{key}" href="{LINKS[key]}">Otevřít kalkulačku</a>' if LINKS[key] else '<span class="open off">Kalkulačka se připravuje</span>'
         cards.append(f'''<article class="mcard">
   <header><h2>{m["title"]}</h2><p class="spec">{m["spec"]}</p></header>
   <dl>
@@ -288,7 +288,7 @@ def build_index():
   <p class="risk"><b>Hlavní riziko:</b> {RISK[key]}</p>
   {link}
 </article>''')
-    machines = ''.join(f'<a class="m" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>' for k, m in MACHINES.items())
+    machines = ''.join(f'<a class="m" data-m="{k}" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>' for k, m in MACHINES.items())
     head = (Path(__file__).resolve().parent.parent / 'src' / 'v2head.html').read_text(encoding='utf-8').replace('{{V2_TITLE}}', 'Přehled těžebních strojů')
     return f'''{head}
 <header class="top"><div class="top-in">
@@ -306,7 +306,8 @@ def build_index():
 {B.CHART}
 <script>{THEME_JS}</script>
 <script>{V2_PRE}</script>
-<script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>'''
+<script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>
+<script>{SUITE_CHILD}</script>'''
 
 
 # day / night switch in the top bar: remembered per viewer, default follows the system setting
@@ -334,6 +335,10 @@ THEME_JS = r"""
     const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+  // another page of the same artifact may have switched the theme meanwhile: take the remembered one
+  window.v2Theme = () => { let s = null; try { s = localStorage.getItem(KEY); } catch (e) {}
+    if ((s === 'dark' || s === 'light') && s !== root.getAttribute('data-theme')){ root.setAttribute('data-theme', s); label();
+      const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true})); } };
 })();
 """
 
@@ -459,12 +464,23 @@ function place(){
   return `${pn.id.slice(2)}.${i}.${Math.round(h - kids[i].getBoundingClientRect().top)}`;
 }
 document.querySelectorAll('.machines a.m').forEach(a => a.addEventListener('click', () => { a.href = a.href.split('#')[0] + '#' + place(); }));
-if (hm && hm[2] !== undefined){
+function goPlace(pl, fresh){
+  const m = /^(\w+)\.(\d+)\.(-?\d+)$/.exec(pl || ''); if (!m) return;
+  if (tabs.some(t => t.dataset.tab === m[1])) show(m[1]);
   let moved = false; ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => moved = true, {once:true, passive:true}));
-  const go = () => { if (moved) return; const el = curPanel().children[+hm[2]]; if (!el) return;
-    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+hm[3])}); };
-  // charts and the Monte Carlo fill in after load; place again once they have their size
-  setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200);
+  const go = () => { if (moved) return; const el = curPanel().children[+m[2]]; if (!el) return;
+    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+m[3])}); };
+  // on a fresh load charts and the Monte Carlo fill in later: place again once they have their size
+  go(); if (fresh){ setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200); }
+}
+if (hm && hm[2] !== undefined) goPlace(hm[0].slice(1), true);   // show() has already rewritten the hash
+// inside the one-artifact suite (index.html shows every page in a frame): machine links ask the shell to switch,
+// handing over the place; the shell sends it back to the frame it shows
+if (window.parent !== window){
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m, place:place()}, '*'); });
+  addEventListener('message', e => { if (e.source !== parent || !e.data || e.data.type !== 'v2go') return;
+    window.v2Theme && window.v2Theme(); goPlace(e.data.place); });
 }
 // links inside the FAQ to a group: switch tab first
 document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', e => {
@@ -481,6 +497,44 @@ st.addEventListener('click', () => { const open = st.getAttribute('aria-expanded
 ['adv', 'adv2'].forEach(id => { const d = $(id), k = KEY + '-' + id; if (store.get(k)) d.open = true; d.addEventListener('toggle', () => store.set(k, d.open)); });
 })();
 '''
+
+SUITE_CHILD = r'''
+if (window.parent !== window){
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m}, '*'); });
+  addEventListener('message', e => { if (e.source === parent && e.data && e.data.type === 'v2go') window.v2Theme && window.v2Theme(); });
+}
+'''
+
+# the artifact's own page: shows the overview and the calculators (files of the same artifact) in frames, switches
+# between them without reloading, remembers the last one; each frame keeps its own scroll position
+SHELL = '''<title>Těžba: kalkulačky</title>
+<style>
+:root{--bg:#f3f4f7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d0f14}}
+:root[data-theme="dark"]{--bg:#0d0f14}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
+iframe.on{display:block}
+</style>
+<script>
+(() => {
+  const PAGES = {index:'overview.html', s21:'s21.html', z15:'z15.html', l9:'l9.html'}, TITLES = {index:'Přehled strojů', s21:'S21 XP', z15:'Z15 Pro', l9:'L9'};
+  const fr = {}, KEY = 'v2-suite';
+  try { const t = localStorage.getItem('v2-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  function show(k, place){
+    if (!PAGES[k]) k = 'index';
+    if (!fr[k]){ const f = document.createElement('iframe'); f.src = PAGES[k] + (place ? '#' + place : ''); f.title = TITLES[k]; document.body.append(f); fr[k] = f; }
+    else fr[k].contentWindow.postMessage({type:'v2go', place:place || ''}, '*');
+    for (const [kk, f] of Object.entries(fr)) f.classList.toggle('on', kk === k);
+    try { localStorage.setItem(KEY, k); } catch (e) {}
+  }
+  addEventListener('message', e => { const d = e.data;
+    if (d && d.type === 'v2switch' && Object.values(fr).some(f => f.contentWindow === e.source)) show(d.to, d.place); });
+  let k0 = 'index'; try { k0 = localStorage.getItem(KEY) || 'index'; } catch (e) {}
+  document.addEventListener('DOMContentLoaded', () => show(k0));
+})();
+</script>'''
 
 PUBLIC_LINKS = {'index': 'index.html', 's21': 's21.html', 'z15': 'z15.html', 'l9': 'l9.html'}
 
@@ -502,19 +556,33 @@ def public_page(html):
             f'{html}</body></html>\n')
 
 
+def suite_page(html):
+    """A page file inside the artifact: own skeleton; links that leave the artifact open in the whole window."""
+    title = re.search(r'<title>.*?</title>', html).group(0)
+    html = html.replace(title, '', 1)
+    return ('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><base target="_top">'
+            f'{title}<style>:root{{color-scheme:light}}body{{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}}'
+            'img{max-width:100%}[hidden]{display:none!important}</style></head><body>'
+            f'{html}</body></html>\n')
+
+
 def main():
-    """python3 scripts/build_v2.py OUT_DIR             claude.ai artifact files (links between the published artifacts)
+    """python3 scripts/build_v2.py OUT_DIR             one claude.ai artifact: index.html (shell) + overview/s21/z15/l9.html
        python3 scripts/build_v2.py --public OUT_DIR    website pages (relative links), e.g. docs/v2"""
     public = sys.argv[1] == '--public'
     out = Path(sys.argv[-1]); out.mkdir(parents=True, exist_ok=True)
     if public:
         LINKS.update(PUBLIC_LINKS)
     pages = {f'{key}.html': (lambda k=key: build(k)) for key in MACHINES}
-    pages['index.html'] = build_index
+    pages['index.html' if public else 'overview.html'] = build_index
     for name, make in pages.items():
         html = make()
-        (out / name).write_text(public_page(html) if public else html, encoding='utf-8')
+        (out / name).write_text(public_page(html) if public else suite_page(html), encoding='utf-8')
         print('wrote', out / name)
+    if not public:
+        (out / 'index.html').write_text(SHELL, encoding='utf-8')
+        print('wrote', out / 'index.html')
 
 
 if __name__ == '__main__':

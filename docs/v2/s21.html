@@ -244,8 +244,8 @@ details.qa .a p{margin:0 0 8px}
 </style>
 
 <header class="top"><div class="top-in">
-  <div class="brand"><a href="index.html">Těžba</a><span class="sep">/</span><span>Antminer S21 XP</span></div>
-  <nav class="machines" aria-label="Stroj"><span class="m on" aria-current="page">S21 XP</span><a class="m" href="z15.html">Z15 Pro</a><a class="m" href="l9.html">L9</a></nav>
+  <div class="brand"><a data-m="index" href="index.html">Těžba</a><span class="sep">/</span><span>Antminer S21 XP</span></div>
+  <nav class="machines" aria-label="Stroj"><span class="m on" aria-current="page">S21 XP</span><a class="m" data-m="z15" href="z15.html">Z15 Pro</a><a class="m" data-m="l9" href="l9.html">L9</a></nav>
   <span class="startinfo">Začátek těžby <b id="startLbl"></b></span>
   <span class="asof">Data k 14. 10. 2026</span>
   <button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><span class="tl"></span></button>
@@ -514,6 +514,10 @@ details.qa .a p{margin:0 0 8px}
     const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+  // another page of the same artifact may have switched the theme meanwhile: take the remembered one
+  window.v2Theme = () => { let s = null; try { s = localStorage.getItem(KEY); } catch (e) {}
+    if ((s === 'dark' || s === 'light') && s !== root.getAttribute('data-theme')){ root.setAttribute('data-theme', s); label();
+      const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true})); } };
 })();
 </script>
 <script>
@@ -1705,12 +1709,23 @@ function place(){
   return `${pn.id.slice(2)}.${i}.${Math.round(h - kids[i].getBoundingClientRect().top)}`;
 }
 document.querySelectorAll('.machines a.m').forEach(a => a.addEventListener('click', () => { a.href = a.href.split('#')[0] + '#' + place(); }));
-if (hm && hm[2] !== undefined){
+function goPlace(pl, fresh){
+  const m = /^(\w+)\.(\d+)\.(-?\d+)$/.exec(pl || ''); if (!m) return;
+  if (tabs.some(t => t.dataset.tab === m[1])) show(m[1]);
   let moved = false; ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => moved = true, {once:true, passive:true}));
-  const go = () => { if (moved) return; const el = curPanel().children[+hm[2]]; if (!el) return;
-    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+hm[3])}); };
-  // charts and the Monte Carlo fill in after load; place again once they have their size
-  setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200);
+  const go = () => { if (moved) return; const el = curPanel().children[+m[2]]; if (!el) return;
+    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+m[3])}); };
+  // on a fresh load charts and the Monte Carlo fill in later: place again once they have their size
+  go(); if (fresh){ setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200); }
+}
+if (hm && hm[2] !== undefined) goPlace(hm[0].slice(1), true);   // show() has already rewritten the hash
+// inside the one-artifact suite (index.html shows every page in a frame): machine links ask the shell to switch,
+// handing over the place; the shell sends it back to the frame it shows
+if (window.parent !== window){
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m, place:place()}, '*'); });
+  addEventListener('message', e => { if (e.source !== parent || !e.data || e.data.type !== 'v2go') return;
+    window.v2Theme && window.v2Theme(); goPlace(e.data.place); });
 }
 // links inside the FAQ to a group: switch tab first
 document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', e => {

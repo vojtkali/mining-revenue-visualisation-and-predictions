@@ -245,7 +245,7 @@ details.qa .a p{margin:0 0 8px}
 
 <header class="top"><div class="top-in">
   <div class="brand"><b>Těžba</b><span class="sep">/</span><span>Přehled strojů</span></div>
-  <nav class="machines" aria-label="Stroj"><a class="m" href="s21.html">S21 XP</a><a class="m" href="z15.html">Z15 Pro</a><a class="m" href="l9.html">L9</a></nav>
+  <nav class="machines" aria-label="Stroj"><a class="m" data-m="s21" href="s21.html">S21 XP</a><a class="m" data-m="z15" href="z15.html">Z15 Pro</a><a class="m" data-m="l9" href="l9.html">L9</a></nav>
   <span class="startinfo" title="Karty počítají se strojem koupeným v poslední den dat">Začátek těžby <b>14. 10. 2026</b></span>
   <span class="asof">Data k 14. 10. 2026</span>
   <button type="button" class="theme" id="themeBtn" aria-label="Přepnout denní a noční režim"><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><span class="tl"></span></button>
@@ -261,7 +261,7 @@ details.qa .a p{margin:0 0 8px}
     <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big neg">−$4 100</span><span class="czk">základní scénář</span></dd></div>
   </dl>
   <p class="risk"><b>Hlavní riziko:</b> Růst sítě a halving v dubnu 2028</p>
-  <a class="open" href="s21.html">Otevřít kalkulačku</a>
+  <a class="open" data-m="s21" href="s21.html">Otevřít kalkulačku</a>
 </article><article class="mcard">
   <header><h2>Antminer Z15 Pro</h2><p class="spec">840 kSol/s · 2 780 W · Equihash (Zcash) · výplata v BTC</p></header>
   <dl>
@@ -271,7 +271,7 @@ details.qa .a p{margin:0 0 8px}
     <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big neg">−$3 293</span><span class="czk">základní scénář</span></dd></div>
   </dl>
   <p class="risk"><b>Hlavní riziko:</b> Pád ceny ZEC po prudkém růstu</p>
-  <a class="open" href="z15.html">Otevřít kalkulačku</a>
+  <a class="open" data-m="z15" href="z15.html">Otevřít kalkulačku</a>
 </article><article class="mcard">
   <header><h2>Antminer L9</h2><p class="spec">16,2 GH/s · 3 260 W · Scrypt, merge mining LTC + DOGE · výplata v BTC</p></header>
   <dl>
@@ -281,7 +281,7 @@ details.qa .a p{margin:0 0 8px}
     <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big neg">−$738</span><span class="czk">základní scénář</span></dd></div>
   </dl>
   <p class="risk"><b>Hlavní riziko:</b> Cena DOGE, která tvoří většinu výnosu</p>
-  <a class="open" href="l9.html">Otevřít kalkulačku</a>
+  <a class="open" data-m="l9" href="l9.html">Otevřít kalkulačku</a>
 </article></div>
 <div class="ov-body">
 
@@ -397,6 +397,10 @@ details.qa .a p{margin:0 0 8px}
     const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+  // another page of the same artifact may have switched the theme meanwhile: take the remembered one
+  window.v2Theme = () => { let s = null; try { s = localStorage.getItem(KEY); } catch (e) {}
+    if ((s === 'dark' || s === 'light') && s !== root.getAttribute('data-theme')){ root.setAttribute('data-theme', s); label();
+      const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true})); } };
 })();
 </script>
 <script>
@@ -456,4 +460,11 @@ function render(){
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
 new MutationObserver(render).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
 render();
+</script>
+<script>
+if (window.parent !== window){
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m}, '*'); });
+  addEventListener('message', e => { if (e.source === parent && e.data && e.data.type === 'v2go') window.v2Theme && window.v2Theme(); });
+}
 </script></body></html>
