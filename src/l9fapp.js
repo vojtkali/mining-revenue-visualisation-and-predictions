@@ -23,6 +23,11 @@ const GH = 16.2, W = 3260;
 const SCN_DEF = [['Propad −30 % ročně; BTC +10 %',-.30,'--s2',.10],['Stagnace 0 %',0,'--fg2'],['Základní +10 % ročně',.10,'--s1'],['Růst +30 % ročně',.30,'--s3']];
 // with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, LTC, DOGE]
 const SCN_IN = [['Pesimistický','lbB','llB','ldB'], null, ['Základní','lbM','llM','ldM'], ['Optimistický','lbU','llU','ldU']];
+// reserve to break-even over time along the selected scenario: how far LTC and DOGE could fall from the scenario prices that
+// day before the revenue (network grown by g a year and following the prices, LTC halving included) stops covering electricity
+const beSeries = (out, f, dH) => { const pts = [['za rok', 365], ['za 2 roky', 730]];
+  if (dH > 0 && dH < out.length) pts.push([`po halvingu LTC ${NEXT_HALVING.slice(0, 4)}`, dH]);
+  return pts.filter(([, t]) => t < out.length).sort((a, b) => a[1]-b[1]).map(([l, t]) => `${l} ${f(out[t])}`).join(' · '); };
 const pcs = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100))} %`;
 function scnNow(){
   const v = id => Math.max(-.9, (parseFloat(document.getElementById(id)?.value) || 0)/100);
@@ -59,6 +64,7 @@ function proj(p, r, g=p.g, years=5, rd=r){
   firstLoss = accounted.find(o => o.m*o.price < o.elecDay)?.d ?? null;
   payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
+  accounted.forEach(o => o.res = 1 - o.elecDay/o.usd);
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
 
@@ -152,7 +158,7 @@ function render(){
   $('kpis').innerHTML = [
     ['Čistě za měsíc', usd(netDay*M), `výnos ${usd(revDay*M)} − elektřina ${usd(elecDay*M)}`, netDay],
     ['BTC za měsíc', btc(btcDay*M), `${sats(btcDay)} denně, DOGE ${pct(shD)} výnosu`],
-    ['Rezerva do bodu zvratu', pct(beDrop), 'o kolik mohou klesnout ceny DOGE a LTC', beDrop],
+    ['Rezerva do bodu zvratu', pct(beDrop), `o kolik mohou dnes klesnout ceny DOGE a LTC; ${beSeries(base.out, o => o.res >= 0 ? pct(o.res) : `ztráta, výnos pokryje ${pct(1-o.res)} elektřiny`, dH)} (proti cenám ve zvoleném scénáři; síť ${pcs(p.g)} ročně a sleduje ceny)`, beDrop],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Scénář cen LTC a DOGE</th><th>DOGE za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
@@ -203,7 +209,7 @@ function render(){
   charts.push(new Chart($('cHalv'), {type:'line', plugins:[zones,crosshair], options:opts(v=>kfmt(v), v=>Math.round(v).toLocaleString('cs-CZ')+' sats'), data:{labels:LS, datasets:[
     line('Sats za den', base.out.map(o=>o.m*1e8), css('--s1'))]}}));
   charts.push(new Chart($('cBe'), {type:'line', plugins:[zones,crosshair], options:opts(v=>'$'+v, v=>usd(v,2)), data:{labels:LS, datasets:
-    [ref('Elektřina za den', LS.map(()=>base.elec))].concat(sc.map(x => line(x.name, x.out.map(o=>o.usd), css(x.col), {borderWidth:1.5})))}}));
+    [ref('Elektřina za den', base.out.map(o=>o.elecDay))].concat(sc.map(x => line(x.name, x.out.map(o=>o.usd), css(x.col), {borderWidth:1.5})))}}));
   charts.push(new Chart($('cVs'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:[
     line('Těžba', base.out.map(o=>o.btc), css('--s1')), line('Spot při ročních vkladech', lumpS, css('--s2')), line('Týdenní DCA', dcaS, css('--s3'))]}}));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:

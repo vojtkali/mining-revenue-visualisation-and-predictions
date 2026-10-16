@@ -23,6 +23,11 @@ const KS = 840, W = 2780;
 const SCN_DEF = [['Propad ZEC −70 %, pak 0 %; BTC +10 %',-.70,0,'--s2',.10],['Stagnace ZEC 0 %',0,0,'--fg2'],['Korekce ZEC −40 %, pak +10 % ročně',-.40,.10,'--s1'],['Růst ZEC +30 %, pak +20 % ročně',.30,.20,'--s3']];
 // with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, ZEC 1st year, ZEC later]
 const SCN_IN = [['Pesimistický','bB','zB1','zB2'], null, ['Základní','bM','zM1','zM2'], ['Optimistický','bU','zU1','zU2']];
+// break-even over time along the selected scenario: electricity that day (energy price steps yearly) / what the machine
+// earns that day with the network grown by g a year (and following the price where the model says so), halvings included
+const beSeries = (out, f, dH) => { const pts = [['za rok', 365], ['za 2 roky', 730]];
+  if (dH > 0 && dH < out.length) pts.push([`po halvingu ${NEXT_HALVING.slice(0, 4)}`, dH]);
+  return pts.filter(([, t]) => t < out.length).sort((a, b) => a[1]-b[1]).map(([l, t]) => `${l} ${f(out[t])}`).join(' · '); };
 const pcs = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100))} %`;
 function scnNow(){
   const v = (id, lo) => Math.max(lo, (parseFloat(document.getElementById(id)?.value) || 0)/100);
@@ -52,12 +57,13 @@ function proj(p, z1, z2, g=p.g, years=5){
     if (firstLoss===null && zd*zp < elec) firstLoss = d;
     if (payS===null && rev-el >= p.hw) payS = d;
     if (payH===null && b*bp-el >= p.hw) payH = d;
-    out.push({d, zp, bp, zd, m, btc:b, el, stack:b*bp, hodl:b*bp-el, sell:rev-el, be:elec/zd});
+    out.push({d, zp, bp, zd, m, btc:b, el, stack:b*bp, hodl:b*bp-el, sell:rev-el});
   }
   const accounted = Economics.account(out,{hw:p.hw,elecDay:elec,energyGrowth:energyGrowth()});
   firstLoss = accounted.find(o => o.m*o.price < o.elecDay)?.d ?? null;
   payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
+  accounted.forEach(o => o.be = o.elecDay/o.zd);
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
 
@@ -106,7 +112,7 @@ function render(){
   const p = P(); charts.forEach(c=>c.destroy()); charts = [];
   const eff = KS*p.up*(1-p.fee), zecDay = L0.mz/(L0.hr*1e6)*eff, revDay = zecDay*p.zec, btcDay = revDay/p.btc;
   const elecDay = W/1000*24*p.kwh*p.up, netDay = revDay-elecDay, M = 30.44, bePrice = elecDay/zecDay;
-  const dH = daysBetween(TODAY, NEXT_HALVING), bePriceH = bePrice*L0.mz/((L0.mz-(L0.fees||0))/2+(L0.fees||0))*Math.pow(1+p.g, dH/365);
+  const dH = daysBetween(TODAY, NEXT_HALVING);
   const from12 = addDays(TODAY,-365), from6 = addDays(TODAY,-182);
   const hist = ALL.filter(r => r.d > from12).map(r => { const m = r.hv*eff; return {d:r.d, e:r.e, rev:m*r.p, el:elecDay, net:m*r.p-elecDay, btc:m, hp:r.hv*r.p*1000}; });
   const sum = (a,k) => a.reduce((s,x)=>s+x[k],0), h6 = hist.filter(x=>x.d>from6);
@@ -134,7 +140,7 @@ function render(){
     hrGrowth12: (L0.hr/hr12.hr-1>=0?'+':'')+pct(L0.hr/hr12.hr-1),
     hpMin: usd(Math.min(...hps),2), hpMax: usd(Math.max(...hps),2), netMin: usd(Math.min(...nets),2), netMax: usd(Math.max(...nets),2), hpChg: pct(chg[Math.floor(chg.length/2)],1),
     netUp10: usd(revDay*1.1-elecDay,2), netDn10: usd(revDay*0.9-elecDay,2), netDiff10: usd(revDay/1.1-elecDay,2),
-    bePrice: usd(bePrice), bePriceH: usd(bePriceH), beMargin: pct(1-bePrice/p.zec),
+    bePrice: usd(bePrice), bePriceH: usd(base.out[Math.min(dH, base.out.length-1)].be), beMargin: pct(1-bePrice/p.zec),
     payBull: fmtPay(sc[3].payH), payFlat: fmtPay(sc[1].payH), payBase: fmtPay(sc[2].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), el5y: usd(base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump), dca5y: btc(dcaAcc),
     scName: SCN[p.si][0].charAt(0).toLowerCase()+SCN[p.si][0].slice(1), monthVal5y: usd(btcDay*M*base.end.bp), stack5y: usd(base.end.stack), hodl5yHw: usd(base.end.stack-base.el-p.hw),
@@ -149,7 +155,7 @@ function render(){
   $('kpis').innerHTML = [
     ['Čistě za měsíc', usd(netDay*M), `výnos ${usd(revDay*M)} − elektřina ${usd(elecDay*M)}`, netDay],
     ['BTC za měsíc', btc(btcDay*M), `${sats(btcDay)} denně`],
-    ['Bod zvratu, cena ZEC', usd(bePrice), `po halvingu 2028 asi ${usd(bePriceH)}`, p.zec-bePrice],
+    ['Bod zvratu, cena ZEC', usd(bePrice), `při dnešní síti; ${beSeries(base.out, o => usd(o.be), dH)} (zvolený scénář; síť ${pcs(p.g)} ročně a sleduje cenu ZEC)`, p.zec-bePrice],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Scénář ceny ZEC</th><th>ZEC za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+

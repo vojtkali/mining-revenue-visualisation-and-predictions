@@ -49,7 +49,8 @@ function compute(p, scKey=p.sc){
     const operatingElec = Economics.daily(elecDay,energyGrowth(),rows[0].d,r.d);
     b += mined; rev += mined*r.p; el += elecDay;
     return {d:r.d, e:r.e, price:r.p, z:r.z, btc:b, rev, el, net:rev-el, stack:b*r.p, hodl:b*r.p-el, mined, loss: mined*r.p < operatingElec,
-            sats:mined*1e8, hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? operatingElec/eff*1000 : 0};
+            sats:mined*1e8, hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? operatingElec/eff*1000 : 0,
+            bez: mined > 0 ? operatingElec*r.z/(mined*r.p) : null};   // ZEC price that just pays the electricity with that day's network
   });
   return Economics.account(calculated,{hw:p.hw,elecDay,energyGrowth:energyGrowth()});
 }
@@ -135,8 +136,9 @@ function render(){
     ref('Bod zvratu', s.map(r=>r.be))]}}));
   charts.push(new Chart($('c6'), {type:'line', plugins:pl, options:opts(v=>kfmt(v), v=>Math.round(v).toLocaleString('cs-CZ')+' sats'), data:{labels:L, datasets:[
     line('Denní výplata', s.map(r=>r.sats), css('--s4'))]}}));
-  charts.push(new Chart($('c9'), {type:'line', plugins:pl, options:opts(v=>'$'+kfmt(v), v=>usd(v)), data:{labels:L, datasets:[
-    line('Cena ZEC', s.map(r=>r.z), css('--s5'))]}}));
+  const o9 = opts(v=>'$'+kfmt(v), v=>usd(v)); o9.scales.y.type = 'logarithmic';
+  charts.push(new Chart($('c9'), {type:'line', plugins:pl, options:o9, data:{labels:L, datasets:[
+    line('Cena ZEC', s.map(r=>r.z), css('--s5')), line('Bod zvratu', s.map(r=>r.bez), css('--fg2'), {borderDash:[6,4], borderWidth:1.5})]}}));
 
   const be1 = s.find(r => r.net >= p.hw), be2 = s.find(r => r.hodl >= p.hw);
   const maxNet = s.reduce((m,r)=>r.net>m.net?r:m, s[0]);
