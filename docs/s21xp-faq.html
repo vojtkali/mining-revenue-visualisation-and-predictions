@@ -99,7 +99,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <label for="fUp">Uptime, %<input id="fUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="fHwS">Cena stroje, USD<input id="fHwS" type="number" step="100" min="0" value="7180"></label>
   <label for="fScen3">Scénář ceny BTC pro grafy<select id="fScen3"><option value="0">Pesimistický +10 % ročně</option><option value="1" selected>Základní +20 % ročně</option><option value="2">Optimistický +40 % ročně</option></select></label>
-  <label for="fHg">Růst hashrate sítě, % ročně<input id="fHg" type="number" step="5" min="-50" max="200" value="30"></label>
+  <label for="fHg">Růst hashrate sítě, % ročně<input id="fHg" type="number" step="5" min="-50" value="30"></label>
 </form>
 
 <div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
@@ -448,14 +448,21 @@ function proj(p, r, years=5, g=p.g){
     if (firstLoss===null && m*pr < elec) firstLoss = d;
     if (payS===null && rev-el >= p.hw) payS = d;
     if (payH===null && b*pr-el >= p.hw) payH = d;
-    out.push({d, pr, m, btc:b, el, stack:b*pr, hodl:b*pr-el, sell:rev-el, be:elec/m});
+    out.push({d, pr, m, btc:b, el, stack:b*pr, hodl:b*pr-el, sell:rev-el});
   }
   const accounted = Economics.account(out,{hw:p.hw,elecDay:elec,energyGrowth:energyGrowth()});
   firstLoss = accounted.find(o => o.m*o.price < o.elecDay)?.d ?? null;
   payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
+  accounted.forEach(o => o.be = o.elecDay/o.m);
   return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
 }
+// break-even over time along the selected scenario: electricity that day (energy price steps yearly) / what the machine
+// earns that day with the network grown by g a year (and following the price where the model says so), halvings included
+const beSeries = (out, f, dH) => { const pts = [['za rok', 365], ['za 2 roky', 730]];
+  if (dH > 0 && dH < out.length) pts.push([`po halvingu ${NEXT_HALVING.slice(0, 4)}`, dH]);
+  return pts.filter(([, t]) => t < out.length).sort((a, b) => a[1]-b[1]).map(([l, t]) => `${l} ${f(out[t])}`).join(' · '); };
+const sgnPct = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100)).toLocaleString('cs-CZ')} %`;
 // BTC price scenarios; rates come from the yBear/yBase/yBull inputs when the page has them
 const SCN_DEF = [['Pesimistický',.10,'--s2','yBear'],['Základní',.20,'--s1','yBase'],['Optimistický',.40,'--s3','yBull']];
 const scnNow = () => SCN_DEF.map(([n,r0,col,id]) => { const v = parseFloat(document.getElementById(id)?.value), r = Number.isFinite(v) ? Math.max(-.9, v/100) : r0;
@@ -465,7 +472,7 @@ function render(){
   const p = P(); charts.forEach(c=>c.destroy()); charts = [];
   const eff = TH*p.up*(1-p.fee), btcDay = L0.hv*eff, revDay = btcDay*p.price, elecDay = W/1000*24*p.kwh*p.up, netDay = revDay-elecDay;
   const M = 30.44, bePrice = elecDay/btcDay;
-  const dH = daysBetween(TODAY, NEXT_HALVING), btcDayH = hvAt(p, dH, NEXT_HALVING)*eff, bePriceH = elecDay/btcDayH;
+  const dH = daysBetween(TODAY, NEXT_HALVING), btcDayH = hvAt(p, dH, NEXT_HALVING)*eff;
   const btcDay1y = hvAt(p, 365, addDays(TODAY,365))*eff;
   // last 12 months history with current parameters
   const from12 = addDays(TODAY,-365), from6 = addDays(TODAY,-182);
@@ -498,7 +505,7 @@ function render(){
     hpMin: usd(Math.min(...hps),2), hpMax: usd(Math.max(...hps),2), netMin: usd(Math.min(...nets),2), netMax: usd(Math.max(...nets),2), hpChg: pct(chg[Math.floor(chg.length/2)],1),
     netUp10: usd(revDay*1.1-elecDay,2), netDn10: usd(revDay*0.9-elecDay,2), netDiff10: usd(revDay/1.1-elecDay,2),
     hrGrowth12: (L0.hr/hr12.hr-1>=0?'+':'')+pct(L0.hr/hr12.hr-1), hr12: `${Math.round(hr12.hr).toLocaleString('cs-CZ')} EH/s`, btcDrop1y: pct(1-btcDay1y/btcDay),
-    bePrice: usd(bePrice), bePriceH: usd(bePriceH), beMargin: pct(1-bePrice/p.price),
+    bePrice: usd(bePrice), bePriceH: usd(base.out[Math.min(dH, base.out.length-1)].be), beMargin: pct(1-bePrice/p.price),
     payBull: fmtPay(sc[2].payH), payBase: fmtPay(sc[1].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
@@ -511,7 +518,7 @@ function render(){
   $('kpis').innerHTML = [
     ['Čistě za měsíc', usd(netDay*M), `výnos ${usd(revDay*M)} − elektřina ${usd(elecDay*M)}`, netDay],
     ['BTC za měsíc', btc(btcDay*M), `${sats(btcDay)} denně`],
-    ['Bod zvratu, cena BTC', usd(bePrice), `po halvingu 2028 asi ${usd(bePriceH)}`, p.price-bePrice],
+    ['Bod zvratu, cena BTC', usd(bePrice), `při dnešní síti; ${beSeries(base.out, o => usd(o.be), dH)} (síť ${sgnPct(p.g)} ročně)`, p.price-bePrice],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Cena BTC</th><th>Cena za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>Stack − zaplaceno (vč. stroje)</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+

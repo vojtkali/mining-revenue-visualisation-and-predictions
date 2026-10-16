@@ -7,7 +7,7 @@ app's inputs; the FAQ and timing apps keep hidden copies that are synced from it
 
     python3 scripts/build_v2.py OUT_DIR      # s21.html, z15.html, l9.html
 """
-import json, re, sys
+import json, math, re, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -22,7 +22,8 @@ MACHINES = {
     sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg']},
     prices=[('Cena BTC dnes', 'fPrice')],
     scen={'bear': [('BTC', 'yBear')], 'base': [('BTC', 'yBase')], 'bull': [('BTC', 'yBull')]},
-    proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')]),
+    proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')],
+    mc=dict(assets='BTC', corr='dlouhé trendy', net='Hashrate sítě BTC reaguje na odchylku ceny od scénáře se zpožděním asi tří měsíců s citlivostí 0,5: když je BTC o 20 % levnější, než říká scénář, síť časem zpomalí asi o 10 % a stroj natěží víc BTC.')),
   'z15': dict(name='Z15 Pro', title='Antminer Z15 Pro', data='zec', main=('zbody', 'zapp'), faq=('fzbody', 'fzapp'), lump=('zlbody', 'zlapp'),
     spec='840 kSol/s · 2 780 W · Equihash (Zcash) · výplata v BTC', today='Při dnešních cenách ZEC a BTC a výkonu sítě Zcash, po elektřině a poplatku poolu.',
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
@@ -30,7 +31,8 @@ MACHINES = {
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
     scen={'bear': [('ZEC 1. rok', 'zB1'), ('ZEC dál', 'zB2'), ('BTC', 'bB')], 'base': [('ZEC 1. rok', 'zM1'), ('ZEC dál', 'zM2'), ('BTC', 'bM')],
           'bull': [('ZEC 1. rok', 'zU1'), ('ZEC dál', 'zU2'), ('BTC', 'bU')]},
-    proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')]),
+    proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
+    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Hashrate Zcash reaguje na odchylku ceny ZEC od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
     spec='16,2 GH/s · 3 260 W · Scrypt, merge mining LTC + DOGE · výplata v BTC', today='Při dnešních cenách LTC, DOGE a BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwL', hg='lhg', faq_sel='qScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
@@ -38,11 +40,12 @@ MACHINES = {
     prices=[('Cena LTC dnes', 'qLtc'), ('Cena DOGE dnes', 'qDoge'), ('Cena BTC dnes', 'qBtc')],
     scen={'bear': [('LTC', 'llB'), ('DOGE', 'ldB'), ('BTC', 'lbB')], 'base': [('LTC', 'llM'), ('DOGE', 'ldM'), ('BTC', 'lbM')],
           'bull': [('LTC', 'llU'), ('DOGE', 'ldU'), ('BTC', 'lbU')]},
-    proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')]),
+    proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
+    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Hashrate Scrypt reaguje na odchylku cen LTC a DOGE od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
 }
-# claude.ai links of the published calculators (None = not published yet)
-LINKS = {'index': 'https://claude.ai/artifact/GjajZXcYDdL5dyNdzHUf2M', 's21': 'https://claude.ai/artifact/6tEzys5PUCArXZCpfADioK',
-         'z15': 'https://claude.ai/artifact/Ka5NMmHAb96wUo8QGZ3wGX', 'l9': 'https://claude.ai/artifact/W9pPfWT5rML7CjGBtbPLpJ'}
+# links between the pages: in the claude.ai artifact all pages are files of one artifact (index.html is a shell
+# that shows them in frames and switches between them); the website build (--public) uses PUBLIC_LINKS
+LINKS = {'index': 'overview.html', 's21': 's21.html', 'z15': 'z15.html', 'l9': 'l9.html'}
 
 
 def sections(html):
@@ -63,6 +66,32 @@ def rename_ids(html, js, ids, prefix, extra_js=()):
     for i in extra_js:
         js = re.sub(rf'#{i}\b', f'#{prefix}{i}', js)
     return html, js
+
+
+MC_ASSETS = {'s21': ['btc'], 'z15': ['btc', 'zec'], 'l9': ['btc', 'ltc', 'doge']}
+
+
+def mc_returns(assets):
+    """Daily log returns (x 1e5, rounded) of the closing prices in the versioned Coin Metrics snapshot,
+    on the days all the assets have a price; the Monte Carlo draws its swings from these."""
+    snap = json.loads((B.ROOT / 'data' / 'source' / 'coinmetrics.json').read_text())
+    px = {a: {} for a in assets}
+    for r in snap['data']:
+        if r['asset'] in px:
+            px[r['asset']][r['time'][:10]] = float(r['PriceUSD'])
+    days = sorted(set.intersection(*(set(v) for v in px.values())))
+    out = {a: [round(math.log(px[a][d] / px[a][p]) * 1e5) for p, d in zip(days, days[1:])] for a in assets}
+    out['from'], out['to'] = days[0], days[-1]
+    return json.dumps(out, separators=(',', ':'))
+
+
+def mc_parts(key):
+    M = MACHINES[key]
+    t = B.read('mcbody.html')
+    for k, v in M['mc'].items():
+        t = t.replace('{{MC_' + k.upper() + '}}', v)
+    assert '{{' not in t
+    return {m.group(1): m.group(2) for m in re.finditer(r'<!--@(\w+)-->(.*?)(?=<!--@|\Z)', t, re.S)}
 
 
 FONT_SWAP = [('IBM Plex Mono', 'Geist Mono'), ('IBM Plex Sans', 'Geist')]
@@ -107,6 +136,7 @@ def build(key):
         faq_hidden = faq_hidden.replace(fi[pid], '')
 
     ms, fs, ls = sections(main_html), sections(faq_html), sections(lump_html)
+    mc = mc_parts(key)
     main_kpis = '<div class="kpis" id="kpis"></div>'
     lump_kpis = '<div class="kpis" id="L_kpis"></div>'
 
@@ -148,6 +178,7 @@ def build(key):
   {field('Odhad do', mi['end'], '', 'Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.')}
   {field('Růst hashrate sítě', mi[M['hg']], '% / rok')}
   {''.join(field(lbl, mi[i], u) for lbl, i, u in M['proj_extra'])}
+  {field('Kolísání cen (Monte Carlo)', '<input id="mcVol" type="number" value="100" min="0" max="300" step="10">', '%', 'Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.')}
   <span hidden>{sel}</span>
   </details>
 </form>
@@ -174,9 +205,11 @@ def build(key):
 {ms["c4"]}'''),
         ('navratnost', 'Návratnost', f'''<div class="intro"><h2>Kdy se stroj zaplatí</h2><p>Tři scénáře ceny vedle sebe. Procenta změníte v panelu vlevo.</p></div>
 {strip_heading(ms["c5"])}
+{mc["navratnost"]}
 {fs["navratnost"]}'''),
         ('nakup', 'Těžba vs. nákup', f'''<div class="intro"><h2>Těžit, nebo koupit BTC?</h2><p>Stejné vklady ve stejných dnech pro těžbu, jednorázový nákup a týdenní DCA.</p></div>
 {strategy}
+{mc["nakup"]}
 <div class="grid2">{strip_heading(ms["c7"])}{strip_heading(ms["c8"])}</div>
 <div class="intro"><h2>Načasování nákupu v historii</h2><p>Jak by dopadla těžba proti nákupu BTC podle dne vstupu. Vlastní data vstupu zadáte níže.</p></div>
 {lump_kpis}
@@ -187,13 +220,13 @@ def build(key):
 <nav class="toc">{toc}</nav>
 {"".join(fs[g] for g in faq_groups if g not in moved)}'''),
         ('metodika', 'Metodika', f'''<div class="intro"><h2>Data a metodika</h2></div>
-<div class="notes-grid">{ms["Data a metodika"]}{fs["Metodika"]}{ls["Metodika"]}</div>'''),
+<div class="notes-grid">{ms["Data a metodika"]}{mc["metodika"]}{fs["Metodika"]}{ls["Metodika"]}</div>'''),
     ]
     tabbar = ''.join(f'<button type="button" role="tab" id="t-{k}" aria-controls="p-{k}" aria-selected="{"true" if i == 0 else "false"}" data-tab="{k}">{n}</button>' for i, (k, n, _) in enumerate(tabs))
     panels = ''.join(f'<section class="panel" role="tabpanel" id="p-{k}" aria-labelledby="t-{k}"{"" if i == 0 else " hidden"}>{c}</section>' for i, (k, n, c) in enumerate(tabs))
     machines = ''.join(f'<span class="m on" aria-current="page">{m["name"]}</span>' if k == key else
-                       (f'<a class="m" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>') for k, m in MACHINES.items())
-    brand = f'<a href="{LINKS["index"]}">Těžba</a>' if LINKS['index'] else '<b>Těžba</b>'
+                       (f'<a class="m" data-m="{k}" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>') for k, m in MACHINES.items())
+    brand = f'<a data-m="index" href="{LINKS["index"]}">Těžba</a>' if LINKS['index'] else '<b>Těžba</b>'
     cfg = dict(KEY='v2-' + key, SYNC={**{k: v + ([f'L_{k}'] if k in ('kwh', 'poolFee', 'uptime', M['hw']) else []) for k, v in M['sync'].items()}, 'start': ['L_start']},
                SEL=M['faq_sel'], SI=M['faq_si'])
 
@@ -216,15 +249,20 @@ def build(key):
 <script>{V2_PRE}</script>
 <script>{B.read("economics.js")}</script>
 <script>const DATA={B.embedded_data(M["data"])};
+const MCR={mc_returns(MC_ASSETS[key])};
 {GLOBAL_FMT}
-{v2_fonts(scoped(main_js))}
+{v2_fonts(scoped(main_js + chr(10) + B.read('mc_' + key + '.js') + chr(10) + B.read('mc.js')))}
 {v2_fonts(scoped(faq_js, mute_strategy=True))}
 {v2_fonts(scoped(lump_js, mute_strategy=True))}
 </script>
 <script>{V2_POST.replace('__CFG__', json.dumps(cfg))}</script>'''
+    # the FAQ points to the machine's old main page for the charts; here they are in the Přehled tab
+    page = re.sub(r'Podrobné grafy jsou na stránce <a href="https://claude\.ai/(code/)?artifact/\w+">[^<]*</a>', 'Podrobné grafy jsou v záložce Přehled', page)
     return page
 
 
+BASE = {'s21': 'BTC +20 % ročně', 'z15': 'ZEC −40 % v prvním roce, pak +10 % ročně; BTC +20 % ročně',
+        'l9': 'LTC a DOGE +10 % ročně; BTC +20 % ročně'}
 RISK = {'s21': 'Růst sítě a halving v dubnu 2028', 'z15': 'Pád ceny ZEC po prudkém růstu', 'l9': 'Cena DOGE, která tvoří většinu výnosu'}
 
 
@@ -236,26 +274,35 @@ def build_index():
     body = B.fill(B.read('sumbody.html'), {**sv, **vals}, 'v2 index')
     body = re.sub(r'<header>.*?</header>', '', body, count=1, flags=re.S)
     body = re.sub(r'\s*<h3>Podrobné stránky</h3>\s*<div class="links">.*?</div>', '<h3>Data</h3>', body, count=1, flags=re.S)
-    body = body.replace('<div class="wrap">', '<div class="ov-body">', 1)
+    body = body.replace('<div class="wrap">', '<div class="ov-body"><p class="hint ovnote" id="ovNote" hidden>Tabulky a graf níže (Ve zkratce, Návratnost, Těžit, nebo koupit) se v kalkulačkách řídí jejich nastavením. Ostatní odpovědi počítají s výchozími hodnotami a strojem koupeným v poslední den dat.</p>', 1)
+    # links to the old per-machine pages lead to the machine's calculator instead (the calculator has all of it)
+    old = {'s21xp.html': 's21', 'z15pro.html': 'z15', 'l9.html': 'l9'}
+    for art, page in B.ARTIFACT_LINKS.items():
+        if page in old:
+            body = re.sub(r'href="https://claude\.ai/(code/)?artifact/' + art + '"', f'data-m="{old[page]}" href="{LINKS[old[page]]}"', body)
     cards = []
     for key, m in MACHINES.items():
         k = lambda n: sv[f'{key}.{n}']
         czk = round(B.num(k('netMonth')) * rate / 10) * 10
         val5 = re.search(r'<td class="(pos|neg)"><span class="n">(.*?)</span>', k('cellBase'))
-        link = f'<a class="open" href="{LINKS[key]}">Otevřít kalkulačku</a>' if LINKS[key] else '<span class="open off">Kalkulačka se připravuje</span>'
+        link = f'<a class="open" data-m="{key}" href="{LINKS[key]}">Otevřít kalkulačku</a>' if LINKS[key] else '<span class="open off">Kalkulačka se připravuje</span>'
         cards.append(f'''<article class="mcard">
   <header><h2>{m["title"]}</h2><p class="spec">{m["spec"]}</p></header>
   <dl>
     <div><dt>Čistě za měsíc dnes</dt><dd><span class="big">{k("netMonth")}</span><span class="czk">{B.sep(czk)} Kč</span></dd></div>
     <div><dt>BTC za měsíc</dt><dd><span class="big">{k("btcM")}</span><span class="czk">{k("netDay")} denně</span></dd></div>
-    <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm">{k("payBase")}</span><span class="czk">základní scénář</span></dd></div>
-    <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}">{val5.group(2)}</span><span class="czk">základní scénář</span></dd></div>
+    <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm" data-f="pay-{key}">{k("payBase")}</span><span class="czk" data-f="paysub-{key}">základní scénář</span></dd></div>
+    <div><dt data-f="resl-{key}">Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}" data-f="res-{key}">{val5.group(2)}</span><span class="czk" data-f="ressub-{key}">základní scénář</span></dd></div>
   </dl>
+  <div class="mscn" data-f="tab-{key}"></div>
+  <p class="risk" data-f="scn-{key}"><b>Základní scénář:</b> {BASE[key]}; stroj koupený {vals["LAST"]}, 5 let, výchozí parametry kalkulačky.</p>
   <p class="risk"><b>Hlavní riziko:</b> {RISK[key]}</p>
   {link}
 </article>''')
-    machines = ''.join(f'<a class="m" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>' for k, m in MACHINES.items())
+    machines = ''.join(f'<a class="m" data-m="{k}" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>' for k, m in MACHINES.items())
     head = (Path(__file__).resolve().parent.parent / 'src' / 'v2head.html').read_text(encoding='utf-8').replace('{{V2_TITLE}}', 'Přehled těžebních strojů')
+    LAST_ISO = B.meta()['updated']
+    MIN_START = min(json.loads(B.embedded_data(M['data']))['rows'][0]['d'] for M in MACHINES.values())
     return f'''{head}
 <header class="top"><div class="top-in">
   <div class="brand"><b>Těžba</b><span class="sep">/</span><span>Přehled strojů</span></div>
@@ -265,14 +312,16 @@ def build_index():
   {THEME_BTN}
 </div></header>
 <div class="overview">
-<div class="intro"><h2>Tři stroje vedle sebe</h2><p>Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %; základní scénář ceny. Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p></div>
+<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
+<div class="ovstart" id="ovStartBox" hidden><label class="field"><span class="fl">Začátek těžby pro všechny stroje</span><span class="fi"><input type="date" id="ovStart" min="{MIN_START}" max="{LAST_ISO}"><button type="button" class="today" id="ovToday">Dnes</button></span><span class="hint">Nastaví začátek těžby ve všech třech kalkulačkách; konec odhadu se posune na začátek + 4,5 roku. Karty pak ukazují výsledky podle kalkulaček.</span></label></div></div>
 <div class="mcards">{"".join(cards)}</div>
 {body}
 </div>
 {B.CHART}
 <script>{THEME_JS}</script>
 <script>{V2_PRE}</script>
-<script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>'''
+<script>{v2_fonts(B.fill(B.read('sumapp.js'), sv, 'v2 index'))}</script>
+<script>{SUITE_CHILD}</script>'''
 
 
 # day / night switch in the top bar: remembered per viewer, default follows the system setting
@@ -300,6 +349,10 @@ THEME_JS = r"""
     const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true}));
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', label);
+  // another page of the same artifact may have switched the theme meanwhile: take the remembered one
+  window.v2Theme = () => { let s = null; try { s = localStorage.getItem(KEY); } catch (e) {}
+    if ((s === 'dark' || s === 'light') && s !== root.getAttribute('data-theme')){ root.setAttribute('data-theme', s); label();
+      const k = document.getElementById('kwh'); if (k) k.dispatchEvent(new Event('input', {bubbles:true})); } };
 })();
 """
 
@@ -411,8 +464,45 @@ tabs.forEach((t, i) => {
   t.addEventListener('click', () => show(t.dataset.tab));
   t.addEventListener('keydown', e => { const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (d) show(tabs[(i + d + tabs.length) % tabs.length].dataset.tab, true); });
 });
-const start = location.hash.slice(1);
+// switching machines keeps the place: the machine links carry #tab.block.offset (block = n-th card of the tab panel,
+// offset = px scrolled into it), so the same card of the other machine opens at the same height
+const hm = /^#(\w+)(?:\.(\d+)\.(-?\d+))?$/.exec(location.hash), start = hm ? hm[1] : '';
 show(tabs.some(t => t.dataset.tab === start) ? start : (store.get(KEY + '-tab') || 'prehled'));
+const hdrH = () => document.querySelector('.top').offsetHeight;
+const curPanel = () => document.querySelector('.panel:not([hidden])');
+function place(){
+  const pn = curPanel(), kids = [...pn.children], h = hdrH();
+  // anchor on the first card that starts below the header (cards differ in height between machines), else the one cut by it
+  let i = kids.findIndex(c => c.getBoundingClientRect().top >= h - 1);
+  if (i < 0 || (i > 0 && kids[i].getBoundingClientRect().top > innerHeight)) i = Math.max(0, kids.findIndex(c => c.getBoundingClientRect().bottom > h + 1));
+  return `${pn.id.slice(2)}.${i}.${Math.round(h - kids[i].getBoundingClientRect().top)}`;
+}
+document.querySelectorAll('.machines a.m').forEach(a => a.addEventListener('click', () => { a.href = a.href.split('#')[0] + '#' + place(); }));
+function goPlace(pl, fresh){
+  const m = /^(\w+)\.(\d+)\.(-?\d+)$/.exec(pl || ''); if (!m) return;
+  if (tabs.some(t => t.dataset.tab === m[1])) show(m[1]);
+  let moved = false; ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => moved = true, {once:true, passive:true}));
+  const go = () => { if (moved) return; const el = curPanel().children[+m[2]]; if (!el) return;
+    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+m[3])}); };
+  // on a fresh load charts and the Monte Carlo fill in later: place again once they have their size
+  go(); if (fresh){ setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200); }
+}
+if (hm && hm[2] !== undefined) goPlace(hm[0].slice(1), true);   // show() has already rewritten the hash
+// inside the one-artifact suite (index.html shows every page in a frame): machine links ask the shell to switch,
+// handing over the place; the shell sends it back to the frame it shows
+if (window.parent !== window){
+  const key = KEY.slice(3), sendSum = () => window.v2Sum && parent.postMessage({type:'v2sum', key, sum:window.v2Sum}, '*');
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m, place:place()}, '*'); });
+  addEventListener('v2sum', sendSum);   // the main app recalculated: the overview cards follow
+  addEventListener('message', e => { if (e.source !== parent || !e.data) return;
+    if (e.data.type === 'v2go'){ window.v2Theme && window.v2Theme(); goPlace(e.data.place); }
+    if (e.data.type === 'v2start'){   // start set for all machines in the overview (clamped to this machine's data)
+      const s = $('start'); let v = e.data.start; if (s.min && v < s.min) v = s.min; if (s.max && v > s.max) v = s.max;
+      if (s.value !== v){ s.value = v; fire(s); startLbl(); } else sendSum(); }
+  });
+  parent.postMessage({type:'v2ready', key}, '*'); sendSum();
+}
 // links inside the FAQ to a group: switch tab first
 document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', e => {
   e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); t && t.scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -428,6 +518,93 @@ st.addEventListener('click', () => { const open = st.getAttribute('aria-expanded
 ['adv', 'adv2'].forEach(id => { const d = $(id), k = KEY + '-' + id; if (store.get(k)) d.open = true; d.addEventListener('toggle', () => store.set(k, d.open)); });
 })();
 '''
+
+SUITE_CHILD = r'''
+if (window.parent !== window){
+  const $ = id => document.getElementById(id), F = n => document.querySelector(`[data-f="${n}"]`);
+  const fmt = s => `${+s.slice(8,10)}. ${+s.slice(5,7)}. ${s.slice(0,4)}`;
+  document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
+    parent.postMessage({type:'v2switch', to:a.dataset.m}, '*'); });
+  // one start date for all machines: sent to every calculator through the shell
+  const box = $('ovStartBox'), inp = $('ovStart'); box.hidden = false;
+  if ($('ovNote')) $('ovNote').hidden = false;
+  // the field shows the start the calculators share; empty while they differ
+  const starts = {};
+  const send = () => { if (!inp.value) return;
+    parent.postMessage({type:'v2start', start:inp.value}, '*'); };
+  inp.addEventListener('change', send);
+  $('ovToday').addEventListener('click', () => { inp.value = inp.max; send(); });
+  // the cards follow the calculators (each with its own parameters and scenario)
+  let live = false;
+  addEventListener('message', e => { if (e.source !== parent || !e.data) return;
+    if (e.data.type === 'v2go') window.v2Theme && window.v2Theme();
+    if (e.data.type !== 'v2sum') return;
+    const k = e.data.key, s = e.data.sum; if (!F('pay-' + k)) return;
+    starts[k] = s.start; const all = Object.values(starts);
+    if (document.activeElement !== inp) inp.value = all.length === 3 && all.every(v => v === all[0]) ? all[0] : '';
+    if (!live){ live = true; $('ovIntro').textContent = 'Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Návratnost a výsledek na konci odhadu jsou podle nastavení každé kalkulačky: scénář a parametry má každý stroj svoje, začátek těžby lze nastavit všem najednou.'; }
+    F('pay-' + k).textContent = s.pay; F('paysub-' + k).textContent = `při držení BTC; ${s.scen.toLowerCase()} scénář`;
+    F('resl-' + k).textContent = `Do ${fmt(s.end)}: hodnota BTC − vše vložené`;
+    const r = F('res-' + k); r.textContent = s.resTxt; r.classList.toggle('pos', s.res >= 0); r.classList.toggle('neg', s.res < 0);
+    F('ressub-' + k).textContent = `${s.scen.toLowerCase()} scénář`;
+    const tb = F('tab-' + k);   // all three scenarios of the calculator, the selected one highlighted
+    if (tb && s.scens) tb.innerHTML = `<span class="h">Scénář</span><span class="h n">Zaplaceno</span><span class="h n">Do ${fmt(s.end)}</span>` +
+      s.scens.map(x => { const c = x.sel ? ' sel' : '';
+        return `<span class="lab${c}">${x.label}</span><span class="n${c}">${x.pay}</span><span class="n${c} ${x.res >= 0 ? 'pos' : 'neg'}">${x.resTxt}</span>`; }).join('');
+    // the comparison below the cards: rows of the selected scenario and of all three, column = machine
+    const j = ['s21', 'z15', 'l9'].indexOf(k), cell = (row, html, cls) => { const tr = F(row); if (!tr) return; const td = tr.children[j + 1]; if (td){ td.innerHTML = html; td.className = cls || ''; } };
+    const th = (row, txt) => { const tr = F(row); if (tr) tr.children[0].textContent = txt; };
+    cell('row-pay', s.pay); th('row-pay', 'Zaplacení při držení BTC, scénář vybraný v kalkulačce');
+    cell('row-res', `<span class="n">${s.resTxt}</span>`, s.res >= 0 ? 'pos' : 'neg'); th('row-res', 'Na konci odhadu: hodnota BTC − všechno vložené');
+    (s.scens || []).forEach((x, i) => { cell('scn-' + i, x.label); cell('pay-' + i, x.pay); });
+    if (s.strat){ const mx = Math.max(...s.stratV); s.strat.forEach((x, i) => cell('st-' + i, s.stratV[i] === mx ? `<b><span class="n">${x}</span></b>` : `<span class="n">${x}</span>`)); }
+    if (window.sumSet && s.scens) window.sumSet(j, s.scens.map(x => x.res));
+    F('scn-' + k).innerHTML = `<b>Podle kalkulačky:</b> ${s.scen.toLowerCase()} scénář, stroj od ${fmt(s.start)} do ${fmt(s.end)}.`;
+  });
+  parent.postMessage({type:'v2ready', key:'index'}, '*');
+}
+'''
+
+# the artifact's own page: shows the overview and the calculators (files of the same artifact) in frames, switches
+# between them without reloading, remembers the last one; each frame keeps its own scroll position
+SHELL = '''<title>Těžba: kalkulačky</title>
+<style>
+:root{--bg:#f3f4f7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d0f14}}
+:root[data-theme="dark"]{--bg:#0d0f14}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
+iframe.on{display:block}
+</style>
+<script>
+(() => {
+  const PAGES = {index:'overview.html', s21:'s21.html', z15:'z15.html', l9:'l9.html'}, TITLES = {index:'Přehled strojů', s21:'S21 XP', z15:'Z15 Pro', l9:'L9'};
+  const fr = {}, KEY = 'v2-suite', sums = {}, ready = {}; let start = null;
+  try { const t = localStorage.getItem('v2-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  const make = (k, place) => { if (fr[k]) return false; const f = document.createElement('iframe'); f.src = PAGES[k] + (place ? '#' + place : '');
+    f.title = TITLES[k]; document.body.append(f); fr[k] = f; return true; };
+  function show(k, place){
+    if (!PAGES[k]) k = 'index';
+    if (!make(k, place)) fr[k].contentWindow.postMessage({type:'v2go', place:place || ''}, '*');
+    for (const [kk, f] of Object.entries(fr)) f.classList.toggle('on', kk === k);
+    try { localStorage.setItem(KEY, k); } catch (e) {}
+  }
+  // every page is loaded (the overview cards are filled from the calculators); summaries and the shared start are
+  // passed on, and kept for pages that are not ready yet
+  const post = (k, msg) => { if (fr[k] && ready[k]) fr[k].contentWindow.postMessage(msg, '*'); };
+  addEventListener('message', e => { const d = e.data; if (!d) return;
+    const from = Object.keys(fr).find(k => fr[k].contentWindow === e.source); if (!from) return;
+    if (d.type === 'v2switch') show(d.to, d.place);
+    if (d.type === 'v2ready'){ ready[from] = true;
+      if (from === 'index') Object.entries(sums).forEach(([key, sum]) => post('index', {type:'v2sum', key, sum}));
+      else if (start) post(from, {type:'v2start', start}); }
+    if (d.type === 'v2sum'){ sums[d.key] = d.sum; post('index', {type:'v2sum', key:d.key, sum:d.sum}); }
+    if (d.type === 'v2start'){ start = d.start; ['s21', 'z15', 'l9'].forEach(k => post(k, {type:'v2start', start})); }
+  });
+  let k0 = 'index'; try { k0 = localStorage.getItem(KEY) || 'index'; } catch (e) {}
+  document.addEventListener('DOMContentLoaded', () => { show(k0); setTimeout(() => Object.keys(PAGES).forEach(k => make(k)), 300); });
+})();
+</script>'''
 
 PUBLIC_LINKS = {'index': 'index.html', 's21': 's21.html', 'z15': 'z15.html', 'l9': 'l9.html'}
 
@@ -449,19 +626,33 @@ def public_page(html):
             f'{html}</body></html>\n')
 
 
+def suite_page(html):
+    """A page file inside the artifact: own skeleton; links that leave the artifact open in the whole window."""
+    title = re.search(r'<title>.*?</title>', html).group(0)
+    html = html.replace(title, '', 1)
+    return ('<!doctype html><html lang="cs"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><base target="_top">'
+            f'{title}<style>:root{{color-scheme:light}}body{{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}}'
+            'img{max-width:100%}[hidden]{display:none!important}</style></head><body>'
+            f'{html}</body></html>\n')
+
+
 def main():
-    """python3 scripts/build_v2.py OUT_DIR             claude.ai artifact files (links between the published artifacts)
+    """python3 scripts/build_v2.py OUT_DIR             one claude.ai artifact: index.html (shell) + overview/s21/z15/l9.html
        python3 scripts/build_v2.py --public OUT_DIR    website pages (relative links), e.g. docs/v2"""
     public = sys.argv[1] == '--public'
     out = Path(sys.argv[-1]); out.mkdir(parents=True, exist_ok=True)
     if public:
         LINKS.update(PUBLIC_LINKS)
     pages = {f'{key}.html': (lambda k=key: build(k)) for key in MACHINES}
-    pages['index.html'] = build_index
+    pages['index.html' if public else 'overview.html'] = build_index
     for name, make in pages.items():
         html = make()
-        (out / name).write_text(public_page(html) if public else html, encoding='utf-8')
+        (out / name).write_text(public_page(html) if public else suite_page(html), encoding='utf-8')
         print('wrote', out / name)
+    if not public:
+        (out / 'index.html').write_text(SHELL, encoding='utf-8')
+        print('wrote', out / 'index.html')
 
 
 if __name__ == '__main__':

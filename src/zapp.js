@@ -5,7 +5,7 @@ const usd = (v, d=0) => (v<0?'−':'') + '$' + Math.abs(v).toLocaleString('cs-CZ
 const btc = v => v.toLocaleString('cs-CZ',{minimumFractionDigits:4,maximumFractionDigits:4}) + ' BTC';
 const fmtDate = s => { const [y,m,d]=s.split('-'); return `${+d}. ${+m}. ${y}`; };
 const MONTHS=['led','úno','bře','dub','kvě','čvn','čvc','srp','zář','říj','lis','pro'];
-let charts = [];
+let charts = [], PROJ = [];   // PROJ: the three scenario runs of the last render
 
 
 
@@ -49,7 +49,8 @@ function compute(p, scKey=p.sc){
     const operatingElec = Economics.daily(elecDay,energyGrowth(),rows[0].d,r.d);
     b += mined; rev += mined*r.p; el += elecDay;
     return {d:r.d, e:r.e, price:r.p, z:r.z, btc:b, rev, el, net:rev-el, stack:b*r.p, hodl:b*r.p-el, mined, loss: mined*r.p < operatingElec,
-            sats:mined*1e8, hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? operatingElec/eff*1000 : 0};
+            sats:mined*1e8, hp:r.hv*r.p*1000, hv:r.hv, hr:r.hr, be: p.th>0 ? operatingElec/eff*1000 : 0,
+            bez: mined > 0 ? operatingElec*r.z/(mined*r.p) : null};   // ZEC price that just pays the electricity with that day's network
   });
   return Economics.account(calculated,{hw:p.hw,elecDay,energyGrowth:energyGrowth()});
 }
@@ -135,21 +136,36 @@ function render(){
     ref('Bod zvratu', s.map(r=>r.be))]}}));
   charts.push(new Chart($('c6'), {type:'line', plugins:pl, options:opts(v=>kfmt(v), v=>Math.round(v).toLocaleString('cs-CZ')+' sats'), data:{labels:L, datasets:[
     line('Denní výplata', s.map(r=>r.sats), css('--s4'))]}}));
-  charts.push(new Chart($('c9'), {type:'line', plugins:pl, options:opts(v=>'$'+kfmt(v), v=>usd(v)), data:{labels:L, datasets:[
-    line('Cena ZEC', s.map(r=>r.z), css('--s5'))]}}));
+  const o9 = opts(v=>'$'+kfmt(v), v=>usd(v)); o9.scales.y.type = 'logarithmic';
+  charts.push(new Chart($('c9'), {type:'line', plugins:pl, options:o9, data:{labels:L, datasets:[
+    line('Cena ZEC', s.map(r=>r.z), css('--s5')), line('Bod zvratu', s.map(r=>r.bez), css('--fg2'), {borderDash:[6,4], borderWidth:1.5})]}}));
 
   const be1 = s.find(r => r.net >= p.hw), be2 = s.find(r => r.hodl >= p.hw);
   const maxNet = s.reduce((m,r)=>r.net>m.net?r:m, s[0]);
+  // energy is prepaid a whole contractual year ahead: the last payment also covers days after the end of the projection
+  const pre = end.prepaid > 0 ? ` (z toho ${usd(end.prepaid)} předplaceno na dny po konci odhadu)` : '';
   const k = [
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
-    ['Průběžný prodej: tržba − energie', usd(now.net), `tržba ${usd(now.rev)} − energie ${usd(now.el)} placená rok předem; `+(now.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(now.net-p.hw)), now.net-p.hw],
-    ['Držení: hodnota BTC − energie', usd(now.hodl), `BTC ${usd(now.stack)} při ${usd(now.price)}/BTC − energie ${usd(now.el)} placená rok předem; bez ceny stroje`, now.hodl-p.hw],
-    [`Na konci odhadu, ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář: čistá hodnota ${usd(end.hodl)}`, end.hodl-p.hw],
+    [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
+    [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
     ['Aktuální denní zisk', usd((now.hp-now.be)*p.th*p.up*(1-p.fee)/1000,2), `${Math.round(now.sats).toLocaleString('cs-CZ')} sats/den, ZEC ${usd(now.z)}`, now.hp-now.be],
   ];
-  $('kpis').innerHTML = k.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
+  // HODL: the same deposits on the same days bought as BTC at once and held (spot buys from the strategy table)
+  const cE = Economics.compare(s, {hw:p.hw, elecDay:p.w/1000*24*p.kwh*p.up, energyGrowth:energyGrowth()}).at(-1);
+  const hodlTile = [`HODL: spot nákupy k ${fmtDate(end.d)}`, usd(cE.spotValue), `${btc(cE.spot)} koupeno za stejné vklady ve stejné dny (stroj + rok energie při startu, pak energie každých 365 dní) a drženo do konce; `+(cE.spotValue>=end.stack?'o ':'')+`${usd(Math.abs(cE.spotValue-end.stack))} ${cE.spotValue>=end.stack?'víc':'méně'} než těžba + držení`, cE.spotValue-end.invested];
+  // side by side: what went in, mining + holding, HODL; then BTC count, selling, payback; then today
+  const K = [k[1], k[3], hodlTile, k[4], k[2], k[5], k[0], k[6]];
+  // summary for the overview of the one-artifact suite (its cards follow the calculators)
+  window.v2Sum = {start:p.start, end:end.d, scen:SC[p.sc][0], pay: be2 ? fmtDate(be2.d) : `do ${fmtDate(end.d)} ne`, res:end.stack-end.invested, resTxt:usd(end.stack-end.invested),
+    strat:[end.stack, end.rev, cE.spotValue, cE.dcaValue].map(x => usd(x)), stratV:[end.stack, end.rev, cE.spotValue, cE.dcaValue],
+    scens:PROJ.map((x, i) => { const pay = x.r.find(r => r.hodl >= p.hw), e = x.e;
+      return {name:x.name, label:x.label||x.name, sel:Object.keys(SC)[i]===p.sc, pay: pay ? fmtDate(pay.d) : 'ne', res:e.stack-e.invested, resTxt:usd(e.stack-e.invested)}; })};
+  window.dispatchEvent(new Event('v2sum'));
+  $('kpis').innerHTML = K.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
   document.querySelectorAll('.endLabel').forEach(e => e.textContent = fmtDate(p.end));
 }
 
@@ -174,6 +190,7 @@ function renderProj(p, s, iT){
   const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
   res.forEach(x => { const [n,,b,z1,z2] = SC[x.k], t = `${n} (ZEC ${sgp(pctv(z1))}, pak ${sgp(pctv(z2,-90))} / rok; BTC ${sgp(pctv(b,-90))})`;
     x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
+  PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
   const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
     .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))

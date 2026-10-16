@@ -31,7 +31,7 @@ Při srovnání konečných hodnot mají všechny strategie totožné vklady. Ku
 - `<stroj>-faq.html`: pětiletá simulace stroje pořízeného k datu posledních dat.
 - `<stroj>-nakup.html`: čistý historický backtest; každý den vstupu má vlastní těžbu i nákup se stejnými vklady, konec je vždy datum posledních pozorování. Žádné budoucí předpoklady neovlivňují historické skóre. Vstupy mají různé délky držení; podíl výher není pravděpodobností budoucího úspěchu. Používá se zadaná konstantní cena stroje a energie, nikoli archiv nabídek ASICů. Před skutečným dodáním stroje je simulace hypotetická.
 
-BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimistická varianta modelu, nikoli dolní mez možného výsledku. Samostatný růst hashratu je na všech projekčních stránkách: BTC výchozích 30 %, ZEC 50 %, Scrypt 15 % ročně. Jsou to upravitelné předpoklady, nikoli tvrzení o historickém průměru. U ZEC/Scrypt je zvlášť citlivost hashratu na cenu mince (výchozí 0,3).
+BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimistická varianta modelu, nikoli dolní mez možného výsledku. Samostatný růst hashratu je na všech projekčních stránkách: BTC výchozích 30 %, ZEC 300 %, Scrypt 15 % ročně. Jsou to upravitelné předpoklady, nikoli tvrzení o historickém průměru. U ZEC/Scrypt je zvlášť citlivost hashratu na cenu mince (výchozí 0,3).
 
 Halvingy jsou přibližná kalendářní data, skutečně závisí na výšce bloků. Projekce půlí pouze dotaci, zachovává transakční poplatky a normalizuje odměnu vůči datu posledních dat, takže už proběhlý halving neaplikuje podruhé. U ZEC je modelovaný podíl těžařů 80 % dotace; případná budoucí změna protokolu vyžaduje aktualizaci tohoto předpokladu.
 
@@ -77,7 +77,14 @@ node tests/browser.cjs                    # všechny stránky a změny parametr�
 
 ## Nové kalkulačky (docs/v2)
 
-`scripts/build_v2.py` skládá pro každý stroj jednu stránku se záložkami (Přehled, Návratnost, Těžba vs. nákup, Otázky, Metodika) a panelem parametrů vlevo; k tomu úvod se srovnáním strojů. Výpočty jsou stejné jako na stránkách v `docs/` (hlavní stránka, FAQ a srovnání podle dne vstupu stroje běží beze změny, panel jim synchronizuje parametry). `python3 scripts/build_v2.py OUT_DIR` vytvoří totéž ve formátu artefaktů claude.ai (odkazy mezi publikovanými artefakty jsou v `LINKS`).
+`scripts/build_v2.py` skládá pro každý stroj jednu stránku se záložkami (Přehled, Návratnost, Těžba vs. nákup, Otázky, Metodika) a panelem parametrů vlevo; k tomu úvod se srovnáním strojů. Výpočty jsou stejné jako na stránkách v `docs/` (hlavní stránka, FAQ a srovnání podle dne vstupu stroje běží beze změny, panel jim synchronizuje parametry). `python3 scripts/build_v2.py OUT_DIR` vytvoří totéž jako jeden artefakt claude.ai: `index.html` je obal, který zobrazuje `overview.html`, `s21.html`, `z15.html` a `l9.html` (soubory téhož artefaktu) v rámech. Přepínač strojů přepíná rámy bez načítání a předá záložku i pozici na stránce; na webu (`--public`) totéž dělá odkaz s `#záložka.karta.posun`.
+
+**Monte Carlo a horská dráha** (jen kalkulačky, `src/mc.js` + adaptér stroje `src/mc_<stroj>.js`). Hladká projekce posouvá cenu každý den o stejné procento, takže neukáže propady ani to, kdy DCA pomůže. Proto se vybraný scénář přehraje 2 000×. Ke scénářové cestě se přidá kolísání z historických denních logaritmických výnosů (verzovaný snímek Coin Metrics od 25. 5. 2023). Výnosy jsou očištěné o průměr a losují se v 60denních kruhových blocích ze stejných dnů pro všechny měny stroje (BTC; BTC + ZEC; BTC + LTC + DOGE). Hashrate sítě reaguje na odchylku ceny od scénáře se zpožděním asi 90 dní: u BTC s citlivostí 0,5, u Zcash a Scrypt s citlivostí z panelu. Účetnictví je stejné jako v tabulce čtyř strategií. Při kolísání 0 % dá Monte Carlo přesně čísla deterministické projekce. Generátor má pevné semínko, výpočet běží po načtení stránky v dávkách (asi 0,3 s na M2). Výstupy:
+- v záložce Těžba vs. nákup pravděpodobnosti, pásma 10.–90. percentilu, tabulka strategií s propady a „horská dráha“ jedné cesty den po dni;
+- v záložce Návratnost podíl cest se zaplaceným strojem v čase;
+- v Přehledu rozsah čisté hodnoty na konci odhadu.
+
+Vzorek je kratší než celý cyklus, výsledky jsou proto rozsah možností, ne předpověď.
 
 `CHROMIUM=/cesta/k/chromium` umožňuje použít vlastní prohlížeč. `scripts/rebuild_data.sh --offline` zopakuje kompletní sestavení z verzovaného snímku; bez přepínače obnoví data z API.
 
