@@ -194,7 +194,7 @@ details.qa .a p{margin:0 0 8px}
 .overview{max-width:1240px;margin:0 auto;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));padding-block:36px 72px;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
 .overview>.intro h2{font-size:30px}
 .mcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.mcard{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:22px 22px 20px;display:grid;gap:16px;align-content:start;min-width:0}
+.mcard{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:22px 22px 20px;display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-content:start;min-width:0}
 .mcard h2{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:0}
 .mcard .spec{margin:4px 0 0}
 .mcard dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 16px;margin:0}
@@ -208,6 +208,14 @@ details.qa .a p{margin:0 0 8px}
 .mcard .open:hover{background:var(--s1);color:#fff}
 .mcard .open.off{background:var(--bg);color:var(--muted)}
 .ovstart{max-width:440px;margin-top:16px;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px}
+.mscn:empty{display:none}
+.mscn{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:0 12px;font-size:12.5px;min-width:0}
+.mscn>span{padding:5px 0;border-bottom:1px solid var(--line);color:var(--fg2)}
+.mscn>.h{color:var(--muted);padding-top:0}
+.mscn>.n{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+.mscn>.sel{color:var(--fg);font-weight:600}
+.mscn>.sel.lab::before{content:"● ";color:var(--s1)}
+.mscn>.pos{color:var(--good)} .mscn>.neg{color:var(--bad)}
 .ov-body{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
 .cmp{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
 .cmp th,.cmp td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:normal}
@@ -672,7 +680,7 @@ const usd = (v, d=0) => (v<0?'−':'') + '$' + Math.abs(v).toLocaleString('cs-CZ
 const btc = v => v.toLocaleString('cs-CZ',{minimumFractionDigits:4,maximumFractionDigits:4}) + ' BTC';
 const fmtDate = s => { const [y,m,d]=s.split('-'); return `${+d}. ${+m}. ${y}`; };
 const MONTHS=['led','úno','bře','dub','kvě','čvn','čvc','srp','zář','říj','lis','pro'];
-let charts = [];
+let charts = [], PROJ = [];   // PROJ: the three scenario runs of the last render
 
 
 
@@ -830,7 +838,9 @@ function render(){
   // side by side: what went in, mining + holding, HODL; then BTC count, selling, payback; then today
   const K = [k[1], k[3], hodlTile, k[4], k[2], k[5], k[0], k[6]];
   // summary for the overview of the one-artifact suite (its cards follow the calculators)
-  window.v2Sum = {start:p.start, end:end.d, scen:SC[p.sc][0], pay: be2 ? fmtDate(be2.d) : `do ${fmtDate(end.d)} ne`, res:end.stack-end.invested, resTxt:usd(end.stack-end.invested)};
+  window.v2Sum = {start:p.start, end:end.d, scen:SC[p.sc][0], pay: be2 ? fmtDate(be2.d) : `do ${fmtDate(end.d)} ne`, res:end.stack-end.invested, resTxt:usd(end.stack-end.invested),
+    scens:PROJ.map((x, i) => { const pay = x.r.find(r => r.hodl >= p.hw), e = x.e;
+      return {name:x.name, label:x.label||x.name, sel:Object.keys(SC)[i]===p.sc, pay: pay ? fmtDate(pay.d) : 'ne', res:e.stack-e.invested, resTxt:usd(e.stack-e.invested)}; })};
   window.dispatchEvent(new Event('v2sum'));
   $('kpis').innerHTML = K.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
   document.querySelectorAll('.endLabel').forEach(e => e.textContent = fmtDate(p.end));
@@ -857,6 +867,7 @@ function renderProj(p, s, iT){
   const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
   res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))}, BTC ${sgp(pctv(b))} / rok)`;
     x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
+  PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
   const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
     .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))

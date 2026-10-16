@@ -294,6 +294,7 @@ def build_index():
     <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm" data-f="pay-{key}">{k("payBase")}</span><span class="czk" data-f="paysub-{key}">základní scénář</span></dd></div>
     <div><dt data-f="resl-{key}">Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}" data-f="res-{key}">{val5.group(2)}</span><span class="czk" data-f="ressub-{key}">základní scénář</span></dd></div>
   </dl>
+  <div class="mscn" data-f="tab-{key}"></div>
   <p class="risk" data-f="scn-{key}"><b>Základní scénář:</b> {BASE[key]}; stroj koupený {vals["LAST"]}, 5 let, výchozí parametry kalkulačky.</p>
   <p class="risk"><b>Hlavní riziko:</b> {RISK[key]}</p>
   {link}
@@ -545,6 +546,10 @@ if (window.parent !== window){
     F('resl-' + k).textContent = `Do ${fmt(s.end)}: hodnota BTC − vše vložené`;
     const r = F('res-' + k); r.textContent = s.resTxt; r.classList.toggle('pos', s.res >= 0); r.classList.toggle('neg', s.res < 0);
     F('ressub-' + k).textContent = `${s.scen.toLowerCase()} scénář`;
+    const tb = F('tab-' + k);   // all three scenarios of the calculator, the selected one highlighted
+    if (tb && s.scens) tb.innerHTML = `<span class="h">Scénář</span><span class="h n">Zaplaceno</span><span class="h n">Do ${fmt(s.end)}</span>` +
+      s.scens.map(x => { const c = x.sel ? ' sel' : '';
+        return `<span class="lab${c}">${x.label}</span><span class="n${c}">${x.pay}</span><span class="n${c} ${x.res >= 0 ? 'pos' : 'neg'}">${x.resTxt}</span>`; }).join('');
     F('scn-' + k).innerHTML = `<b>Podle kalkulačky:</b> ${s.scen.toLowerCase()} scénář, stroj od ${fmt(s.start)} do ${fmt(s.end)}.`;
   });
   parent.postMessage({type:'v2ready', key:'index'}, '*');
