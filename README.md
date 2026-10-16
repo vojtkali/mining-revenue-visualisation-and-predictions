@@ -103,7 +103,7 @@ Projekce, otázky, bod zvratu i Monte Carlo počítají výkon sítě (hashrate)
 
 Ceny ZEC (Z15 Pro) a LTC a DOGE (L9) se ve scénářích zadávají vůči BTC; cena v USD je kurz krát cena BTC ze scénáře. Výplata v BTC tak závisí jen na kurzu vůči BTC a na síti, ne na tom, jak roste samotný BTC.
 
-- L9: výchozí LTC a DOGE −35 / −20 / −5 % ročně vůči BTC (za posledních 2–5 let DOGE −21 až −25 %, LTC −14 až −31 % ročně). Poločas poklesu sítě Scrypt je 2 920 dní: síť v letech 2025–26 skoro neklesla, i když tržba na výkon spadla na pětinu.
+- L9: výchozí LTC a DOGE −35 / −20 / −5 % ročně vůči BTC (za posledních 2–5 let DOGE −21 až −25 %, LTC −14 až −31 % ročně). Síť Scrypt má výchozí pevný růst 15 % ročně (s citlivostí na ceny): v letech 2025–26 skoro neklesla, i když tržba na výkon spadla na pětinu, a přicházejí L11. Model dohánění jde zapnout, poločas poklesu je pak 2 920 dní.
 - Z15 Pro: výchozí tvar „po pumpě“ (`src/zpath.js`): kurz ZEC/BTC se ukotví na vrcholu z posledního roku dat a jde přes body v % vrcholu za 3–6 měsíců, za rok a za 2 roky, potom ročním tempem vůči BTC. Body z pump LTC 2017, DOGE 2018, DOGE 2021, DOGE 2024 a ZEC 2021 vůči BTC: pesimistický 40 / 28 / 20 % a −30 % ročně, základní 45 / 40 / 25 % a −15 %, optimistický 55 / 55 / 31 % a −5 %. Tvar „procenta ročně“ zůstává jako volba.
 
 - `scripts/pump_network_test.py` testuje výkon sítě po pumpách třemi variantami (dohánění tržeb, zpožděné dodávky, vyhlazené tržby), s parametry z dat mimo testovanou epizodu. U Zcash vychází nejlépe prosté dohánění (chyba 0,27 po pumpě 2021, 0,15 při pumpě 2025–26), proto ho kalkulačky používají dál. U Scryptu se netrefí žádná varianta. Výsledek je v `data/derived/pump_network_test.json`.
