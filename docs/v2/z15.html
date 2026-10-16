@@ -1726,8 +1726,27 @@ tabs.forEach((t, i) => {
   t.addEventListener('click', () => show(t.dataset.tab));
   t.addEventListener('keydown', e => { const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (d) show(tabs[(i + d + tabs.length) % tabs.length].dataset.tab, true); });
 });
-const start = location.hash.slice(1);
+// switching machines keeps the place: the machine links carry #tab.block.offset (block = n-th card of the tab panel,
+// offset = px scrolled into it), so the same card of the other machine opens at the same height
+const hm = /^#(\w+)(?:\.(\d+)\.(-?\d+))?$/.exec(location.hash), start = hm ? hm[1] : '';
 show(tabs.some(t => t.dataset.tab === start) ? start : (store.get(KEY + '-tab') || 'prehled'));
+const hdrH = () => document.querySelector('.top').offsetHeight;
+const curPanel = () => document.querySelector('.panel:not([hidden])');
+function place(){
+  const pn = curPanel(), kids = [...pn.children], h = hdrH();
+  // anchor on the first card that starts below the header (cards differ in height between machines), else the one cut by it
+  let i = kids.findIndex(c => c.getBoundingClientRect().top >= h - 1);
+  if (i < 0 || (i > 0 && kids[i].getBoundingClientRect().top > innerHeight)) i = Math.max(0, kids.findIndex(c => c.getBoundingClientRect().bottom > h + 1));
+  return `${pn.id.slice(2)}.${i}.${Math.round(h - kids[i].getBoundingClientRect().top)}`;
+}
+document.querySelectorAll('.machines a.m').forEach(a => a.addEventListener('click', () => { a.href = a.href.split('#')[0] + '#' + place(); }));
+if (hm && hm[2] !== undefined){
+  let moved = false; ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => moved = true, {once:true, passive:true}));
+  const go = () => { if (moved) return; const el = curPanel().children[+hm[2]]; if (!el) return;
+    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - hdrH() + (+hm[3])}); };
+  // charts and the Monte Carlo fill in after load; place again once they have their size
+  setTimeout(go, 60); setTimeout(go, 500); setTimeout(go, 1200);
+}
 // links inside the FAQ to a group: switch tab first
 document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', e => {
   e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); t && t.scrollIntoView({behavior: 'smooth', block: 'start'});
