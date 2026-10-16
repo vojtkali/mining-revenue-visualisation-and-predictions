@@ -273,7 +273,7 @@ details.qa .a p{margin:0 0 8px}
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
   <label class="field"><span class="fl">Odhad do</span><span class="fi"><input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"><span class="u"></span></span><span class="hint">Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.</span></label>
-  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="hgr" type="number" step="5" min="-50" max="200" value="30"><span class="u">% / rok</span></span></label>
+  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="hgr" type="number" step="5" min="-50" value="30"><span class="u">% / rok</span></span></label>
   <label class="field"><span class="fl">Nárůst poplatků v bull marketu</span><span class="fi"><input id="feeBull" type="number" step="10" min="-90" max="2000" value="33"><span class="u">%</span></span></label>
   <label class="field"><span class="fl">Kolísání cen (Monte Carlo)</span><span class="fi"><input id="mcVol" type="number" value="100" min="0" max="300" step="10"><span class="u">%</span></span><span class="hint">Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.</span></label>
   <span hidden><select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></span>
@@ -483,7 +483,7 @@ details.qa .a p{margin:0 0 8px}
   <label for="fUp">Uptime, %<input id="fUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="fHwS">Cena stroje, USD<input id="fHwS" type="number" step="100" min="0" value="7180"></label>
   <label for="fScen3">Scénář ceny BTC pro grafy<select id="fScen3"><option value="0">Pesimistický +10 % ročně</option><option value="1" selected>Základní +20 % ročně</option><option value="2">Optimistický +40 % ročně</option></select></label>
-  <label for="fHg">Růst hashrate sítě, % ročně<input id="fHg" type="number" step="5" min="-50" max="200" value="30"></label>
+  <label for="fHg">Růst hashrate sítě, % ročně<input id="fHg" type="number" step="5" min="-50" value="30"></label>
 </form><form class="controls" id="L_f" onsubmit="return false">
   <label for="L_start">Začátek těžby<input id="L_start" type="date" value="2024-06-17" min="2024-06-01" max="2026-10-13"></label>
   <label for="L_kwh">Elektřina, USD/kWh<input id="L_kwh" type="number" step="0.005" min="0" value="0.07"></label>

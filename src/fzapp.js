@@ -78,7 +78,7 @@ function renderEdgeZ(p, base){
     z2:   {n:'Růst ceny ZEC v dalších letech', cur:o0.z2*100, set:(o,x)=>{o.z2=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     zec:  {n:'Cena ZEC v den nákupu', cur:o0.zec, set:(o,x)=>{o.zec=x}, min:5, max:o0.zec*50, step:Math.max(10,o0.zec*.1), dir:'nad', fx:money, ax:x=>'$'+kfmt(x)},
     br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
-    g:    {n:'Růst hashrate Zcash', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Zcash', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:Math.max(500, o0.g*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
     fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
     rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},

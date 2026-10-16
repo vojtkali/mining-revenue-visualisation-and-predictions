@@ -273,7 +273,7 @@ details.qa .a p{margin:0 0 8px}
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
   <label class="field"><span class="fl">Odhad do</span><span class="fi"><input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"><span class="u"></span></span><span class="hint">Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.</span></label>
-  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="lhg" type="number" step="5" min="-50" max="300" value="15"><span class="u">% / rok</span></span></label>
+  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="lhg" type="number" step="5" min="-50" value="15"><span class="u">% / rok</span></span></label>
   <label class="field"><span class="fl">Citlivost hashrate na ceny LTC a DOGE</span><span class="fi"><input id="lk" type="number" step="0.05" min="0" max="1.5" value="0.3"><span class="u"></span></span></label>
   <label class="field"><span class="fl">Kolísání cen (Monte Carlo)</span><span class="fi"><input id="mcVol" type="number" value="100" min="0" max="300" step="10"><span class="u">%</span></span><span class="hint">Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.</span></label>
   <span hidden><select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></span>
@@ -520,7 +520,7 @@ details.qa .a p{margin:0 0 8px}
   <label for="qHwL">Cena stroje, USD<input id="qHwL" type="number" step="100" min="0" value="7100"></label>
   <label for="qScen">Scénář cen LTC a DOGE pro grafy<select id="qScen"><option value="0">Propad −30 % ročně (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Základní +10 % ročně</option><option value="3">Růst +30 % ročně</option></select></label>
   <label for="qBtcR">Cena BTC, % ročně<input id="qBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
-  <label for="qHg">Růst hashrate Scrypt, % ročně<input id="qHg" type="number" step="5" min="-50" max="300" value="15"></label>
+  <label for="qHg">Růst hashrate Scrypt, % ročně<input id="qHg" type="number" step="5" min="-50" value="15"></label>
   <label for="qK">Citlivost hashrate na ceny<input id="qK" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form><form class="controls" id="L_f" onsubmit="return false">
   <label for="L_start">Začátek těžby<input id="L_start" type="date" value="2024-05-15" min="2024-05-01" max="2026-10-13"></label>
@@ -1328,7 +1328,7 @@ function renderEdgeL(p, base){
     r:    {n:'Růst ceny LTC', cur:o0.r*100, set:(o,x)=>{o.r=x/100}, min:-90, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     doge: {n:'Cena DOGE v den nákupu', cur:o0.doge, set:(o,x)=>{o.doge=x}, min:.001, max:o0.doge*50, step:Math.max(.005,o0.doge*.1), dir:'nad', fx:x=>'$'+n4(x), ax:x=>'$'+n3(x)},
     br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
-    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:Math.max(500, o0.g*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
     fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
     rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},

@@ -79,7 +79,7 @@ function renderEdgeL(p, base){
     r:    {n:'Růst ceny LTC', cur:o0.r*100, set:(o,x)=>{o.r=x/100}, min:-90, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     doge: {n:'Cena DOGE v den nákupu', cur:o0.doge, set:(o,x)=>{o.doge=x}, min:.001, max:o0.doge*50, step:Math.max(.005,o0.doge*.1), dir:'nad', fx:x=>'$'+n4(x), ax:x=>'$'+n3(x)},
     br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
-    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:Math.max(500, o0.g*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
     fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
     rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},
