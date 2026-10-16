@@ -19,29 +19,32 @@ MACHINES = {
   's21': dict(name='S21 XP', title='Antminer S21 XP', data='btc', main=('body', 'app'), faq=('fbody', 'fapp'), lump=('lbody', 'lapp'),
     spec='270 TH/s · 3 645 W · SHA-256 · výplata v BTC', today='Při dnešní ceně BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwS', hg='hgr', faq_sel='fScen3', faq_si={'bear': 0, 'base': 1, 'bull': 2},
-    sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg']},
+    sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg'], 'netMode': ['fNetMode'], 'netUp': ['fNetUp'], 'netDown': ['fNetDown'], 'netEff': ['fNetEff']},
     prices=[('Cena BTC dnes', 'fPrice')],
     scen={'bear': [('BTC', 'yBear')], 'base': [('BTC', 'yBase')], 'bull': [('BTC', 'yBull')]},
     proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')],
-    mc=dict(assets='BTC', corr='dlouhé trendy', net='Hashrate sítě BTC reaguje na odchylku ceny od scénáře se zpožděním asi tří měsíců s citlivostí 0,5: když je BTC o 20 % levnější, než říká scénář, síť časem zpomalí asi o 10 % a stroj natěží víc BTC.')),
+    mc=dict(assets='BTC', corr='dlouhé trendy', net='Každá cesta má vlastní výkon sítě BTC: dohání tržby těžařů v této cestě stejně jako v projekci (poločas růstu podle panelu), takže po propadu ceny síť zpomalí a stroj natěží víc BTC.')),
   'z15': dict(name='Z15 Pro', title='Antminer Z15 Pro', data='zec', main=('zbody', 'zapp'), faq=('fzbody', 'fzapp'), lump=('zlbody', 'zlapp'),
     spec='840 kSol/s · 2 780 W · Equihash (Zcash) · výplata v BTC', today='Při dnešních cenách ZEC a BTC a výkonu sítě Zcash, po elektřině a poplatku poolu.',
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
-    sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR']},
+    sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR'], 'netMode': ['zNetMode'], 'netUp': ['zNetUp'], 'netDown': ['zNetDown'], 'netEff': ['zNetEff']},
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
-    scen={'bear': [('ZEC 1. rok', 'zB1'), ('ZEC dál', 'zB2'), ('BTC', 'bB')], 'base': [('ZEC 1. rok', 'zM1'), ('ZEC dál', 'zM2'), ('BTC', 'bM')],
-          'bull': [('ZEC 1. rok', 'zU1'), ('ZEC dál', 'zU2'), ('BTC', 'bU')]},
+    scen={k: [('BTC v USD', f'b{c}', '% / rok', ''), ('ZEC/BTC 3–6 měs.', f'z{c}3', '% vrch.', 'pump'), ('ZEC/BTC za rok', f'z{c}12', '% vrch.', 'pump'),
+              ('ZEC/BTC 2 roky', f'z{c}24', '% vrch.', 'pump'), ('ZEC/BTC potom', f'z{c}t', '% / rok', 'pump'), ('ZEC/BTC 1. rok', f'z{c}1', '%', 'pct'), ('ZEC/BTC dál', f'z{c}2', '% / rok', 'pct')]
+          for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
+    shape=('zShape', 'Tvar ceny ZEC', 'ZEC se zadává vůči BTC (kurz ZEC/BTC). Po pumpě: kurz jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024, ZEC 2021), v % vrcholu z posledního roku dat; potom roční trend. Procenta: první rok změna, pak roční tempo.'),
+    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD, ZEC vůči BTC; pokles se znaménkem minus.',
     proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
-    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Hashrate Zcash reaguje na odchylku ceny ZEC od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
+    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Každá cesta má vlastní výkon sítě Zcash, který dohání tržby těžařů v této cestě stejně jako v projekci.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
     spec='16,2 GH/s · 3 260 W · Scrypt, merge mining LTC + DOGE · výplata v BTC', today='Při dnešních cenách LTC, DOGE a BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwL', hg='lhg', faq_sel='qScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
-    sync={'kwh': ['qKwh'], 'poolFee': ['qFee'], 'uptime': ['qUp'], 'hwL': ['qHwL'], 'lhg': ['qHg'], 'lk': ['qK'], 'lbM': ['qBtcR']},
+    sync={'kwh': ['qKwh'], 'poolFee': ['qFee'], 'uptime': ['qUp'], 'hwL': ['qHwL'], 'lhg': ['qHg'], 'lk': ['qK'], 'lbM': ['qBtcR'], 'netMode': ['qNetMode'], 'netUp': ['qNetUp'], 'netDown': ['qNetDown'], 'netEff': ['qNetEff']},
     prices=[('Cena LTC dnes', 'qLtc'), ('Cena DOGE dnes', 'qDoge'), ('Cena BTC dnes', 'qBtc')],
-    scen={'bear': [('LTC', 'llB'), ('DOGE', 'ldB'), ('BTC', 'lbB')], 'base': [('LTC', 'llM'), ('DOGE', 'ldM'), ('BTC', 'lbM')],
-          'bull': [('LTC', 'llU'), ('DOGE', 'ldU'), ('BTC', 'lbU')]},
+    scen={k: [('BTC v USD', f'lb{c}'), ('LTC vůči BTC', f'll{c}'), ('DOGE vůči BTC', f'ld{c}')] for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
+    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD, LTC a DOGE vůči BTC (za 2–5 let DOGE −21 až −25 % ročně, LTC −14 až −31 %); pokles se znaménkem minus.',
     proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
-    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Hashrate Scrypt reaguje na odchylku cen LTC a DOGE od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
+    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Každá cesta má vlastní výkon sítě Scrypt, který dohání tržby těžařů z LTC a DOGE v této cestě stejně jako v projekci.')),
 }
 # links between the pages: in the claude.ai artifact all pages are files of one artifact (index.html is a shell
 # that shows them in frames and switches between them); the website build (--public) uses PUBLIC_LINKS
@@ -125,7 +128,9 @@ def build(key):
     lump_html, lump_js = rename_ids(lump_html, lump_js, ['f', 'start', 'kwh', 'poolFee', 'uptime', M['hw'], 'th', 'w', 'kpis', 'budget', 'fl'], 'L_', extra_js=['fx'])
 
     def inputs(html):
-        return {m.group(1): m.group(0) for m in re.finditer(r'<input id="([^"]+)"[^>]*>', html)}
+        out = {m.group(1): m.group(0) for m in re.finditer(r'<input id="([^"]+)"[^>]*>', html)}
+        out.update({m.group(1): m.group(0) for m in re.finditer(r'<select id="([^"]+)">.*?</select>', html, re.S)})
+        return out
     mi, fi = inputs(main_html), inputs(faq_html)
     sel = re.search(r'<select id="sc">.*?</select>', main_html, re.S).group(0)
     lump_form = re.search(r'<form class="controls" id="L_f".*?</form>', lump_html, re.S).group(0)
@@ -150,7 +155,7 @@ def build(key):
     scen = ''.join(
         f'<div class="scen" data-sc="{k}" role="radio" tabindex="0" aria-checked="{"true" if k == "base" else "false"}">'
         f'<span class="sn"><i style="background:var({c})"></i>{n}</span>'
-        + ''.join(f'<span class="sv"><span class="lbl">{lbl}</span>{bare(mi[i])}<span class="u">{"%" if "1. rok" in lbl else "% / rok"}</span></span>' for lbl, i in M['scen'][k])
+        + ''.join(f'<span class="sv"{f" data-zm={chr(34)}{e[3]}{chr(34)}" if len(e) > 3 and e[3] else ""}><span class="lbl">{e[0]}</span>{bare(mi[e[1]])}<span class="u">{e[2] if len(e) > 2 else ("%" if "1. rok" in e[0] else "% / rok")}</span></span>' for e in M['scen'][k])
         + '</div>'
         for k, n, c in (('bear', 'Pesimistický', '--s2'), ('base', 'Základní', '--s1'), ('bull', 'Optimistický', '--s3')))
 
@@ -159,8 +164,9 @@ def build(key):
 <div class="side-body" id="sideBody">
 <form id="f" onsubmit="return false">
   <div class="sg"><h3>Scénář ceny</h3>
+  {field(M['shape'][1], mi[M['shape'][0]], '', M['shape'][2]) if M.get('shape') else ''}
   <div class="scens" role="radiogroup" aria-label="Scénář ceny">{scen}</div>
-  <p class="hint">Klik vybere scénář pro grafy. Procenta platí každý rok; pokles zadejte se znaménkem minus.</p></div>
+  <p class="hint">{M.get('scen_hint', 'Klik vybere scénář pro grafy. Procenta platí každý rok; pokles zadejte se znaménkem minus.')}</p></div>
   <div class="sg"><h3>Náklady</h3>
   {field('Elektřina', mi['kwh'], 'USD/kWh')}
   {field('Cena stroje', mi[M['hw']], 'USD')}
@@ -176,8 +182,12 @@ def build(key):
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
   {field('Odhad do', mi['end'], '', 'Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.')}
-  {field('Růst hashrate sítě', mi[M['hg']], '% / rok')}
-  {''.join(field(lbl, mi[i], u) for lbl, i, u in M['proj_extra'])}
+  {field('Model sítě', mi['netMode'], '', 'Dohánění: hashrate sleduje tržby těžařů se zpožděním (kalibrováno na 2017–2026). Pevný růst: stejné procento každý rok.')}
+  {field('Poločas růstu sítě', mi['netUp'], 'dní')}
+  {field('Poločas poklesu sítě', mi['netDown'], 'dní')}
+  {field('Zlepšování strojů', mi['netEff'], '% / rok')}
+  {field('Pevný růst sítě', mi[M['hg']], '% / rok', 'Jen pro model Pevný růst.')}
+  {''.join(field(lbl, mi[i], u, 'Jen pro model Pevný růst.' if i in ('zk', 'lk') else '') for lbl, i, u in M['proj_extra'])}
   {field('Kolísání cen (Monte Carlo)', '<input id="mcVol" type="number" value="100" min="0" max="300" step="10">', '%', 'Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.')}
   <span hidden>{sel}</span>
   </details>
@@ -312,7 +322,7 @@ def build_index():
   {THEME_BTN}
 </div></header>
 <div class="overview">
-<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
+<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 22 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
 <div class="ovstart" id="ovStartBox" hidden><label class="field"><span class="fl">Začátek těžby pro všechny stroje</span><span class="fi"><input type="date" id="ovStart" min="{MIN_START}" max="{LAST_ISO}"><button type="button" class="today" id="ovToday">Dnes</button></span><span class="hint">Nastaví začátek těžby ve všech třech kalkulačkách; konec odhadu se posune na začátek + 4,5 roku. Karty pak ukazují výsledky podle kalkulaček.</span></label></div></div>
 <div class="mcards">{"".join(cards)}</div>
 {body}
@@ -419,7 +429,9 @@ function sync(){
 }
 function markScen(){
   document.querySelectorAll('.scen').forEach(c => { const on = c.dataset.sc === $('sc').value; c.classList.toggle('on', on); c.setAttribute('aria-checked', on); });
+  const zs = $('zShape'); if (zs) document.querySelectorAll('[data-zm]').forEach(e => { e.style.display = e.dataset.zm === zs.value ? '' : 'none'; });
 }
+$('zShape')?.addEventListener('input', markScen);
 function pickScen(k){ $('sc').value = k; markScen(); fire($('sc')); }
 document.querySelectorAll('.scen').forEach(c => {
   c.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') pickScen(c.dataset.sc); });
@@ -568,12 +580,15 @@ if (window.parent !== window){
 # the artifact's own page: shows the overview and the calculators (files of the same artifact) in frames, switches
 # between them without reloading, remembers the last one; each frame keeps its own scroll position
 SHELL = '''<title>Těžba: kalkulačky</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
 :root{--bg:#f3f4f7}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d0f14}}
 :root[data-theme="dark"]{--bg:#0d0f14}
 html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
-iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
+/* frames do not see the safe-area insets (the app's own bar on phones), so the shell keeps them out of it */
+:root{--st:env(safe-area-inset-top,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--sb:env(safe-area-inset-bottom,0px)}
+iframe{position:fixed;top:var(--st);left:var(--sl);width:calc(100% - var(--sl) - var(--sr));height:calc(100% - var(--st) - var(--sb));border:0;display:none;background:var(--bg)}
 iframe.on{display:block}
 </style>
 <script>

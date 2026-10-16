@@ -22,20 +22,30 @@ function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   let end = $('end').value || '2030-12-31'; if (end <= TODAY) end = addDays(TODAY, 30);
   return {start:$('start').value||'2024-05-15', end, kwh:n('kwh'), fee:n('poolFee')/100, up:Math.min(1,n('uptime')/100), hw:n('hwL'),
-          th:n('th')||16.2, w:n('w')||3260, sc:$('sc').value, g:raw('lhg')/100, k:raw('lk')};
+          th:n('th')||16.2, w:n('w')||3260, sc:$('sc').value, g:raw('lhg')/100, k:raw('lk'),
+          q:netQ({mode:'netMode', up:'netUp', down:'netDown', c:'netEff'}, raw('lhg')/100)};
 }
+/*@include netmodel.js*/
+// Scrypt network revenue in USD a day (LTC + DOGE, merge mining) and hashrate (LTC, Coin Metrics units)
+const NET_GAP = netGap(r => r.ml*r.l + r.mg*r.g, r => r.hl);
 
 // Projection: BTC, LTC and DOGE prices at constant yearly rates; Scrypt hashrate = baseline growth x (revenue-weighted
 // LTC/DOGE price ratio)^k, applied to both chains; the LTC halving halves LTC rewards, DOGE stays 10 000 per block.
 function future(p, scKey){
   const L = ALL[ALL.length-1], [, , bId, lId, dId] = SC[scKey];
-  const rb = pctv(bId)/100, rl = pctv(lId)/100, rd = pctv(dId)/100, N = daysBetween(L.d, p.end), out = [];
+  // LTC and DOGE are given against BTC: USD rate = (1 + BTC) x (1 + against BTC) - 1
+  const rb = pctv(bId)/100, rl = (1+rb)*(1+pctv(lId)/100)-1, rd = (1+rb)*(1+pctv(dId)/100)-1, N = daysBetween(L.d, p.end), out = [];
+  const mlAt = d => (L.ml-(L.fl||0))*ltcSub(d)/ltcSub(L.d)+(L.fl||0);
+  // Scrypt hashrate: catch-up to the LTC + DOGE revenue, or fixed growth with the price sensitivity k
+  const lrr = t => { const d = addDays(L.d, t);
+    return Math.log((mlAt(d)*L.l*Math.pow(1+rl, t/365) + L.mg*L.g*Math.pow(1+rd, t/365))/(L.ml*L.l + L.mg*L.g)); };
+  const F = netPath(N, lrr, p.q, NET_GAP);
   for (let t=1; t<=N; t++){
     const d = addDays(L.d, t), pb = L.p*Math.pow(1+rb, t/365), pl = L.l*Math.pow(1+rl, t/365), pg = L.g*Math.pow(1+rd, t/365);
-    const idx = L.sd*pg/L.g + (1-L.sd)*pl/L.l, f = Math.pow(1+p.g, t/365)*Math.pow(idx, p.k);
-    const hl = L.hl*f, hg = L.hg*f, ml = (L.ml-(L.fl||0))*ltcSub(d)/ltcSub(L.d)+(L.fl||0), mg = L.mg;
+    const idx = L.sd*pg/L.g + (1-L.sd)*pl/L.l, f = F[t]*(p.q.mode === 'catch' ? 1 : Math.pow(idx, p.k));
+    const hl = L.hl*f, hg = L.hg*f, ml = mlAt(d), mg = L.mg;
     const ul = ml/(hl*1e3)*pl, ug = mg/(hg*1e3)*pg;
-    out.push({d, p:pb, l:pl, g:pg, hl, hg, ml, mg, sd:ug/(ul+ug), hv:(ul+ug)/pb, e:2});
+    out.push({d, p:pb, l:pl, g:pg, hl, hg, ml, mg, sd:ug/(ul+ug), hv:(ul+ug)/pb, e:2, lrr:lrr(t), lf:Math.log(f)});
   }
   return out;
 }
@@ -113,18 +123,15 @@ function render(){
   charts.forEach(c => c.destroy()); charts = [];
   if (!s.length) return;
   const L = s.map(r => r.d), iT = Math.max(0, L.indexOf(TODAY)), now = s[iT], end = s[s.length-1];
-  const hw = s.map(()=>p.hw), tip = v => usd(v), pl = [zones, crosshair];
+  const tip = v => usd(v), pl = [zones, crosshair];
   charts.push(new Chart($('c1'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Tržba celkem', s.map(r=>r.rev), css('--s1')),
     line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistý zisk', s.map(r=>r.net), css('--s3')),
-    ref('Cena stroje', hw)]}}));
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   charts.push(new Chart($('c2'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Hodnota stacku', s.map(r=>r.stack), css('--s1')),
-    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistá hodnota', s.map(r=>r.hodl), css('--s3')),
-    line('Průběžný prodej', s.map(r=>r.net), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', hw)]}}));
+    line('Tržby z průběžného prodeje', s.map(r=>r.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   const o3 = opts(v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:2}), v=>btc(v));
   o3.plugins.tooltip.callbacks.afterBody = it => { const r=s[it[0].dataIndex]; return [` Cena BTC: ${usd(r.price)}`, ` Cena LTC: ${usd(r.l,2)}`, ` Cena DOGE: ${usd(r.g,4)}`]; };
   charts.push(new Chart($('c3'), {type:'line', plugins:pl, options:o3, data:{labels:L, datasets:[
@@ -151,7 +158,7 @@ function render(){
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
     [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
     [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
-    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář). Z toho už natěžené ${btc(now.btc)} = ${usd(now.btc*end.price)}, budoucí těžba ${btc(end.btc-now.btc)} = ${usd((end.btc-now.btc)*end.price)} za elektřinu ${usd(end.el-now.el)}. Po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
@@ -191,18 +198,19 @@ function renderProj(p, s, iT){
     return {k, name:SC[k][0], col:SC[k][1], r, e, off:r.slice(iT+1).filter(x=>x.loss).length,
             pay:r.find(x=>x.d>TODAY && x.hodl>=p.hw), held:r.slice(iT).every(x=>x.hodl>=p.hw)}; });
   const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
-  res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))}, BTC ${sgp(pctv(b))} / rok)`;
+  res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (BTC ${sgp(pctv(b))} / rok; vůči BTC LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))} / rok)`;
     x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
   PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
-  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
-    .concat([ref('Cena stroje', L.map(()=>p.hw))]);
+  // value of the mined BTC against everything put in (machine + energy prepaid a year ahead): above it, all is paid back
+  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.stack : null), css('--fg2'))]
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.stack : null), css(x.col))))
+    .concat([ref('Vloženo celkem (stroj + energie)', s.slice(from).map(r=>r.invested))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
   const endD = fmtDate(res[0].e.d);
-  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC / LTC / DOGE ročně</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Ceny ${endD} (BTC / LTC / DOGE)</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
+  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně / LTC a DOGE vůči BTC</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Ceny ${endD} (BTC / LTC / DOGE)</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
     `<tr><td><span class="sw" style="background:var(--fg2)"></span>Dnes, ${fmtDate(now.d)}</td><td>–</td><td>${usd(now.hodl)}</td><td>${now.hodl>=p.hw?'splaceno':'–'}</td><td>${btc(now.btc)}</td><td>–</td><td>${usd(now.price)} / ${usd(now.l,2)} / ${usd(now.g,4)}</td><td>${usd(now.el)}</td><td>–</td></tr>`+
     res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2]))} / ${sg(pctv(SC[x.k][3]))} / ${sg(pctv(SC[x.k][4]))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)} / ${usd(x.e.l,2)} / ${usd(x.e.g,4)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
 }

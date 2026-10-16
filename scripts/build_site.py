@@ -78,6 +78,12 @@ def embedded_data(name):
         return float(f'{x:.6g}') if isinstance(x, float) else x
     d = json.loads((DATA / f'{name}.json').read_text(encoding='utf-8'))
     d['rows'] = [{k: r(v) for k, v in row.items() if k not in EMBED_DROP} for row in d['rows']]
+    # calibrated catch-up model of the network hashrate (scripts/catchup_hashrate.py)
+    cal = DATA / 'hashrate_catchup.json'
+    if cal.exists():
+        n = json.loads(cal.read_text())['nets'].get({'l9': 'scrypt'}.get(name, name))
+        if n:
+            d['net'] = dict(up=n['params']['up'], down=n['params']['down'], c=n['params']['c'], lhp=round(n['lhp_ref'], 6), ref=n['ref'])
     return json.dumps(d, separators=(',', ':'), ensure_ascii=False)
 
 
@@ -141,7 +147,7 @@ def page_values():
 MONTHS = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec']
 MONTHS_GEN = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince']
 # rows of each FAQ scenario table: worst, base, best
-SCEN = {'s21': ('Pesimistický', 'Základní', 'Optimistický'), 'z15': ('Propad', 'Korekce', 'Růst'), 'l9': ('Propad', 'Základní', 'Růst')}
+SCEN = {'s21': ('Pesimistický', 'Základní', 'Optimistický'), 'z15': ('Propad', 'Pokles', 'Mírný'), 'l9': ('Propad', 'Základní', 'Mírný')}
 
 
 MINUS = '\u2212'

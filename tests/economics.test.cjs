@@ -34,7 +34,8 @@ function load(name,asset,lastDate){
  if(lastDate)data.rows=[{...data.rows.at(-1),d:lastDate}];
  const ctx=vm.createContext({DATA:data,document:{getElementById:()=>({value:'0'})}});
  vm.runInContext(fs.readFileSync('src/economics.js','utf8'),ctx);
- vm.runInContext(fs.readFileSync(`src/${name}.js`,'utf8').split('function render(){')[0],ctx);
+ const src=fs.readFileSync(`src/${name}.js`,'utf8').replace(/\/\*@include (\S+)\*\//g,(_,f)=>fs.readFileSync(`src/${f}`,'utf8'));
+ vm.runInContext(src.split('function render(){')[0],ctx);
  return expression=>vm.runInContext(expression,ctx);
 }
 test('ZEC projection after a halving does not halve its observed baseline again',()=>{

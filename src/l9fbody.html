@@ -10,16 +10,20 @@
   <label for="qDoge">Cena DOGE, USD<input id="qDoge" type="number" step="0.005" min="0.001" value="{{P_DOGE}}"></label>
   <label for="qBtc">Cena BTC, USD<input id="qBtc" type="number" step="1000" min="1000" value="{{P_BTC}}"></label>
   <label for="qKwh">Elektřina, USD/kWh<input id="qKwh" type="number" step="0.005" min="0" value="0.07"></label>
-  <label for="qFee">Poplatek poolu, %<input id="qFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="qFee">Poplatek poolu, %<input id="qFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="qUp">Uptime, %<input id="qUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="qHwL">Cena stroje, USD<input id="qHwL" type="number" step="100" min="0" value="7100"></label>
-  <label for="qScen">Scénář cen LTC a DOGE pro grafy<select id="qScen"><option value="0">Propad −30 % ročně (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Základní +10 % ročně</option><option value="3">Růst +30 % ročně</option></select></label>
+  <label for="qScen">Scénář cen LTC a DOGE pro grafy<select id="qScen"><option value="0">Propad vůči BTC −35 % ročně (BTC +10 %)</option><option value="1">Stagnace 0 % v USD</option><option value="2" selected>Základní: vůči BTC −20 % ročně</option><option value="3">Mírný pokles vůči BTC −5 % ročně</option></select></label>
   <label for="qBtcR">Cena BTC, % ročně<input id="qBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
+  <label for="qNetMode">Model sítě<select id="qNetMode"><option value="catch">dohánění tržeb (kalibrováno)</option><option value="fixed" selected>pevný růst</option></select></label>
+  <label for="qNetUp">Poločas růstu sítě, dny<input id="qNetUp" type="number" step="30" min="1" value="120"></label>
+  <label for="qNetDown">Poločas poklesu sítě, dny<input id="qNetDown" type="number" step="30" min="1" value="2920"></label>
+  <label for="qNetEff">Zlepšování strojů, % za rok<input id="qNetEff" type="number" step="5" min="0" max="80" value="20"></label>
   <label for="qHg">Růst hashrate Scrypt, % ročně<input id="qHg" type="number" step="5" min="-50" value="15"></label>
   <label for="qK">Citlivost hashrate na ceny<input id="qK" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
 
-<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
+<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadané předpoklady, nikoli pravděpodobnostní prognóza. Pesimistický scénář je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Model sítě a jeho parametry jsou v panelu Projekce.</p>
 
 <nav class="toc" aria-label="Obsah">
   <a href="#vydelek">Kolik vydělá</a><a href="#navratnost">Návratnost a ROI</a><a href="#garance">Garance</a><a href="#vypocet">Jak se výnos počítá</a><a href="#cena">Ceny DOGE, LTC a BTC</a><a href="#sit">Difficulty a hashrate</a><a href="#halving">Halving</a><a href="#ztrata">Když se nevyplácí</a><a href="#vsbtc">Těžit, nebo koupit BTC</a><a href="#historie">Historie</a><a href="#nejhorsi">Pesimistické scénáře</a>
@@ -28,18 +32,18 @@
 <section class="group" id="vydelek">
   <h2>Kolik vydělá</h2>
   <div class="qa"><h3>Kolik mi jeden stroj vydělá měsíčně?</h3><div class="a"><p>Při dnešních podmínkách asi <span class="n" data-k="revMonth"></span> za měsíc po poplatku poolu. Po zaplacení elektřiny zůstane <span class="n" data-k="netMonth"></span>. Elektřina stojí <span class="n" data-k="elecMonth"></span> měsíčně.</p><p>Výnos ale nezůstane stejný: budou se hýbat ceny DOGE a LTC, síť poroste a v červenci 2027 halving Litecoinu sníží výnos zhruba o <span class="n" data-k="ltcShareHalf"></span>. Ve scénáři <b data-k="scName"></b> vypadá měsíční výsledek takto:</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za měsíc</span><span><i style="background:var(--s2)"></i>Elektřina za měsíc</span><span><i style="background:var(--s3)"></i>Čistě za měsíc</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
     <div class="chart small"><canvas id="cMonth" aria-label="Měsíční výnos v projekci"></canvas></div>
     <p><b>Při držení BTC:</b> dnešní měsíční výplata <span class="n" data-k="btcMonth"></span> má dnes hodnotu <span class="n" data-k="revMonth"></span>. Za 5 let bude při růstu BTC o <span class="n" data-k="btcR"></span> ročně mít hodnotu <span class="n" data-k="monthVal5y"></span>.</p></div></div>
   <div class="qa"><h3>Kolik vydělá denně?</h3><div class="a"><p>Výnos je <span class="n" data-k="revDay"></span> denně, elektřina <span class="n" data-k="elecDay"></span>, čistě tedy <span class="n" data-k="netDay"></span> za den.</p></div></div>
   <div class="qa"><h3>Kolik BTC dostanu za měsíc?</h3><div class="a"><p>Asi <span class="n" data-k="btcMonth"></span> měsíčně, to je <span class="n" data-k="satsDay"></span> denně. Stroj denně vytěží <span class="n" data-k="ltcDay"></span> LTC a <span class="n" data-k="dogeDay"></span> DOGE a pool je ten den převede na BTC. DOGE dnes tvoří <span class="n" data-k="dogeShare"></span> výnosu. Kolik BTC dostanete, proto závisí hlavně na poměru cen DOGE a BTC.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Vyplacené BTC za měsíc</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span></div>
     <div class="chart small"><canvas id="cBtcM" aria-label="BTC za měsíc v projekci"></canvas></div></div></div>
   <div class="qa"><h3>Jaký je aktuální výnos konkrétního stroje?</h3><div class="a"><p>U Scrypt se výnos udává za 1 GH/s výkonu za den. Dnes vydělá 1 GH/s <span class="n" data-k="hpGH"></span> denně (LTC i DOGE dohromady). L9 má 16,2 GH/s a s uptime <span class="n" data-k="up"></span> a po poplatku poolu <span class="n" data-k="fee"></span> z toho dostane <span class="n" data-k="revDay"></span> denně.</p></div></div>
   <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p>
     <p><b>Při držení BTC</b> si necháváte celou výplatu. Z vyplacených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>, BTC <span class="n" data-k="btcR"></span> ročně). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p>
     <p>Rok po roku:</p><div class="tbl"><table id="tYears"></table></div>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Hodnota stacku − elektřina</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Tržby z průběžného prodeje</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div>
     <div class="verify">K ověření: pokud účtujete další poplatky (hosting, servis, správa), doplňte je sem i do výpočtu.</div></div></div>
 </section>
@@ -50,7 +54,7 @@
     <div class="tbl"><table id="tPay"></table></div>
     <p>„Prodej“ znamená, že vyplacené BTC každý den prodáváte. „Držení“ znamená, že BTC si necháváte a stroj se zaplatí, když hodnota všech vyplacených BTC překročí cenu stroje plus zaplacenou elektřinu.</p></div></div>
   <div class="qa"><h3>Jaké je ROI? Kolik procent ročně můžu očekávat?</h3><div class="a"><p>Za první rok při dnešních podmínkách asi <span class="n" data-k="roiY"></span> z ceny stroje. V dalších letech se bude měnit hlavně podle ceny DOGE. Při držení BTC se ROI v čase vyvíjí takto (hodnota BTC − zaplacená energie − cena stroje, děleno všemi vloženými penězi):</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Růst</span></div>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
     <div class="chart small"><canvas id="cRoi" aria-label="ROI v čase podle scénáře"></canvas></div></div></div>
 </section>
 
@@ -59,7 +63,7 @@
   <div class="qa"><h3>Máte nějaký garantovaný výnos? Garantujete návratnost? Je výnos na stránkách garantovaný?</h3><div class="a"><p>Výnos z těžby garantovat nejde. Závisí na cenách DOGE, LTC a BTC, na výkonu sítě a na halvingu Litecoinu, a nic z toho nikdo neovlivní. Kalkulace ukazuje výnos při dnešních podmínkách a scénáře do budoucna, ne slib.</p>
     <div class="verify">K ověření: odpověď musí odpovídat vašim obchodním podmínkám. Pokud nějakou formu garance nabízíte (třeba uptime), uveďte ji tady přesně.</div></div></div>
   <div class="qa"><h3>Garantujete množství vytěženého BTC?</h3><div class="a"><p>Ne. Stroj má daný výkon (16,2 GH/s), ale kolik LTC a DOGE vytěží, závisí na výkonu celé sítě. Kolik BTC za to dostanete, závisí navíc na kurzech DOGE/BTC a LTC/BTC. Kolik BTC stroj vyplatí za 5 let podle růstu sítě (při stálých cenách):</p>
-    <div class="legend"><span><i style="background:var(--s3)"></i>Síť +0 % ročně</span><span><i style="background:var(--s1)"></i>+15 %</span><span><i style="background:var(--s4)"></i>+30 %</span><span><i style="background:var(--s2)"></i>+60 %</span></div>
+    <div class="legend"><span><i style="background:var(--s3)"></i>Optimistický</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s4)"></i>+30 %</span><span><i style="background:var(--s2)"></i>Pesimistický</span></div>
     <div class="chart small"><canvas id="cHr" aria-label="Vyplacené BTC podle růstu sítě"></canvas></div></div></div>
 </section>
 
@@ -71,7 +75,7 @@
   <div class="qa"><h3>Jsou ve výpočtu zahrnuté všechny poplatky?</h3><div class="a"><p>Zahrnutý je poplatek poolu (<span class="n" data-k="fee"></span>), který u výplaty v BTC obsahuje i převod LTC a DOGE na BTC, a elektřina. Nezahrnuté jsou daně, případné opravy a postupný pokles výkonu stroje.</p>
     <div class="verify">K ověření: doplňte poplatky, které účtujete vy.</div></div></div>
   <div class="qa"><h3>Jak moc se může výnos měnit?</h3><div class="a"><p>Hodně. Za posledních 12 měsíců byl výnos mezi <span class="n" data-k="hpMin"></span> a <span class="n" data-k="hpMax"></span> za GH/s za den. Pro tento stroj to znamená čistý výnos od <span class="n" data-k="netMin"></span> do <span class="n" data-k="netMax"></span> denně (při dnešní ceně elektřiny a poplatku).</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos, USD za GH/s za den</span><span><i class="dash"></i>Bod zvratu při vaší elektřině</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i class="dash"></i>Bod zvratu při vaší elektřině</span></div>
     <div class="chart small"><canvas id="cVar" aria-label="Výnos za 12 měsíců"></canvas></div></div></div>
   <div class="qa"><h3>Jak často se výnos přepočítává? Proč dnes kalkulačka ukazuje jiné číslo než včera?</h3><div class="a"><p>Výnos se mění neustále: ceny DOGE, LTC a BTC se hýbou každou minutu. Litecoin upravuje obtížnost každých 2 016 bloků (asi 3,5 dne), Dogecoin po každém bloku. Za posledních 12 měsíců se výnos ze dne na den měnil v průměru (medián) o <span class="n" data-k="hpChg"></span>.</p>
     <div class="verify">K ověření: doplňte, jak často se aktualizují data na vašem webu.</div></div></div>
@@ -81,12 +85,12 @@
   <h2>Ceny DOGE, LTC a BTC</h2>
   <div class="qa"><h3>Jak ovlivňuje cena můj výnos? Co když DOGE, LTC nebo Bitcoin klesne nebo vyroste?</h3><div class="a"><p>Hodnotu výnosu v USD určují ceny <b>DOGE</b> (dnes <span class="n" data-k="dogeShare"></span> výnosu) a <b>LTC</b>. Když obě vyrostou o 10 %, čistý denní zisk vzroste z <span class="n" data-k="netDay"></span> na <span class="n" data-k="netUp10"></span>. Když o 10 % klesnou, spadne na <span class="n" data-k="netDn10"></span>.</p>
     <p>Cena <b>BTC</b> určuje, kolik BTC za to dostanete. Když BTC vyroste o 10 % a DOGE s LTC ne, dostanete o 9 % méně BTC, ale stejnou hodnotu v USD. Při držení BTC pak záleží hlavně na tom, kolik bude BTC stát v době prodeje.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výsledek před cenou stroje za den dnes</span><span><i style="background:var(--s2)"></i>Po halvingu LTC 2027 (s růstem sítě)</span><span><i class="dash"></i>Nula</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i class="dash"></i>Nula</span></div>
     <div class="chart small"><canvas id="cPrice" aria-label="Čistý denní zisk podle změny cen LTC a DOGE"></canvas></div>
     <p><b>Při držení BTC:</b> aby se za 5 let vrátil stroj i elektřina, musí BTC v té době stát aspoň <span class="n" data-k="costPerBtc"></span> (ve scénáři <b data-k="scName"></b>). Výsledek po 5 letech podle ceny BTC:</p>
-    <div class="legend"><span><i style="background:var(--s3)"></i>Hodnota stacku − všechno zaplacené, po 5 letech</span><span><i class="dash"></i>Nula</span></div>
+    <div class="legend"><span><i style="background:var(--s3)"></i>Optimistický</span><span><i class="dash"></i>Nula</span></div>
     <div class="chart small"><canvas id="cEnd" aria-label="Výsledek po 5 letech podle ceny BTC"></canvas></div></div></div>
-  <div class="qa"><h3>Jak ovlivňuje kurz návratnost stroje?</h3><div class="a"><p>Zásadně. Při držení BTC se stroj zaplatí: při růstu cen <span class="n" data-k="payBull"></span>, v základním scénáři <span class="n" data-k="payBase"></span>, při stagnaci <span class="n" data-k="payFlat"></span> a při propadu o 30 % ročně <span class="n" data-k="payBear"></span>. Celá tabulka je v sekci Návratnost.</p></div></div>
+  <div class="qa"><h3>Jak ovlivňuje kurz návratnost stroje?</h3><div class="a"><p>Zásadně. Při držení BTC se stroj zaplatí: v optimistickém scénáři <span class="n" data-k="payBull"></span>, v základním <span class="n" data-k="payBase"></span>, při stagnaci cen v USD <span class="n" data-k="payFlat"></span> a v pesimistickém <span class="n" data-k="payBear"></span>. Celá tabulka je v sekci Návratnost.</p></div></div>
 </section>
 
 <section class="group" id="sit">
@@ -99,7 +103,7 @@
   <h2>Halving</h2>
   <div class="qa"><h3>Co je halving a kdy bude?</h3><div class="a"><p>Litecoin snižuje odměnu za blok na polovinu každých 840 000 bloků (zhruba 4 roky). Poslední halving byl v srpnu 2023 (z 12,5 na 6,25 LTC), další bude zhruba koncem července 2027 (na 3,125 LTC). Dogecoin halving nemá: odměna je napořád 10 000 DOGE za blok.</p></div></div>
   <div class="qa"><h3>Jak halving ovlivní můj stroj? Co se stane s výnosností?</h3><div class="a"><p>Méně než u Bitcoinu. Halving sníží na polovinu jen část výnosu z Litecoinu, která dnes tvoří <span class="n" data-k="ltcShare"></span>. Celkový výnos tak klesne zhruba o <span class="n" data-k="ltcShareHalf"></span>. Hlavní riziko u L9 není halving, ale cena DOGE.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Vyplacené sats za den</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span></div>
     <div class="chart small"><canvas id="cHalv" aria-label="Sats za den v projekci"></canvas></div>
     <p><b>Při držení BTC:</b> ve zvoleném scénáři vyplatí stroj do halvingu LTC <span class="n" data-k="btcPreH"></span> z celkových <span class="n" data-k="btc5y"></span> za 5 let.</p></div></div>
 </section>
@@ -107,7 +111,7 @@
 <section class="group" id="ztrata">
   <h2>Když se těžba nevyplácí</h2>
   <div class="qa"><h3>Může se stroj stát ztrátovým? Za jaké ceny se nevyplatí?</h3><div class="a"><p>Ano, když hodnota vytěžených LTC a DOGE za den klesne pod cenu elektřiny. Dnes se to stane, když ceny DOGE a LTC klesnou o <span class="n" data-k="beMargin"></span>; při dnešní ceně LTC to odpovídá ceně DOGE pod <span class="n" data-k="bePrice"></span>. Cena BTC na to vliv nemá. Výnos stroje v čase proti bodu zvratu ve scénářích:</p>
-    <div class="legend"><span><i class="dash"></i>Bod zvratu (elektřina za den)</span><span><i style="background:var(--s2)"></i>Propad</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Růst</span></div>
+    <div class="legend"><span><i class="dash"></i>Bod zvratu (elektřina za den)</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
     <div class="chart"><canvas id="cBe" aria-label="Denní výnos ve scénářích proti elektřině"></canvas></div></div></div>
   <div class="qa"><h3>Co se stane, když těžba přestane být rentabilní? Mohu stroj vypnout a později zapnout?</h3><div class="a"><p>Technicky ano: stroj jde kdykoli vypnout a znovu zapnout. Vypnutý stroj nespotřebovává elektřinu, ale ani netěží. L9 těží jen algoritmus Scrypt, takže ho nejde přepnout na Bitcoin.</p>
     <div class="verify">K ověření: doplňte, jestli hostingová smlouva vypnutí umožňuje a za jakých podmínek.</div></div></div>
@@ -116,7 +120,7 @@
 <section class="group" id="vsbtc">
   <h2>Těžit, nebo koupit BTC?</h2>
   <div class="qa"><h3>Má větší smysl těžit, nebo rovnou koupit BTC?</h3><div class="a"><p>Za 5 let vyplatí stroj koupený dnes ve scénáři <b data-k="scName"></b> asi <span class="n" data-k="btc5y"></span>. Celkem to stojí <span class="n" data-k="cost5y"></span> (stroj + elektřina), takže jeden BTC z těžby vás vyjde na <span class="n" data-k="costPerBtc"></span>. Dnes BTC stojí <span class="n" data-k="btc"></span>. Při nákupu BTC ve stejných dnech ročních vkladů byste měli <span class="n" data-k="lump5y"></span>. V týdenních nákupech po dobu 5 let <span class="n" data-k="dca5y"></span>.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Těžba</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i style="background:var(--s3)"></i>Týdenní DCA</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
     <div class="chart"><canvas id="cVs" aria-label="Stack BTC: těžba vs. nákup"></canvas></div>
     <p>V hodnotě po 5 letech (BTC <span class="n" data-k="price5y"></span>): těžba <span class="n" data-k="valMine"></span>, spot při ročních vkladech <span class="n" data-k="valLump"></span>, DCA <span class="n" data-k="valDca"></span>. Všechny tři strategie stojí stejně.</p></div></div>
   <div class="qa"><h3>Co by se muselo stát, aby byla těžba výhodnější než spot nebo DCA?</h3><div class="a" id="edge"></div></div>
@@ -127,7 +131,7 @@
 <section class="group" id="historie">
   <h2>Historie</h2>
   <div class="qa"><h3>Můžu vidět, jak stroj vydělával posledních 6 nebo 12 měsíců?</h3><div class="a"><p>Bereme dnešek a jdeme 12 a 6 měsíců zpět, nic se neodhaduje dopředu. Za posledních 12 měsíců by L9 s dnešními parametry vyplatil <span class="n" data-k="btc12"></span> a čistě vydělal <span class="n" data-k="net12"></span>. Za posledních 6 měsíců <span class="n" data-k="btc6"></span> a <span class="n" data-k="net6"></span>.</p>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Výnos za den</span><span><i style="background:var(--s2)"></i>Elektřina za den</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje za den</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--s3)"></i>Optimistický</span></div>
     <div class="chart small"><canvas id="cHist" aria-label="Denní výnos za posledních 12 měsíců"></canvas></div>
     <div class="tbl"><table id="tHist"></table></div></div></div>
   <div class="qa"><h3>Máte historické výsledky? Můžu vidět reálné výsledky jiných strojů?</h3><div class="a"><p>Čísla výše jsou výpočet z dat celé sítě, ne výpisy z konkrétních strojů. Reálný stroj se od výpočtu liší hlavně uptime, štěstím poolu a kurzy, za které pool převádí LTC a DOGE na BTC.</p>
@@ -136,14 +140,14 @@
 
 <section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
-  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC minus zaplacená elektřina, po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad −30 % ročně (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní +10 % ročně</span><span><i style="background:var(--s3)"></i>Růst +30 % ročně</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Pesimistický</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní</span><span><i style="background:var(--s3)"></i>Optimistický</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
-    <p>V pesimistickém scénáři (DOGE a LTC každý rok −30 %, za 5 let DOGE <span class="n" data-k="bearDoge"></span>, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
+    <p>V pesimistickém scénáři (<span data-k="sc0"></span>; za 5 let DOGE <span class="n" data-k="bearDoge"></span>) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section>
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: L9, 16,2 GH/s, 3 260 W. Data sítí a ceny: Coin Metrics Community API do {{LAST}}. Projekce: ceny LTC a DOGE podle scénáře, cena BTC o zadané procento ročně, hashrate Scrypt roste zadaným tempem a sleduje ceny LTC a DOGE, halving Litecoinu kolem 30. 7. 2027, Dogecoin bez halvingu, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/EV6kP3pBeG4WnoPVSpGfAv">L9: merge mining LTC + DOGE</a>. Cena stroje je $7 100.</div>
+  <div>Stroj: L9, 16,2 GH/s, 3 260 W. Data sítí a ceny: Coin Metrics Community API do {{LAST}}. Projekce: ceny LTC a DOGE podle scénáře, cena BTC o zadané procento ročně, hashrate Scrypt: výkon sítě dohání tržby těžařů (model kalibrovaný na historii, viz Metodika; v panelu jde přepnout na pevný růst), halving Litecoinu kolem 30. 7. 2027, Dogecoin bez halvingu, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/EV6kP3pBeG4WnoPVSpGfAv">L9: merge mining LTC + DOGE</a>. Cena stroje je $7 100.</div>
 </section>
 </div>

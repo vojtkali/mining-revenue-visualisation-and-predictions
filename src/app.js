@@ -20,19 +20,25 @@ function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   let end = $('end').value || '2030-12-31'; if (end <= TODAY) end = addDays(TODAY, 30);
   return {start:$('start').value||'2024-06-17', end, kwh:n('kwh'), fee:n('poolFee')/100, up:Math.min(1,n('uptime')/100), hw:n('hwS'),
-          th:n('th')||270, w:n('w')||3645, sc:$('sc').value, g:raw('hgr')/100, F:1+raw('feeBull')/100};
+          th:n('th')||270, w:n('w')||3645, sc:$('sc').value, g:raw('hgr')/100, F:1+raw('feeBull')/100,
+          q:netQ({mode:'netMode', up:'netUp', down:'netDown', c:'netEff'}, raw('hgr')/100)};
 }
+/*@include netmodel.js*/
+// network revenue in USD a day and hashrate in Coin Metrics units (TH/s) from a data row
+const NET_GAP = netGap(r => r.hv*r.hr*1e6*r.p, r => r.hr*1e6);
 
 // Daily projection after the last known day: scenario price path, growing network hashrate,
 // halving-adjusted subsidy and fees per block (flat, or rising after the halving when bullFees).
 function future(p, scKey, bullFees){
   const L = ALL[ALL.length-1], r = Math.min(500, Math.max(-90, parseFloat($(SC[scKey][2]).value) || 0))/100;   // yearly price change
   const fee0 = (L.fee ?? Math.max(0, L.hv*L.hr*1e6/144 - subsidy(L.d))), N = daysBetween(L.d, p.end), out = [];
+  const feeAt = d => fee0*(bullFees ? 1+(p.F-1)*Math.min(1, Math.max(0, daysBetween(HALVINGS[0], d)/365)) : 1);
+  // network hashrate follows the scenario's revenue (BTC a day x price) with the catch-up model, or grows by p.g
+  const lrr = t => { const d = addDays(L.d, t); return Math.log((subsidy(d)+feeAt(d))/(subsidy(L.d)+fee0)) + t/365*Math.log(1+r); };
+  const f = netPath(N, lrr, p.q, NET_GAP);
   for (let t=1; t<=N; t++){
-    const d = addDays(L.d, t), hr = L.hr*Math.pow(1+p.g, t/365);
-    const ramp = Math.min(1, Math.max(0, daysBetween(HALVINGS[0], d)/365));
-    const fee = fee0*(bullFees ? 1+(p.F-1)*ramp : 1);
-    out.push({d, p:L.p*Math.pow(1+r, t/365), hr, hv:144*(subsidy(d)+fee)/(hr*1e6), e:2});
+    const d = addDays(L.d, t), hr = L.hr*f[t];
+    out.push({d, p:L.p*Math.pow(1+r, t/365), hr, hv:144*(subsidy(d)+feeAt(d))/(hr*1e6), e:2, lrr:lrr(t), lf:Math.log(f[t])});
   }
   return out;
 }
@@ -110,18 +116,15 @@ function render(){
   charts.forEach(c => c.destroy()); charts = [];
   if (!s.length) return;
   const L = s.map(r => r.d), iT = Math.max(0, L.indexOf(TODAY)), now = s[iT], end = s[s.length-1];
-  const hw = s.map(()=>p.hw), tip = v => usd(v), pl = [zones, crosshair];
+  const tip = v => usd(v), pl = [zones, crosshair];
   charts.push(new Chart($('c1'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Tržba celkem', s.map(r=>r.rev), css('--s1')),
     line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistý zisk', s.map(r=>r.net), css('--s3')),
-    ref('Cena stroje', hw)]}}));
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   charts.push(new Chart($('c2'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Hodnota stacku', s.map(r=>r.stack), css('--s1')),
-    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistá hodnota', s.map(r=>r.hodl), css('--s3')),
-    line('Průběžný prodej', s.map(r=>r.net), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', hw)]}}));
+    line('Tržby z průběžného prodeje', s.map(r=>r.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   const o3 = opts(v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:2}), v=>btc(v));
   o3.plugins.tooltip.callbacks.afterBody = it => { const r=s[it[0].dataIndex]; return [` Cena BTC: ${usd(r.price)}`]; };
   charts.push(new Chart($('c3'), {type:'line', plugins:pl, options:o3, data:{labels:L, datasets:[
@@ -140,7 +143,7 @@ function render(){
     ['Natěženo dosud', btc(now.btc), `${iT+1} dní těžby`],
     [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
     [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
-    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář). Z toho už natěžené ${btc(now.btc)} = ${usd(now.btc*end.price)}, budoucí těžba ${btc(end.btc-now.btc)} = ${usd((end.btc-now.btc)*end.price)} za elektřinu ${usd(end.el-now.el)}. Po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
@@ -185,9 +188,10 @@ function renderProj(p, s, iT){
     res[i].label = t; const el = $('lg_'+k); if (el) el.textContent = t; });
   PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
-  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
-    .concat([ref('Cena stroje', L.map(()=>p.hw))]);
+  // value of the mined BTC against everything put in (machine + energy prepaid a year ahead): above it, all is paid back
+  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.stack : null), css('--fg2'))]
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.stack : null), css(x.col))))
+    .concat([ref('Vloženo celkem (stroj + energie)', s.slice(from).map(r=>r.invested))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const pct = x => Math.min(500,Math.max(-90,parseFloat($(SC[Object.keys(SC).find(k=>SC[k][0]===x.name)][2]).value)||0)).toLocaleString('cs-CZ',{signDisplay:'always'})+' %';

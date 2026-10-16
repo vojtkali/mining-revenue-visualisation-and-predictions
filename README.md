@@ -41,7 +41,7 @@ Všechny výpočty běží v USD: cena stroje, elektřina (USD/kWh) i ceny minc�
 
 ## Limity modelu
 
-- Výkon sítě BTC v projekci roste zadaným tempem bez ohledu na cenu BTC (u ZEC a Scrypt sleduje cenu mince přes citlivost 0,3). V pesimistickém scénáři proto síť roste stejně rychle jako v optimistickém, ačkoli v reálu by část strojů při nízké hashprice vypnula; kapitulace minerů modelovaná není.
+- Výkon sítě dohání tržby těžařů (model dohánění, viz níže); nové generace strojů, zákazy těžby ani omezení výroby ASICů modelované nejsou. Scrypt (L9) se modelem předpovídá stejně dobře jako pevným růstem, ne lépe.
 - Ceny se mění plynule o stálé roční procento (CAGR); cykly, propady a volatilita nejsou modelované. Scénáře nejsou předpověď ani pravděpodobnosti.
 - Data budoucích halvingů jsou kalendářní odhad (rozestup 4 roky), skutečné datum určuje výška bloku.
 - Transakční poplatky zůstávají na dnešní úrovni v BTC za blok, pokud varianta neuvádí jinak.
@@ -79,7 +79,7 @@ node tests/browser.cjs                    # všechny stránky a změny parametr�
 
 `scripts/build_v2.py` skládá pro každý stroj jednu stránku se záložkami (Přehled, Návratnost, Těžba vs. nákup, Otázky, Metodika) a panelem parametrů vlevo; k tomu úvod se srovnáním strojů. Výpočty jsou stejné jako na stránkách v `docs/` (hlavní stránka, FAQ a srovnání podle dne vstupu stroje běží beze změny, panel jim synchronizuje parametry). `python3 scripts/build_v2.py OUT_DIR` vytvoří totéž jako jeden artefakt claude.ai: `index.html` je obal, který zobrazuje `overview.html`, `s21.html`, `z15.html` a `l9.html` (soubory téhož artefaktu) v rámech. Přepínač strojů přepíná rámy bez načítání a předá záložku i pozici na stránce; na webu (`--public`) totéž dělá odkaz s `#záložka.karta.posun`.
 
-**Monte Carlo a horská dráha** (jen kalkulačky, `src/mc.js` + adaptér stroje `src/mc_<stroj>.js`). Hladká projekce posouvá cenu každý den o stejné procento, takže neukáže propady ani to, kdy DCA pomůže. Proto se vybraný scénář přehraje 2 000×. Ke scénářové cestě se přidá kolísání z historických denních logaritmických výnosů (verzovaný snímek Coin Metrics od 25. 5. 2023). Výnosy jsou očištěné o průměr a losují se v 60denních kruhových blocích ze stejných dnů pro všechny měny stroje (BTC; BTC + ZEC; BTC + LTC + DOGE). Hashrate sítě reaguje na odchylku ceny od scénáře se zpožděním asi 90 dní: u BTC s citlivostí 0,5, u Zcash a Scrypt s citlivostí z panelu. Účetnictví je stejné jako v tabulce čtyř strategií. Při kolísání 0 % dá Monte Carlo přesně čísla deterministické projekce. Generátor má pevné semínko, výpočet běží po načtení stránky v dávkách (asi 0,3 s na M2). Výstupy:
+**Monte Carlo a horská dráha** (jen kalkulačky, `src/mc.js` + adaptér stroje `src/mc_<stroj>.js`). Hladká projekce posouvá cenu každý den o stejné procento, takže neukáže propady ani to, kdy DCA pomůže. Proto se vybraný scénář přehraje 2 000×. Ke scénářové cestě se přidá kolísání z historických denních logaritmických výnosů (verzovaný snímek Coin Metrics od 25. 5. 2023). Výnosy jsou očištěné o průměr a losují se v 60denních kruhových blocích ze stejných dnů pro všechny měny stroje (BTC; BTC + ZEC; BTC + LTC + DOGE). Každá cesta má vlastní výkon sítě, který dohání tržby těžařů v té cestě stejně jako v projekci (v režimu pevného růstu reaguje na odchylku ceny se zpožděním asi 90 dní). Účetnictví je stejné jako v tabulce čtyř strategií. Při kolísání 0 % dá Monte Carlo přesně čísla deterministické projekce. Generátor má pevné semínko, výpočet běží po načtení stránky v dávkách (asi 0,3 s na M2). Výstupy:
 - v záložce Těžba vs. nákup pravděpodobnosti, pásma 10.–90. percentilu, tabulka strategií s propady a „horská dráha“ jedné cesty den po dni;
 - v záložce Návratnost podíl cest se zaplaceným strojem v čase;
 - v Přehledu rozsah čisté hodnoty na konci odhadu.
@@ -89,3 +89,22 @@ Vzorek je kratší než celý cyklus, výsledky jsou proto rozsah možností, ne
 `CHROMIUM=/cesta/k/chromium` umožňuje použít vlastní prohlížeč. `scripts/rebuild_data.sh --offline` zopakuje kompletní sestavení z verzovaného snímku; bez přepínače obnoví data z API.
 
 GitHub Action běží denně v 6:17 UTC, validuje data a výpočty, sestaví stránky, přepočítá souhrn a změny uloží. Staré generátory založené na neaktualizovaném CSV archivu byly nahrazeny společným aktualizátorem.
+
+## Výkon sítě: model dohánění
+
+Projekce, otázky, bod zvratu i Monte Carlo počítají výkon sítě (hashrate) modelem dohánění (`src/netmodel.js`). Cílový výkon je ten, který tržby všech těžařů v USD (odměna × cena mince, u L9 LTC + DOGE) uživí při běžné hashprice. Běžná hashprice klesá o „zlepšování strojů“ (výchozí 20 % ročně). Skutečný výkon se k cíli přibližuje s poločasem růstu, nad cílem klesá s poločasem poklesu. Tržby se v projekci řídí scénářem ceny, takže pumpa ceny zrychlí růst sítě a propad ho zastaví.
+
+- `scripts/fetch_history.py` (GitHub Action `history.yml`) stáhne dlouhou denní historii Coin Metrics do `data/source/history.json`.
+- `scripts/catchup_hashrate.py` kalibruje poločasy a úroveň běžné hashprice na celé historii (od 2017–2018) a testuje model ze šesti výchozích dnů 2021–2025 na 2 roky dopředu proti pevnému růstu. Výsledek je v `data/derived/hashrate_catchup.json`; build ho vloží do stránek (`DATA.net`).
+- Výchozí parametry: BTC poločas růstu 270 dní, poklesu 2 920 dní; Zcash 180 / 2 920 dní; Scrypt 120 / 2 920 dní (kalibrace dává u Scryptu 365 dní, ale síť v letech 2025–26 skoro neklesla, i když tržba na výkon spadla na pětinu). V panelu Projekce jdou změnit nebo přepnout na pevný růst.
+- Test (průměrná absolutní chyba logaritmu hashrate po 2 letech, model / pevný růst): BTC 0,24 / 0,47, Zcash 0,15 / 0,80, Scrypt 0,44 / 0,42.
+
+## Ceny altcoinů vůči BTC a ZEC po pumpě
+
+Ceny ZEC (Z15 Pro) a LTC a DOGE (L9) se ve scénářích zadávají vůči BTC; cena v USD je kurz krát cena BTC ze scénáře. Výplata v BTC tak závisí jen na kurzu vůči BTC a na síti, ne na tom, jak roste samotný BTC.
+
+- L9: výchozí LTC a DOGE −35 / −20 / −5 % ročně vůči BTC (za posledních 2–5 let DOGE −21 až −25 %, LTC −14 až −31 % ročně). Síť Scrypt má výchozí pevný růst 15 % ročně (s citlivostí na ceny): v letech 2025–26 skoro neklesla, i když tržba na výkon spadla na pětinu, a přicházejí L11. Model dohánění jde zapnout, poločas poklesu je pak 2 920 dní.
+- Z15 Pro: výchozí tvar „po pumpě“ (`src/zpath.js`): kurz ZEC/BTC se ukotví na vrcholu z posledního roku dat a jde přes body v % vrcholu za 3–6 měsíců, za rok a za 2 roky, potom ročním tempem vůči BTC. Body z pump LTC 2017, DOGE 2018, DOGE 2021, DOGE 2024 a ZEC 2021 vůči BTC: pesimistický 40 / 28 / 20 % a −30 % ročně, základní 45 / 40 / 25 % a −15 %, optimistický 55 / 55 / 31 % a −5 %. Tvar „procenta ročně“ zůstává jako volba.
+
+- `scripts/pump_network_test.py` testuje výkon sítě po pumpách třemi variantami (dohánění tržeb, zpožděné dodávky, vyhlazené tržby), s parametry z dat mimo testovanou epizodu. U Zcash vychází nejlépe prosté dohánění (chyba 0,27 po pumpě 2021, 0,15 při pumpě 2025–26), proto ho kalkulačky používají dál. U Scryptu se netrefí žádná varianta. Výsledek je v `data/derived/pump_network_test.json`.
+
