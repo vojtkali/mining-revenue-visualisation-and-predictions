@@ -274,7 +274,7 @@ def build_index():
     body = B.fill(B.read('sumbody.html'), {**sv, **vals}, 'v2 index')
     body = re.sub(r'<header>.*?</header>', '', body, count=1, flags=re.S)
     body = re.sub(r'\s*<h3>Podrobné stránky</h3>\s*<div class="links">.*?</div>', '<h3>Data</h3>', body, count=1, flags=re.S)
-    body = body.replace('<div class="wrap">', '<div class="ov-body">', 1)
+    body = body.replace('<div class="wrap">', '<div class="ov-body"><p class="hint ovnote" id="ovNote" hidden>Tabulky a graf níže (Ve zkratce, Návratnost, Těžit, nebo koupit) se v kalkulačkách řídí jejich nastavením. Ostatní odpovědi počítají s výchozími hodnotami a strojem koupeným v poslední den dat.</p>', 1)
     # links to the old per-machine pages lead to the machine's calculator instead (the calculator has all of it)
     old = {'s21xp.html': 's21', 'z15pro.html': 'z15', 'l9.html': 'l9'}
     for art, page in B.ARTIFACT_LINKS.items():
@@ -527,6 +527,7 @@ if (window.parent !== window){
     parent.postMessage({type:'v2switch', to:a.dataset.m}, '*'); });
   // one start date for all machines: sent to every calculator through the shell
   const box = $('ovStartBox'), inp = $('ovStart'); box.hidden = false;
+  if ($('ovNote')) $('ovNote').hidden = false;
   // the field shows the start the calculators share; empty while they differ
   const starts = {};
   const send = () => { if (!inp.value) return;
@@ -550,6 +551,14 @@ if (window.parent !== window){
     if (tb && s.scens) tb.innerHTML = `<span class="h">Scénář</span><span class="h n">Zaplaceno</span><span class="h n">Do ${fmt(s.end)}</span>` +
       s.scens.map(x => { const c = x.sel ? ' sel' : '';
         return `<span class="lab${c}">${x.label}</span><span class="n${c}">${x.pay}</span><span class="n${c} ${x.res >= 0 ? 'pos' : 'neg'}">${x.resTxt}</span>`; }).join('');
+    // the comparison below the cards: rows of the selected scenario and of all three, column = machine
+    const j = ['s21', 'z15', 'l9'].indexOf(k), cell = (row, html, cls) => { const tr = F(row); if (!tr) return; const td = tr.children[j + 1]; if (td){ td.innerHTML = html; td.className = cls || ''; } };
+    const th = (row, txt) => { const tr = F(row); if (tr) tr.children[0].textContent = txt; };
+    cell('row-pay', s.pay); th('row-pay', 'Zaplacení při držení BTC, scénář vybraný v kalkulačce');
+    cell('row-res', `<span class="n">${s.resTxt}</span>`, s.res >= 0 ? 'pos' : 'neg'); th('row-res', 'Na konci odhadu: hodnota BTC − všechno vložené');
+    (s.scens || []).forEach((x, i) => { cell('scn-' + i, x.label); cell('pay-' + i, x.pay); });
+    if (s.strat){ const mx = Math.max(...s.stratV); s.strat.forEach((x, i) => cell('st-' + i, s.stratV[i] === mx ? `<b><span class="n">${x}</span></b>` : `<span class="n">${x}</span>`)); }
+    if (window.sumSet && s.scens) window.sumSet(j, s.scens.map(x => x.res));
     F('scn-' + k).innerHTML = `<b>Podle kalkulačky:</b> ${s.scen.toLowerCase()} scénář, stroj od ${fmt(s.start)} do ${fmt(s.end)}.`;
   });
   parent.postMessage({type:'v2ready', key:'index'}, '*');

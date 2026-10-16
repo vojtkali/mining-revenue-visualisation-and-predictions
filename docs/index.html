@@ -114,8 +114,8 @@ code{font-family:var(--f-mono);font-size:12.5px}
       <tr><th>BTC za měsíc dnes</th><td><span class="n">0,0030</span></td><td><span class="n">0,0130</span></td><td><span class="n">0,0025</span></td></tr>
       <tr><th>O kolik může klesnout cena, než je stroj ve ztrátě</th><td><span class="n">27 %</span> (BTC pod $59 500)</td><td><span class="n">87 %</span> (ZEC pod $146)</td><td><span class="n">21 %</span> (DOGE i LTC)</td></tr>
       <tr><th>Další halving a jeho dopad</th><td>duben 2028, výnos −50 %</td><td>listopad 2028, výnos −50 %</td><td>LTC červenec 2027, výnos jen −8 %; DOGE halving nemá</td></tr>
-      <tr><th>Zaplacení při držení BTC, základní scénář</th><td>červen 2034</td><td>červenec 2033</td><td>květen 2032</td></tr>
-      <tr><th>Za 5 let: hodnota BTC − všechno zaplacené</th><td class="neg"><span class="n">−$4 100</span></td><td class="neg"><span class="n">−$3 293</span></td><td class="neg"><span class="n">−$738</span></td></tr>
+      <tr data-f="row-pay"><th>Zaplacení při držení BTC, základní scénář</th><td>červen 2034</td><td>červenec 2033</td><td>květen 2032</td></tr>
+      <tr data-f="row-res"><th>Za 5 let: hodnota BTC − všechno zaplacené</th><td class="neg"><span class="n">−$4 100</span></td><td class="neg"><span class="n">−$3 293</span></td><td class="neg"><span class="n">−$738</span></td></tr>
       <tr><th>1 BTC z těžby vás stojí</th><td><span class="n">$263 000</span></td><td><span class="n">$242 000</span></td><td><span class="n">$212 000</span></td></tr>
       <tr><th>Hlavní riziko</th><td>růst sítě a halving 2028</td><td>pád ceny ZEC po prudkém růstu</td><td>cena DOGE (85 % výnosu)</td></tr>
     </tbody>
@@ -126,9 +126,9 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <div class="tbl"><table class="cmp">
     <thead><tr><th>Scénář</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead>
     <tbody>
-      <tr><th><span class="sw" style="background:var(--s2)"></span>Pesimistický</th><td>BTC +10 % ročně</td><td>ZEC první rok −70 %, pak beze změny; BTC +10 % ročně</td><td>DOGE a LTC −30 % ročně; BTC +10 % ročně</td></tr>
-      <tr><th><span class="sw" style="background:var(--s1)"></span>Základní</th><td>BTC +20 % ročně</td><td>ZEC první rok −40 %, pak +10 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +10 % ročně; BTC +20 % ročně</td></tr>
-      <tr><th><span class="sw" style="background:var(--s3)"></span>Optimistický</th><td>BTC +40 % ročně</td><td>ZEC první rok +30 %, pak +20 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +30 % ročně; BTC +20 % ročně</td></tr>
+      <tr data-f="scn-0"><th><span class="sw" style="background:var(--s2)"></span>Pesimistický</th><td>BTC +10 % ročně</td><td>ZEC první rok −70 %, pak beze změny; BTC +10 % ročně</td><td>DOGE a LTC −30 % ročně; BTC +10 % ročně</td></tr>
+      <tr data-f="scn-1"><th><span class="sw" style="background:var(--s1)"></span>Základní</th><td>BTC +20 % ročně</td><td>ZEC první rok −40 %, pak +10 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +10 % ročně; BTC +20 % ročně</td></tr>
+      <tr data-f="scn-2"><th><span class="sw" style="background:var(--s3)"></span>Optimistický</th><td>BTC +40 % ročně</td><td>ZEC první rok +30 %, pak +20 % ročně; BTC +20 % ročně</td><td>DOGE a LTC +30 % ročně; BTC +20 % ročně</td></tr>
       <tr><th>Výkon sítě (všechny scénáře)</th><td>+30 % ročně</td><td>+300 % ročně a navíc sleduje cenu ZEC (při 10× vyšší ceně 2× vyšší výkon)</td><td>+15 % ročně a navíc sleduje ceny DOGE a LTC (stejně jako u Z15 Pro)</td></tr>
       <tr><th>Halving</th><td>duben 2028, odměna na polovinu</td><td>listopad 2028, odměna na polovinu</td><td>jen Litecoin, červenec 2027 (výnos −8 %)</td></tr>
       <tr><th>Společné</th><td colspan="3">Stroj koupený dnes a běží nepřetržitě 5 let, i ve ztrátě. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Ceny se mění plynule (složeně), poplatky v blocích zůstávají na dnešní úrovni.</td></tr>
@@ -148,9 +148,9 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <h2>Návratnost</h2>
   <div class="qa"><h3>Za jak dlouho se stroj zaplatí?</h3><div class="a"><p>Při dnešních podmínkách bez změn: S21 XP <span class="n">9,2 roku</span>, Z15 Pro <span class="n">1,1 roku</span>, L9 <span class="n">14,3 roku</span>. Podmínky se ale mění, proto platí spíš scénáře:</p>
     <div class="tbl"><table class="cmp"><thead><tr><th>Zaplacení při držení BTC</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
-      <tr><th>Nejlepší scénář</th><td>duben 2030</td><td>duben 2031</td><td>březen 2031</td></tr>
-      <tr><th>Základní</th><td>červen 2034</td><td>červenec 2033</td><td>květen 2032</td></tr>
-      <tr><th>Pesimistický</th><td>ani do 2041</td><td>ani do 2041</td><td>ani do 2041</td></tr>
+      <tr data-f="pay-2"><th>Nejlepší scénář</th><td>duben 2030</td><td>duben 2031</td><td>březen 2031</td></tr>
+      <tr data-f="pay-1"><th>Základní</th><td>červen 2034</td><td>červenec 2033</td><td>květen 2032</td></tr>
+      <tr data-f="pay-0"><th>Pesimistický</th><td>ani do 2041</td><td>ani do 2041</td><td>ani do 2041</td></tr>
     </tbody></table></div></div></div>
   <div class="qa"><h3>Jaké je ROI a kolik procent ročně čekat?</h3><div class="a"><p>První rok při dnešních podmínkách: S21 XP <span class="n">11 %</span>, Z15 Pro <span class="n">92 %</span>, L9 <span class="n">7 %</span> z ceny stroje. Dál méně. Pevné roční procento u těžby neexistuje; ROI všech vkladů za 5 let v základním scénáři je −23 %, −16 % a −4 %.</p></div></div>
   <div class="qa"><h3>Je výnos, návratnost nebo množství BTC garantované?</h3><div class="a"><p>Ne. Výnos závisí na ceně mince, výkonu sítě a halvingu, které nikdo neovlivní. Kalkulace jsou scénáře, ne slib.</p></div></div>
@@ -174,10 +174,10 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <h2>Těžit, nebo koupit BTC?</h2>
   <div class="qa"><h3>Co vyjde lépe za stejné peníze?</h3><div class="a"><p>Stejné vklady v totožných dnech: stroj + první rok energie na začátku, další energie každých 365 dní. Základní scénář:</p>
     <div class="tbl"><table class="cmp"><thead><tr><th>BTC + hotovost v USD za 5 let</th><th>S21 XP</th><th>Z15 Pro</th><th>L9</th></tr></thead><tbody>
-      <tr><th>Těžba + držení</th><td><span class="n">$13 696</span></td><td><span class="n">$16 805</span></td><td><span class="n">$15 857</span></td></tr>
-      <tr><th>Těžba + prodej</th><td><span class="n">$7 575</span></td><td><span class="n">$7 502</span></td><td><span class="n">$9 397</span></td></tr>
-      <tr><th>Spot při ročních vkladech</th><td><b><span class="n">$36 809</span></b></td><td><b><span class="n">$44 299</span></b></td><td><b><span class="n">$34 608</span></b></td></tr>
-      <tr><th>Týdenní DCA</th><td><span class="n">$33 659</span></td><td><span class="n">$40 508</span></td><td><span class="n">$31 646</span></td></tr>
+      <tr data-f="st-0"><th>Těžba + držení</th><td><span class="n">$13 696</span></td><td><span class="n">$16 805</span></td><td><span class="n">$15 857</span></td></tr>
+      <tr data-f="st-1"><th>Těžba + prodej</th><td><span class="n">$7 575</span></td><td><span class="n">$7 502</span></td><td><span class="n">$9 397</span></td></tr>
+      <tr data-f="st-2"><th>Spot při ročních vkladech</th><td><b><span class="n">$36 809</span></b></td><td><b><span class="n">$44 299</span></b></td><td><b><span class="n">$34 608</span></b></td></tr>
+      <tr data-f="st-3"><th>Týdenní DCA</th><td><span class="n">$33 659</span></td><td><span class="n">$40 508</span></td><td><span class="n">$31 646</span></td></tr>
     </tbody></table></div>
     <p>Těžba nevyhrává u žádného stroje. V historických backtestech končících datem dat porazil spot těžbu u 100 % vstupních dnů u S21 XP, v 100 % u L9 a v 99 % u Z15 Pro.</p></div></div>
   <div class="qa"><h3>Proč tedy těžit?</h3><div class="a"><p>Pravidelný přísun BTC bez nákupu najednou a možnost získat BTC pod tržní cenou, pokud je elektřina levná nebo mince stroje silná. Proti tomu: stroj ztrácí hodnotu a výnos klesá s růstem sítě a s halvingem.</p>
@@ -197,9 +197,12 @@ code{font-family:var(--f-mono);font-size:12.5px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 let chart;
+const V = [[-8930, -4100, 11794], [-10925, -3293, 1941], [-9702, -738, 3583]];
+// the overview of the calculators replaces a machine's values with the live ones from its calculator
+window.sumSet = (i, vals) => { V[i] = vals; render(); };
 function render(){
   if (chart) chart.destroy();
-  const v = [[-8930, -4100, 11794], [-10925, -3293, 1941], [-9702, -738, 3583]];
+  const v = V;
   const ds = [['Nejhorší','--s2'],['Základní','--s1'],['Nejlepší','--s3']].map(([l,c],i) => ({label:l, data:v.map(r=>r[i]), backgroundColor:css(c), borderRadius:4, borderSkipped:false, barPercentage:.8, categoryPercentage:.7}));
   const fmt = x => (x<0?'−':'+')+'$'+Math.abs(Math.round(x)).toLocaleString('cs-CZ');
   chart = new Chart(document.getElementById('cSum'), {type:'bar', data:{labels:['S21 XP','Z15 Pro','L9'], datasets:ds},

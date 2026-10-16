@@ -379,6 +379,7 @@ function render(){
   const K = [k[1], k[3], hodlTile, k[4], k[2], k[5], k[0], k[6]];
   // summary for the overview of the one-artifact suite (its cards follow the calculators)
   window.v2Sum = {start:p.start, end:end.d, scen:SC[p.sc][0], pay: be2 ? fmtDate(be2.d) : `do ${fmtDate(end.d)} ne`, res:end.stack-end.invested, resTxt:usd(end.stack-end.invested),
+    strat:[end.stack, end.rev, cE.spotValue, cE.dcaValue].map(x => usd(x)), stratV:[end.stack, end.rev, cE.spotValue, cE.dcaValue],
     scens:PROJ.map((x, i) => { const pay = x.r.find(r => r.hodl >= p.hw), e = x.e;
       return {name:x.name, label:x.label||x.name, sel:Object.keys(SC)[i]===p.sc, pay: pay ? fmtDate(pay.d) : 'ne', res:e.stack-e.invested, resTxt:usd(e.stack-e.invested)}; })};
   window.dispatchEvent(new Event('v2sum'));
