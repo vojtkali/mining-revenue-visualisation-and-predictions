@@ -21,8 +21,8 @@ const sats = v => Math.round(v*1e8).toLocaleString('cs-CZ') + ' sats';
 const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsíců` : `${y.toLocaleString('cs-CZ',{minimumFractionDigits:1,maximumFractionDigits:1})} roku`; };
 const GH = 16.2, W = 3260;
 // [name, LTC and DOGE in USD a year, colour, BTC]; the calculator gives LTC and DOGE against BTC: USD = (1 + BTC)(1 + against BTC) - 1
-const SCN_DEF = [['Propad vůči BTC −35 % ročně; BTC +10 %',1.1*.65-1,'--s2',.10],['Stagnace LTC a DOGE 0 % v USD',0,'--fg2'],
-  ['Základní: vůči BTC −20 % ročně (BTC +20 %)',1.2*.8-1,'--s1'],['Mírný pokles vůči BTC −5 % ročně (BTC +20 %)',1.2*.95-1,'--s3']];
+const SCN_DEF = [['Propad vůči BTC −40 % ročně; BTC +10 %',1.1*.6-1,'--s2',.10],['Stagnace LTC a DOGE 0 % v USD',0,'--fg2'],
+  ['Základní: vůči BTC −30 % ročně (BTC +20 %)',1.2*.7-1,'--s1'],['Mírný pokles vůči BTC −10 % ročně (BTC +30 %)',1.3*.9-1,'--s3',.30]];
 // with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, LTC, DOGE]
 const SCN_IN = [['Pesimistický','lbB','llB','ldB'], null, ['Základní','lbM','llM','ldM'], ['Optimistický','lbU','llU','ldU']];
 // reserve to break-even over time along the selected scenario: how far LTC and DOGE could fall from the scenario prices that

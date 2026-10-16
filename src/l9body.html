@@ -19,14 +19,14 @@
   <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
   <label for="sc">Scénář pro grafy 1–4<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
   <label for="lbB">Pesimistický: BTC, % ročně<input id="lbB" type="number" step="1" min="-90" max="500" value="10"></label>
-  <label for="llB">Pesimistický: LTC vůči BTC, % ročně<input id="llB" type="number" step="5" min="-90" max="500" value="-35"></label>
-  <label for="ldB">Pesimistický: DOGE vůči BTC, % ročně<input id="ldB" type="number" step="5" min="-90" max="500" value="-35"></label>
+  <label for="llB">Pesimistický: LTC vůči BTC, % ročně<input id="llB" type="number" step="5" min="-90" max="500" value="-40"></label>
+  <label for="ldB">Pesimistický: DOGE vůči BTC, % ročně<input id="ldB" type="number" step="5" min="-90" max="500" value="-40"></label>
   <label for="lbM">Základní: BTC, % ročně<input id="lbM" type="number" step="1" min="-90" max="500" value="20"></label>
-  <label for="llM">Základní: LTC vůči BTC, % ročně<input id="llM" type="number" step="5" min="-90" max="500" value="-20"></label>
-  <label for="ldM">Základní: DOGE vůči BTC, % ročně<input id="ldM" type="number" step="5" min="-90" max="500" value="-20"></label>
-  <label for="lbU">Optimistický: BTC, % ročně<input id="lbU" type="number" step="1" min="-90" max="500" value="20"></label>
-  <label for="llU">Optimistický: LTC vůči BTC, % ročně<input id="llU" type="number" step="5" min="-90" max="500" value="-5"></label>
-  <label for="ldU">Optimistický: DOGE vůči BTC, % ročně<input id="ldU" type="number" step="5" min="-90" max="500" value="-5"></label>
+  <label for="llM">Základní: LTC vůči BTC, % ročně<input id="llM" type="number" step="5" min="-90" max="500" value="-30"></label>
+  <label for="ldM">Základní: DOGE vůči BTC, % ročně<input id="ldM" type="number" step="5" min="-90" max="500" value="-30"></label>
+  <label for="lbU">Optimistický: BTC, % ročně<input id="lbU" type="number" step="1" min="-90" max="500" value="30"></label>
+  <label for="llU">Optimistický: LTC vůči BTC, % ročně<input id="llU" type="number" step="5" min="-90" max="500" value="-10"></label>
+  <label for="ldU">Optimistický: DOGE vůči BTC, % ročně<input id="ldU" type="number" step="5" min="-90" max="500" value="-10"></label>
   <label for="netMode">Model sítě<select id="netMode"><option value="catch">dohánění tržeb (kalibrováno)</option><option value="fixed" selected>pevný růst</option></select></label>
   <label for="netUp">Poločas růstu sítě, dny<input id="netUp" type="number" step="30" min="1" value="120"></label>
   <label for="netDown">Poločas poklesu sítě, dny<input id="netDown" type="number" step="30" min="1" value="2920"></label>
@@ -34,7 +34,7 @@
   <label for="lhg">Růst hashrate Scrypt, % ročně<input id="lhg" type="number" step="5" min="-50" value="15"></label>
   <label for="lk">Citlivost hashrate na ceny LTC/DOGE<input id="lk" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
-<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Cena BTC se mění o zadané procento ročně, LTC a DOGE jsou zadané vůči BTC: za posledních 2–5 let ztrácel DOGE vůči BTC 21–25 % ročně a LTC 14–31 % ročně, proto výchozí základní scénář počítá s −20 % ročně vůči BTC. Hashrate sítě Scrypt výchozí roste pevným tempem (výchozí 15 % ročně) a sleduje ceny LTC a DOGE s citlivostí z panelu. Model dohánění tržeb tu nesedí: síť je dnes asi 1,8× nad výkonem, který tržby uživí, tržba na výkon spadla od ledna 2025 na pětinu, a hashrate přesto klesl jen o 13 % pod vrchol, protože stroje běží dál a přicházejí účinnější L11. Dohánění jde zapnout v panelu Projekce. Halving Litecoinu kolem 30. 7. 2027 sníží odměnu LTC na polovinu; Dogecoin halving nemá (10 000 DOGE za blok napořád). Dnes tvoří DOGE asi 85 % výnosu, takže halving LTC výnos sníží jen asi o 8 %. Stroj běží nepřetržitě.</p>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Cena BTC se mění o zadané procento ročně, LTC a DOGE jsou zadané vůči BTC: za posledních 2–5 let ztrácel DOGE vůči BTC 21–25 % ročně a LTC 14–31 % ročně, proto výchozí základní scénář počítá s −30 % ročně vůči BTC. Hashrate sítě Scrypt výchozí roste pevným tempem (výchozí 15 % ročně) a sleduje ceny LTC a DOGE s citlivostí z panelu. Model dohánění tržeb tu nesedí: síť je dnes asi 1,8× nad výkonem, který tržby uživí, tržba na výkon spadla od ledna 2025 na pětinu, a hashrate přesto klesl jen o 13 % pod vrchol, protože stroje běží dál a přicházejí účinnější L11. Dohánění jde zapnout v panelu Projekce. Halving Litecoinu kolem 30. 7. 2027 sníží odměnu LTC na polovinu; Dogecoin halving nemá (10 000 DOGE za blok napořád). Dnes tvoří DOGE asi 85 % výnosu, takže halving LTC výnos sníží jen asi o 8 %. Stroj běží nepřetržitě.</p>
 
 <div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadané předpoklady, nikoli pravděpodobnostní prognóza. Pesimistický scénář je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Model sítě a jeho parametry jsou v panelu Projekce.</p>
 
