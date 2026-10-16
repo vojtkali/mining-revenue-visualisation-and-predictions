@@ -29,11 +29,10 @@ MACHINES = {
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
     sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR'], 'netMode': ['zNetMode'], 'netUp': ['zNetUp'], 'netDown': ['zNetDown'], 'netEff': ['zNetEff']},
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
-    scen={k: [('BTC v USD', f'b{c}', '% / rok', ''), ('ZEC/BTC 3–6 měs.', f'z{c}3', '% vrch.', 'pump'), ('ZEC/BTC za rok', f'z{c}12', '% vrch.', 'pump'),
-              ('ZEC/BTC 2 roky', f'z{c}24', '% vrch.', 'pump'), ('ZEC/BTC potom', f'z{c}t', '% / rok', 'pump'), ('ZEC/BTC 1. rok', f'z{c}1', '%', 'pct'), ('ZEC/BTC dál', f'z{c}2', '% / rok', 'pct')]
+    scen={k: [('BTC v USD', f'b{c}', '% / rok'), ('ZEC/BTC za 3 měs.', f'z{c}3', '%'), ('ZEC/BTC za rok', f'z{c}12', '%'),
+              ('ZEC/BTC za 2 roky', f'z{c}24', '%'), ('ZEC/BTC potom', f'z{c}t', '% / rok')]
           for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
-    shape=('zShape', 'Tvar ceny ZEC', 'ZEC se zadává vůči BTC (kurz ZEC/BTC). Po pumpě: kurz jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024, ZEC 2021), v % vrcholu z posledního roku dat; potom roční trend. Procenta: první rok změna, pak roční tempo.'),
-    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD, ZEC vůči BTC; pokles se znaménkem minus.',
+    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD za rok. ZEC/BTC je změna kurzu ZEC vůči BTC proti dnešku za 3 měsíce, za rok a za 2 roky, potom roční tempo; pokles se znaménkem minus.',
     proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
     mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Každá cesta má vlastní výkon sítě Zcash, který dohání tržby těžařů v této cestě stejně jako v projekci.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),

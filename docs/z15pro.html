@@ -88,28 +88,21 @@ code{font-family:var(--f-mono);font-size:12.5px}
 <form class="controls" id="fx" onsubmit="return false">
   <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
   <label for="sc">Scénář pro grafy 1–4<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
-  <label for="zShape">Tvar ceny ZEC<select id="zShape"><option value="pump" selected>po pumpě (jako minulé pumpy)</option><option value="pct">procenta ročně</option></select></label>
   <label for="bB">Pesimistický: BTC, % ročně<input id="bB" type="number" step="1" min="-90" max="500" value="10"></label>
-  <label for="zB1">Pesimistický: ZEC vůči BTC 1. rok, %<input id="zB1" type="number" step="5" min="-95" max="500" value="-70"></label>
-  <label for="zB2">Pesimistický: ZEC vůči BTC dál, % ročně<input id="zB2" type="number" step="5" min="-90" max="500" value="-30"></label>
-  <label for="zB3">Pesimistický: ZEC vůči BTC za 3–6 měsíců od vrcholu, % vrcholu<input id="zB3" type="number" step="5" min="1" max="300" value="40"></label>
-  <label for="zB12">Pesimistický: ZEC vůči BTC rok po vrcholu, % vrcholu<input id="zB12" type="number" step="1" min="1" max="300" value="28"></label>
-  <label for="zB24">Pesimistický: ZEC vůči BTC 2 roky po vrcholu, % vrcholu<input id="zB24" type="number" step="1" min="1" max="300" value="20"></label>
-  <label for="zBt">Pesimistický: ZEC vůči BTC potom, % ročně<input id="zBt" type="number" step="5" min="-90" max="500" value="-30"></label>
+  <label for="zB3">Pesimistický: ZEC vůči BTC za 3 měsíce, % proti dnešku<input id="zB3" type="number" step="5" min="-99" max="500" value="-50"></label>
+  <label for="zB12">Pesimistický: ZEC vůči BTC za rok, % proti dnešku<input id="zB12" type="number" step="5" min="-99" max="500" value="-65"></label>
+  <label for="zB24">Pesimistický: ZEC vůči BTC za 2 roky, % proti dnešku<input id="zB24" type="number" step="5" min="-99" max="500" value="-75"></label>
+  <label for="zBt">Pesimistický: ZEC vůči BTC potom, % ročně<input id="zBt" type="number" step="5" min="-99" max="500" value="-30"></label>
   <label for="bM">Základní: BTC, % ročně<input id="bM" type="number" step="1" min="-90" max="500" value="20"></label>
-  <label for="zM1">Základní: ZEC vůči BTC 1. rok, %<input id="zM1" type="number" step="5" min="-95" max="500" value="-50"></label>
-  <label for="zM2">Základní: ZEC vůči BTC dál, % ročně<input id="zM2" type="number" step="5" min="-90" max="500" value="-15"></label>
-  <label for="zM3">Základní: ZEC vůči BTC za 3–6 měsíců od vrcholu, % vrcholu<input id="zM3" type="number" step="5" min="1" max="300" value="45"></label>
-  <label for="zM12">Základní: ZEC vůči BTC rok po vrcholu, % vrcholu<input id="zM12" type="number" step="1" min="1" max="300" value="40"></label>
-  <label for="zM24">Základní: ZEC vůči BTC 2 roky po vrcholu, % vrcholu<input id="zM24" type="number" step="1" min="1" max="300" value="25"></label>
-  <label for="zMt">Základní: ZEC vůči BTC potom, % ročně<input id="zMt" type="number" step="5" min="-90" max="500" value="-15"></label>
+  <label for="zM3">Základní: ZEC vůči BTC za 3 měsíce, % proti dnešku<input id="zM3" type="number" step="5" min="-99" max="500" value="-40"></label>
+  <label for="zM12">Základní: ZEC vůči BTC za rok, % proti dnešku<input id="zM12" type="number" step="5" min="-99" max="500" value="-50"></label>
+  <label for="zM24">Základní: ZEC vůči BTC za 2 roky, % proti dnešku<input id="zM24" type="number" step="5" min="-99" max="500" value="-65"></label>
+  <label for="zMt">Základní: ZEC vůči BTC potom, % ročně<input id="zMt" type="number" step="5" min="-99" max="500" value="-15"></label>
   <label for="bU">Optimistický: BTC, % ročně<input id="bU" type="number" step="1" min="-90" max="500" value="20"></label>
-  <label for="zU1">Optimistický: ZEC vůči BTC 1. rok, %<input id="zU1" type="number" step="5" min="-95" max="500" value="-20"></label>
-  <label for="zU2">Optimistický: ZEC vůči BTC dál, % ročně<input id="zU2" type="number" step="5" min="-90" max="500" value="-5"></label>
-  <label for="zU3">Optimistický: ZEC vůči BTC za 3–6 měsíců od vrcholu, % vrcholu<input id="zU3" type="number" step="5" min="1" max="300" value="55"></label>
-  <label for="zU12">Optimistický: ZEC vůči BTC rok po vrcholu, % vrcholu<input id="zU12" type="number" step="1" min="1" max="300" value="55"></label>
-  <label for="zU24">Optimistický: ZEC vůči BTC 2 roky po vrcholu, % vrcholu<input id="zU24" type="number" step="1" min="1" max="300" value="31"></label>
-  <label for="zUt">Optimistický: ZEC vůči BTC potom, % ročně<input id="zUt" type="number" step="5" min="-90" max="500" value="-5"></label>
+  <label for="zU3">Optimistický: ZEC vůči BTC za 3 měsíce, % proti dnešku<input id="zU3" type="number" step="5" min="-99" max="500" value="-30"></label>
+  <label for="zU12">Optimistický: ZEC vůči BTC za rok, % proti dnešku<input id="zU12" type="number" step="5" min="-99" max="500" value="-30"></label>
+  <label for="zU24">Optimistický: ZEC vůči BTC za 2 roky, % proti dnešku<input id="zU24" type="number" step="5" min="-99" max="500" value="-60"></label>
+  <label for="zUt">Optimistický: ZEC vůči BTC potom, % ročně<input id="zUt" type="number" step="5" min="-99" max="500" value="-5"></label>
   <label for="netMode">Model sítě<select id="netMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
   <label for="netUp">Poločas růstu sítě, dny<input id="netUp" type="number" step="30" min="1" value="180"></label>
   <label for="netDown">Poločas poklesu sítě, dny<input id="netDown" type="number" step="30" min="1" value="2920"></label>
@@ -117,7 +110,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <label for="zhg">Růst hashrate Zcash, % ročně<input id="zhg" type="number" step="5" min="-50" value="300"></label>
   <label for="zk">Citlivost hashrate na cenu ZEC<input id="zk" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
-<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. ZEC vyrostl za rok z ~$40 na vrchol $1 653 (26. 9. 2026). Cena ZEC se zadává vůči BTC (kurz ZEC/BTC), cena v USD je ten kurz krát cena BTC ze scénáře. Ve výchozím tvaru „po pumpě“ jede ZEC/BTC jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024, ZEC 2021): výchozí body: do 3 měsíců od vrcholu 40–55 % vrcholu, kolem půl roku dozvuk, rok po vrcholu 28–55 %, za 2 roky 20–31 %, pak zadané roční tempo vůči BTC. Body jdou upravit v panelu; tvar „procenta ročně“ zadává změnu ZEC/BTC v prvním roce a roční tempo potom. Cena BTC se mění o zadané procento ročně. Hashrate Zcash dohání tržby těžařů: síť roste k výkonu, který tržby při běžné ziskovosti uživí, s poločasem asi 6 měsíců, a klesá jen pomalu. Po pumpě ZEC je dnes síť hluboko pod touto úrovní, proto v projekci dál roste, dokud ji nedožene; při poklesu ZEC se růst zastaví dřív. V režimu Pevný růst roste hashrate zadaným tempem a sleduje cenu ZEC s citlivostí z panelu. Halving Zcash kolem 20. 11. 2028 sníží odměnu na polovinu. Stroj běží nepřetržitě.</p>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. ZEC vyrostl za rok z ~$40 na vrchol $1 653 (26. 9. 2026). Cena ZEC se zadává vůči BTC: změna kurzu ZEC/BTC proti dnešku za 3 měsíce, za rok a za 2 roky, mezi body plynule, potom roční tempo. Cena v USD je ten kurz krát cena BTC ze scénáře. Výchozí hodnoty vycházejí z minulých pump těžených mincí (LTC 2017, DOGE 2018, 2021, 2024, ZEC 2021): nejdřív rychlý propad, pak pomalejší. Cena BTC se mění o zadané procento ročně. Hashrate Zcash dohání tržby těžařů: síť roste k výkonu, který tržby při běžné ziskovosti uživí, s poločasem asi 6 měsíců, a klesá jen pomalu. Po pumpě ZEC je dnes síť hluboko pod touto úrovní, proto v projekci dál roste, dokud ji nedožene; při poklesu ZEC se růst zastaví dřív. V režimu Pevný růst roste hashrate zadaným tempem a sleduje cenu ZEC s citlivostí z panelu. Halving Zcash kolem 20. 11. 2028 sníží odměnu na polovinu. Stroj běží nepřetržitě.</p>
 
 <div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadané předpoklady, nikoli pravděpodobnostní prognóza. Pesimistický scénář je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Model sítě a jeho parametry jsou v panelu Projekce.</p>
 
@@ -265,36 +258,26 @@ const TODAY = ALL[ALL.length-1].d;
 const HALVINGS = ['2028-11-20', '2032-11-20', '2036-11-20', '2040-11-20', '2044-11-20'];
 const NEXT_HALVING = HALVINGS.find(d=>d>TODAY);          // Zcash, every 1 680 000 blocks of 75 s
 const subsidy = d => 1.5625/Math.pow(2, HALVINGS.filter(h => d >= h).length);
-const SC = {bear:['Pesimistický','--s2','bB','zB1','zB2'], base:['Základní','--s1','bM','zM1','zM2'], bull:['Optimistický','--s3','bU','zU1','zU2']};
+const SC = {bear:['Pesimistický','--s2','bB'], base:['Základní','--s1','bM'], bull:['Optimistický','--s3','bU']};
 function addDays(s,n){ const d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 const daysBetween = (a,b) => Math.round((Date.parse(b)-Date.parse(a))/864e5);
 const pctv = (id, lo=-95, hi=500) => Math.min(hi, Math.max(lo, parseFloat($(id).value) || 0));
 /* ZEC price path of a scenario (main calculator, FAQ and Monte Carlo of Z15 Pro), given AGAINST BTC: the ZEC/BTC
  * rate follows the scenario and the USD price is that times the BTC path.
  *
- * "pump" (default): the course of ZEC/BTC after past pumps of mined coins against BTC (LTC 2017, DOGE 2018, DOGE 2021,
- * DOGE 2024, ZEC 2021; see the Metodika). Anchored at the top of ZEC/BTC in the last year of data; the rate is a share
- * of the top 3 months, 6 months, 1 year and 2 years after it (k3 also holds at 6 months: the echo), then a yearly
- * trend against BTC. From today's rate the path goes log-linearly to the next point still ahead.
- * "pct": ZEC/BTC changes in the first year by z1, then by z2 a year.
+ * Scenario: the change of ZEC/BTC against today after 3 months, 1 year and 2 years ({k3, k12, k24}, e.g. -0.5),
+ * log-linear in between, then a yearly rate z2 against BTC. The defaults follow the course of past pumps of mined
+ * coins against BTC (see the Metodika): a fast fall in the first months, then slower.
+ * A number z1 instead: ZEC/BTC changes by z1 in the first year, then by z2 a year (FAQ and "what would have to happen").
  *
- * zRatio(z1, z2, rb) gives t => ZEC price in USD on day t / today's price, with BTC +rb a year; z1 is a number (pct)
- * or {k3, k12, k24} (pump), z2 the yearly rate against BTC after the first year (pct) or after 2 years from the top.
+ * zRatio(z1, z2, rb) gives t => ZEC price in USD on day t / today's price, with BTC +rb a year.
  */
-const ZPEAK = (() => { const L = ALL[ALL.length-1], from = addDays(L.d, -365);
-  const top = ALL.filter(r => r.d >= from).reduce((a, r) => r.z/r.p > a.z/a.p ? r : a, L);
-  return {d:top.d, z:top.z, r:top.z/top.p}; })();
-const ZPEAK_AGE = daysBetween(ZPEAK.d, ALL[ALL.length-1].d);
 function zRatio(z1, z2, rb=0){
   const btc = t => Math.pow(1+rb, t/365);
   if (typeof z1 !== 'object')
     return t => Math.pow(1+z1, Math.min(t,365)/365)*Math.pow(1+z2, Math.max(0,t-365)/365)*btc(t);
-  const L = ALL[ALL.length-1], tr = Math.log(1+Math.max(-.95, z2));
-  // points as (days from today, ln of price / today's); the first is today
-  const pts = [[0, 0]];
-  for (const [d, k] of [[90, z1.k3], [180, z1.k3], [365, z1.k12], [730, z1.k24]])
-    if (d > ZPEAK_AGE) pts.push([d - ZPEAK_AGE, Math.log(Math.max(1e-6, k)*ZPEAK.r/(L.z/L.p))]);
-  const [tl, yl] = pts[pts.length-1];
+  const tr = Math.log(1+Math.max(-.95, z2)), lv = x => Math.log(Math.max(.001, 1+x));
+  const pts = [[0, 0], [90, lv(z1.k3)], [365, lv(z1.k12)], [730, lv(z1.k24)]], [tl, yl] = pts[pts.length-1];
   return t => {
     if (t >= tl) return Math.exp(yl + tr*(t-tl)/365)*btc(t);
     let i = 1; while (pts[i][0] < t) i++;
@@ -302,21 +285,20 @@ function zRatio(z1, z2, rb=0){
     return Math.exp(y0 + (y1-y0)*(t-t0)/(t1-t0))*btc(t);
   };
 }
-// a scenario's ZEC path from the inputs: shape select + ids {z1, z2} (pct) and {k3, k12, k24, tr} (pump)
-function zScenIn(shapeId, ids){
-  const v = (id, d=0) => { const e = document.getElementById(id); const x = e ? parseFloat(e.value) : NaN; return Number.isFinite(x) ? x/100 : d; };
-  const pump = (document.getElementById(shapeId)?.value || 'pump') === 'pump';
-  return pump ? {z1:{k3:Math.max(.001, v(ids.k3)), k12:Math.max(.001, v(ids.k12)), k24:Math.max(.001, v(ids.k24))}, z2:Math.max(-.9, v(ids.tr))}
-              : {z1:Math.max(-.95, v(ids.z1)), z2:Math.max(-.9, v(ids.z2))};
+// a scenario's ZEC path from the inputs {k3, k12, k24, tr} (changes against BTC in %)
+function zScenIn(ids){
+  const v = id => { const e = document.getElementById(id); const x = e ? parseFloat(e.value) : NaN; return Number.isFinite(x) ? x/100 : 0; };
+  const c = id => Math.max(-.99, v(id));
+  return {z1:{k3:c(ids.k3), k12:c(ids.k12), k24:c(ids.k24)}, z2:Math.max(-.9, v(ids.tr))};
 }
 const zPctTxt = v => `${v<0?'−':'+'}${Math.abs(Math.round(v*100))} %`;
-// short description of a path: pump "ZEC/BTC rok po vrcholu 40 % vrcholu, za 2 roky 25 %, pak −15 % ročně"
+// short description of a path: "ZEC vůči BTC za 3 měsíce −40 %, za rok −50 %, za 2 roky −65 %, pak −15 % ročně"
 const zPathTxt = (z1, z2) => typeof z1 !== 'object' ? `ZEC vůči BTC ${zPctTxt(z1)}, pak ${zPctTxt(z2)} ročně`
-  : `ZEC vůči BTC rok po vrcholu ${Math.round(z1.k12*100)} % vrcholu, za 2 roky ${Math.round(z1.k24*100)} %, pak ${zPctTxt(z2)} ročně`;
+  : `ZEC vůči BTC za 3 měsíce ${zPctTxt(z1.k3)}, za rok ${zPctTxt(z1.k12)}, za 2 roky ${zPctTxt(z1.k24)}, pak ${zPctTxt(z2)} ročně`;
 
-// ZEC "po pumpě" inputs of each scenario (share of the top after 3 months, 1 year, 2 years; trend after that)
+// ZEC/BTC inputs of each scenario: change against today after 3 months, 1 year, 2 years; yearly rate after that
 const ZP = {bear:{k3:'zB3', k12:'zB12', k24:'zB24', tr:'zBt'}, base:{k3:'zM3', k12:'zM12', k24:'zM24', tr:'zMt'}, bull:{k3:'zU3', k12:'zU12', k24:'zU24', tr:'zUt'}};
-const zScen = k => zScenIn('zShape', {z1:SC[k][3], z2:SC[k][4], ...ZP[k]});
+const zScen = k => zScenIn(ZP[k]);
 
 function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
@@ -546,9 +528,9 @@ function renderProj(p, s, iT){
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
   const endD = fmtDate(res[0].e.d);
-  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>${$('zShape')?.value === 'pct' ? 'ZEC/BTC 1. rok / dál' : 'ZEC/BTC za rok / 2 roky, % vrcholu; dál'}</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
+  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>ZEC vůči BTC za 3 měs. / rok / 2 roky; dál ročně</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
     `<tr><td><span class="sw" style="background:var(--fg2)"></span>Dnes, ${fmtDate(now.d)}</td><td>–</td><td>–</td><td>${usd(now.hodl)}</td><td>${now.hodl>=p.hw?'splaceno':'–'}</td><td>${btc(now.btc)}</td><td>–</td><td>${usd(now.price)}</td><td>${usd(now.z)}</td><td>${usd(now.el)}</td><td>–</td></tr>`+
-    res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2],-90))}</td><td>${(z => typeof z.z1 === 'object' ? `${Math.round(z.z1.k12*100)} % / ${Math.round(z.z1.k24*100)} %; ${sg(Math.round(z.z2*100))}` : `${sg(Math.round(z.z1*100))} / ${sg(Math.round(z.z2*100))}`)(zScen(x.k))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)}</td><td>${usd(x.e.z)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
+    res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2],-90))}</td><td>${(z => `${sg(Math.round(z.z1.k3*100))} / ${sg(Math.round(z.z1.k12*100))} / ${sg(Math.round(z.z1.k24*100))}; ${sg(Math.round(z.z2*100))}`)(zScen(x.k))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)}</td><td>${usd(x.e.z)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
 }
 document.querySelectorAll('#f input, #f select, #fx input, #fx select').forEach(i => i.addEventListener('input', render));
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);

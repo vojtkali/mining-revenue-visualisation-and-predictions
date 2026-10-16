@@ -21,12 +21,12 @@ const sats = v => Math.round(v*1e8).toLocaleString('cs-CZ') + ' sats';
 const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsíců` : `${y.toLocaleString('cs-CZ',{minimumFractionDigits:1,maximumFractionDigits:1})} roku`; };
 const KS = 840, W = 2780;
 /*@include zpath.js*/
-// scenarios [name, ZEC z1, ZEC z2, colour, BTC]; ZEC after the pump as in the calculator's defaults (see zpath.js)
-const SCN_DEF = [['Propad po pumpě; BTC +10 %',{k3:.40,k12:.28,k24:.20},-.30,'--s2',.10],['ZEC drží kurz vůči BTC',0,0,'--fg2'],
-  ['Pokles po pumpě, medián minulých pump',{k3:.45,k12:.40,k24:.25},-.15,'--s1'],['Mírný pokles po pumpě',{k3:.55,k12:.55,k24:.31},-.05,'--s3']].map(s => [`${s[0]}: ${zPathTxt(s[1], s[2])}`, ...s.slice(1)]);
+// scenarios [name, ZEC z1, ZEC z2, colour, BTC]; ZEC against BTC as in the calculator's defaults (see zpath.js)
+const SCN_DEF = [['Pesimistický; BTC +10 %',{k3:-.50,k12:-.65,k24:-.75},-.30,'--s2',.10],['ZEC drží kurz vůči BTC',0,0,'--fg2'],
+  ['Základní',{k3:-.40,k12:-.50,k24:-.65},-.15,'--s1'],['Optimistický',{k3:-.30,k12:-.30,k24:-.60},-.05,'--s3']].map(s => [`${s[0]}: ${zPathTxt(s[1], s[2])}`, ...s.slice(1)]);
 // with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, ZEC ids]
-const SCN_IN = [['Pesimistický','bB',{z1:'zB1', z2:'zB2', k3:'zB3', k12:'zB12', k24:'zB24', tr:'zBt'}], null,
-  ['Základní','bM',{z1:'zM1', z2:'zM2', k3:'zM3', k12:'zM12', k24:'zM24', tr:'zMt'}], ['Optimistický','bU',{z1:'zU1', z2:'zU2', k3:'zU3', k12:'zU12', k24:'zU24', tr:'zUt'}]];
+const SCN_IN = [['Pesimistický','bB',{k3:'zB3', k12:'zB12', k24:'zB24', tr:'zBt'}], null,
+  ['Základní','bM',{k3:'zM3', k12:'zM12', k24:'zM24', tr:'zMt'}], ['Optimistický','bU',{k3:'zU3', k12:'zU12', k24:'zU24', tr:'zUt'}]];
 // break-even over time along the selected scenario: electricity that day (energy price steps yearly) / what the machine
 // earns that day with the network grown by g a year (and following the price where the model says so), halvings included
 const beSeries = (out, f, dH) => { const pts = [['za rok', 365], ['za 2 roky', 730]];
@@ -38,7 +38,7 @@ function scnNow(){
   if (!document.getElementById('bM')) return SCN_DEF;
   return SCN_DEF.map((s,i) => { const m = SCN_IN[i];
     if (!m) { const br = v('bM',-.9); return [`ZEC drží kurz vůči BTC; BTC ${pcs(br)} ročně`, 0, 0, s[3], br]; }
-    const br = v(m[1],-.9), {z1, z2} = zScenIn('zShape', m[2]);
+    const br = v(m[1],-.9), {z1, z2} = zScenIn(m[2]);
     return [`${m[0]}: ${zPathTxt(z1, z2)}; BTC ${pcs(br)}`, z1, z2, s[3], br]; });
 }
 
@@ -52,7 +52,7 @@ function P(){
 const zTot = r => (r.mz-(r.fees||0))/.8 + (r.fees||0);   // all issued ZEC + fees a day (mz holds the miners' 80 %)
 const NET_GAP = netGap(r => zTot(r)*r.z, r => r.hr);
 const gEff = f => Math.pow(f[f.length-1], 365/(f.length-1)) - 1;
-// machine bought today, 5 years: ZEC price path zRatio(z1, z2) (after the pump, or first year z1 then z2 a year), BTC +br a year,
+// machine bought today, 5 years: ZEC price path zRatio(z1, z2) (ZEC against BTC, see zpath.js), BTC +br a year,
 // Zcash hashrate = today x (1+g)^t x (ZEC price ratio)^k, subsidy halves at the halving
 function proj(p, z1, z2, g=p.g, years=5){
   const N = Math.round(365*years), eff = KS*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
