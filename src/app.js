@@ -136,9 +136,9 @@ function render(){
   const maxNet = s.reduce((m,r)=>r.net>m.net?r:m, s[0]);
   const k = [
     ['Natěženo dosud', btc(now.btc), `${iT+1} dní těžby`],
-    ['Průběžný prodej: tržba − energie', usd(now.net), `tržba ${usd(now.rev)} − energie ${usd(now.el)} placená rok předem; `+(now.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(now.net-p.hw)), now.net-p.hw],
-    ['Držení: hodnota BTC − energie', usd(now.hodl), `BTC ${usd(now.stack)} při ${usd(now.price)}/BTC − energie ${usd(now.el)} placená rok předem; bez ceny stroje`, now.hodl-p.hw],
-    [`Na konci odhadu, ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář: čistá hodnota ${usd(end.hodl)} při ${usd(end.price)}/BTC`, end.hodl-p.hw],
+    [`Průběžný prodej k ${fmtDate(end.d)}`, usd(end.net), `${SC[p.sc][0].toLowerCase()} scénář: tržba ${usd(end.rev)} − energie ${usd(end.el)} placená rok předem; `+(end.net-p.hw>=0?'po odečtení stroje zbývá ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.net)}`, end.net-p.hw],
+    [`Držení BTC k ${fmtDate(end.d)}`, usd(end.hodl), `${SC[p.sc][0].toLowerCase()} scénář: BTC ${usd(end.stack)} při ${usd(end.price)}/BTC − energie ${usd(end.el)} placená rok předem; bez ceny stroje. K ${fmtDate(now.d)}: ${usd(now.hodl)}`, end.hodl-p.hw],
+    [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
     ['Aktuální denní zisk', usd((now.hp-now.be)*p.th*p.up*(1-p.fee)/1000,2), `hashprice ${usd(now.hp,2)} vs. zvrat ${usd(now.be,2)}`, now.hp-now.be],
