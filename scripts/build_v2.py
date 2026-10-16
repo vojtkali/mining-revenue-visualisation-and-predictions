@@ -29,8 +29,10 @@ MACHINES = {
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
     sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR'], 'netMode': ['zNetMode'], 'netUp': ['zNetUp'], 'netDown': ['zNetDown'], 'netEff': ['zNetEff']},
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
-    scen={'bear': [('ZEC 1. rok', 'zB1'), ('ZEC dál', 'zB2'), ('BTC', 'bB')], 'base': [('ZEC 1. rok', 'zM1'), ('ZEC dál', 'zM2'), ('BTC', 'bM')],
-          'bull': [('ZEC 1. rok', 'zU1'), ('ZEC dál', 'zU2'), ('BTC', 'bU')]},
+    scen={k: [('ZEC 3–6 měs.', f'z{c}3', '% vrch.', 'pump'), ('ZEC za rok', f'z{c}12', '% vrch.', 'pump'), ('ZEC za 2 roky', f'z{c}24', '% vrch.', 'pump'),
+              ('ZEC potom', f'z{c}t', '% / rok', 'pump'), ('ZEC 1. rok', f'z{c}1', '%', 'pct'), ('ZEC dál', f'z{c}2', '% / rok', 'pct'), ('BTC', f'b{c}', '% / rok', '')]
+          for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
+    shape=('zShape', 'Tvar ceny ZEC', 'Po pumpě: cena jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024), v % vrcholu z posledního roku dat; potom roční trend. Procenta: první rok změna, pak roční tempo.'),
     proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
     mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Každá cesta má vlastní výkon sítě Zcash, který dohání tržby těžařů v této cestě stejně jako v projekci.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
@@ -152,7 +154,7 @@ def build(key):
     scen = ''.join(
         f'<div class="scen" data-sc="{k}" role="radio" tabindex="0" aria-checked="{"true" if k == "base" else "false"}">'
         f'<span class="sn"><i style="background:var({c})"></i>{n}</span>'
-        + ''.join(f'<span class="sv"><span class="lbl">{lbl}</span>{bare(mi[i])}<span class="u">{"%" if "1. rok" in lbl else "% / rok"}</span></span>' for lbl, i in M['scen'][k])
+        + ''.join(f'<span class="sv"{f" data-zm={chr(34)}{e[3]}{chr(34)}" if len(e) > 3 and e[3] else ""}><span class="lbl">{e[0]}</span>{bare(mi[e[1]])}<span class="u">{e[2] if len(e) > 2 else ("%" if "1. rok" in e[0] else "% / rok")}</span></span>' for e in M['scen'][k])
         + '</div>'
         for k, n, c in (('bear', 'Pesimistický', '--s2'), ('base', 'Základní', '--s1'), ('bull', 'Optimistický', '--s3')))
 
@@ -161,6 +163,7 @@ def build(key):
 <div class="side-body" id="sideBody">
 <form id="f" onsubmit="return false">
   <div class="sg"><h3>Scénář ceny</h3>
+  {field(M['shape'][1], mi[M['shape'][0]], '', M['shape'][2]) if M.get('shape') else ''}
   <div class="scens" role="radiogroup" aria-label="Scénář ceny">{scen}</div>
   <p class="hint">Klik vybere scénář pro grafy. Procenta platí každý rok; pokles zadejte se znaménkem minus.</p></div>
   <div class="sg"><h3>Náklady</h3>
@@ -425,7 +428,9 @@ function sync(){
 }
 function markScen(){
   document.querySelectorAll('.scen').forEach(c => { const on = c.dataset.sc === $('sc').value; c.classList.toggle('on', on); c.setAttribute('aria-checked', on); });
+  const zs = $('zShape'); if (zs) document.querySelectorAll('[data-zm]').forEach(e => { e.style.display = e.dataset.zm === zs.value ? '' : 'none'; });
 }
+$('zShape')?.addEventListener('input', markScen);
 function pickScen(k){ $('sc').value = k; markScen(); fire($('sc')); }
 document.querySelectorAll('.scen').forEach(c => {
   c.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') pickScen(c.dataset.sc); });

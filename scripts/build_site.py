@@ -147,7 +147,7 @@ def page_values():
 MONTHS = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec']
 MONTHS_GEN = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince']
 # rows of each FAQ scenario table: worst, base, best
-SCEN = {'s21': ('Pesimistický', 'Základní', 'Optimistický'), 'z15': ('Propad', 'Korekce', 'Růst'), 'l9': ('Propad', 'Základní', 'Růst')}
+SCEN = {'s21': ('Pesimistický', 'Základní', 'Optimistický'), 'z15': ('Propad', 'Pokles', 'Mírný'), 'l9': ('Propad', 'Základní', 'Růst')}
 
 
 MINUS = '\u2212'

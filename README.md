@@ -99,3 +99,9 @@ Projekce, otázky, bod zvratu i Monte Carlo počítají výkon sítě (hashrate)
 - Výchozí parametry: BTC poločas růstu 270 dní, poklesu 2 920 dní; Zcash 180 / 2 920 dní; Scrypt 120 / 365 dní. V panelu Projekce jdou změnit nebo přepnout na pevný růst.
 - Test (průměrná absolutní chyba logaritmu hashrate po 2 letech, model / pevný růst): BTC 0,24 / 0,47, Zcash 0,15 / 0,80, Scrypt 0,44 / 0,42.
 
+## Cena ZEC po pumpě
+
+Scénáře Z15 Pro mají výchozí tvar ceny ZEC „po pumpě“ (`src/zpath.js`): cena se ukotví na vrcholu z posledního roku dat a jde přes body v % vrcholu za 3–6 měsíců, za rok a za 2 roky, potom zadaným ročním tempem. Výchozí body vycházejí z pump LTC 2017, DOGE 2018, DOGE 2021 a DOGE 2024: pesimistický 30 / 8 / 8 % a −10 % ročně (jako LTC 2017), základní 35 / 15 / 12 % a 0 % (medián), optimistický 45 / 30 / 20 % a +10 % (jako DOGE 2024). Tvar „procenta ročně“ zůstává jako volba.
+
+- `scripts/pump_network_test.py` testuje výkon sítě po pumpách třemi variantami (dohánění tržeb, zpožděné dodávky, vyhlazené tržby), s parametry z dat mimo testovanou epizodu. U Zcash vychází nejlépe prosté dohánění (chyba 0,27 po pumpě 2021, 0,15 při pumpě 2025–26), proto ho kalkulačky používají dál. U Scryptu se netrefí žádná varianta. Výsledek je v `data/derived/pump_network_test.json`.
+

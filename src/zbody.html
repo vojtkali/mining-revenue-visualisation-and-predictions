@@ -18,15 +18,28 @@
 <form class="controls" id="fx" onsubmit="return false">
   <label for="end">Odhad do<input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"></label>
   <label for="sc">Scénář pro grafy 1–4<select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></label>
+  <label for="zShape">Tvar ceny ZEC<select id="zShape"><option value="pump" selected>po pumpě (jako minulé pumpy)</option><option value="pct">procenta ročně</option></select></label>
   <label for="bB">Pesimistický: BTC, % ročně<input id="bB" type="number" step="1" min="-90" max="500" value="10"></label>
   <label for="zB1">Pesimistický: ZEC 1. rok, %<input id="zB1" type="number" step="5" min="-95" max="500" value="-70"></label>
   <label for="zB2">Pesimistický: ZEC dál, % ročně<input id="zB2" type="number" step="5" min="-90" max="500" value="0"></label>
+  <label for="zB3">Pesimistický: ZEC za 3–6 měsíců od vrcholu, % vrcholu<input id="zB3" type="number" step="5" min="1" max="300" value="30"></label>
+  <label for="zB12">Pesimistický: ZEC rok po vrcholu, % vrcholu<input id="zB12" type="number" step="1" min="1" max="300" value="8"></label>
+  <label for="zB24">Pesimistický: ZEC 2 roky po vrcholu, % vrcholu<input id="zB24" type="number" step="1" min="1" max="300" value="8"></label>
+  <label for="zBt">Pesimistický: ZEC potom, % ročně<input id="zBt" type="number" step="5" min="-90" max="500" value="-10"></label>
   <label for="bM">Základní: BTC, % ročně<input id="bM" type="number" step="1" min="-90" max="500" value="20"></label>
   <label for="zM1">Základní: ZEC 1. rok, %<input id="zM1" type="number" step="5" min="-95" max="500" value="-40"></label>
   <label for="zM2">Základní: ZEC dál, % ročně<input id="zM2" type="number" step="5" min="-90" max="500" value="10"></label>
+  <label for="zM3">Základní: ZEC za 3–6 měsíců od vrcholu, % vrcholu<input id="zM3" type="number" step="5" min="1" max="300" value="35"></label>
+  <label for="zM12">Základní: ZEC rok po vrcholu, % vrcholu<input id="zM12" type="number" step="1" min="1" max="300" value="15"></label>
+  <label for="zM24">Základní: ZEC 2 roky po vrcholu, % vrcholu<input id="zM24" type="number" step="1" min="1" max="300" value="12"></label>
+  <label for="zMt">Základní: ZEC potom, % ročně<input id="zMt" type="number" step="5" min="-90" max="500" value="0"></label>
   <label for="bU">Optimistický: BTC, % ročně<input id="bU" type="number" step="1" min="-90" max="500" value="20"></label>
   <label for="zU1">Optimistický: ZEC 1. rok, %<input id="zU1" type="number" step="5" min="-95" max="500" value="30"></label>
   <label for="zU2">Optimistický: ZEC dál, % ročně<input id="zU2" type="number" step="5" min="-90" max="500" value="20"></label>
+  <label for="zU3">Optimistický: ZEC za 3–6 měsíců od vrcholu, % vrcholu<input id="zU3" type="number" step="5" min="1" max="300" value="45"></label>
+  <label for="zU12">Optimistický: ZEC rok po vrcholu, % vrcholu<input id="zU12" type="number" step="1" min="1" max="300" value="30"></label>
+  <label for="zU24">Optimistický: ZEC 2 roky po vrcholu, % vrcholu<input id="zU24" type="number" step="1" min="1" max="300" value="20"></label>
+  <label for="zUt">Optimistický: ZEC potom, % ročně<input id="zUt" type="number" step="5" min="-90" max="500" value="10"></label>
   <label for="netMode">Model sítě<select id="netMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
   <label for="netUp">Poločas růstu sítě, dny<input id="netUp" type="number" step="30" min="1" value="180"></label>
   <label for="netDown">Poločas poklesu sítě, dny<input id="netDown" type="number" step="30" min="1" value="2920"></label>
@@ -34,7 +47,7 @@
   <label for="zhg">Růst hashrate Zcash, % ročně<input id="zhg" type="number" step="5" min="-50" value="300"></label>
   <label for="zk">Citlivost hashrate na cenu ZEC<input id="zk" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
-<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. ZEC je po růstu z ~$50 na ~$1 200 za rok ve velmi přehřátém trhu, proto má cena ZEC zvlášť změnu v prvním roce (možný zlom) a zvlášť roční tempo potom. Cena BTC se mění o zadané procento ročně. Hashrate Zcash dohání tržby těžařů: síť roste k výkonu, který tržby při běžné ziskovosti uživí, s poločasem asi 6 měsíců, a klesá jen pomalu. Po pumpě ZEC je dnes síť hluboko pod touto úrovní, proto v projekci dál roste, dokud ji nedožene; při poklesu ZEC se růst zastaví dřív. V režimu Pevný růst roste hashrate zadaným tempem a sleduje cenu ZEC s citlivostí z panelu. Halving Zcash kolem 20. 11. 2028 sníží odměnu na polovinu. Stroj běží nepřetržitě.</p>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. ZEC vyrostl za rok z ~$40 na vrchol $1 653 (26. 9. 2026). Cena ZEC proto ve výchozím tvaru „po pumpě“ jede jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024): do 3 měsíců od vrcholu zhruba třetina vrcholu, kolem půl roku dozvuk, rok po vrcholu 8–30 %, za 2 roky 8–20 % vrcholu, pak zadané roční tempo. Body jdou upravit v panelu; tvar „procenta ročně“ zadává změnu v prvním roce a roční tempo potom. Cena BTC se mění o zadané procento ročně. Hashrate Zcash dohání tržby těžařů: síť roste k výkonu, který tržby při běžné ziskovosti uživí, s poločasem asi 6 měsíců, a klesá jen pomalu. Po pumpě ZEC je dnes síť hluboko pod touto úrovní, proto v projekci dál roste, dokud ji nedožene; při poklesu ZEC se růst zastaví dřív. V režimu Pevný růst roste hashrate zadaným tempem a sleduje cenu ZEC s citlivostí z panelu. Halving Zcash kolem 20. 11. 2028 sníží odměnu na polovinu. Stroj běží nepřetržitě.</p>
 
 <div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
 

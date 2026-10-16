@@ -12,7 +12,7 @@
   <label for="zFee">Poplatek poolu, %<input id="zFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="zUp">Uptime, %<input id="zUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="zHw">Cena stroje, USD<input id="zHw" type="number" step="100" min="0" value="12000"></label>
-  <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad −70 %, pak 0 % (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Korekce −40 %, pak +10 % ročně</option><option value="3">Růst +30 %, pak +20 % ročně</option></select></label>
+  <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad po pumpě jako LTC 2017 (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Pokles po pumpě, medián minulých pump</option><option value="3">Mírný pokles po pumpě jako DOGE 2024</option></select></label>
   <label for="zBtcR">Cena BTC, % ročně<input id="zBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
   <label for="zNetMode">Model sítě<select id="zNetMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
   <label for="zNetUp">Poločas růstu sítě, dny<input id="zNetUp" type="number" step="30" min="1" value="180"></label>
@@ -53,7 +53,7 @@
     <div class="tbl"><table id="tPay"></table></div>
     <p>„Prodej“ znamená, že vyplacené BTC každý den prodáváte. „Držení“ znamená, že BTC si necháváte a stroj se zaplatí, když hodnota všech vyplacených BTC překročí cenu stroje plus zaplacenou elektřinu.</p></div></div>
   <div class="qa"><h3>Jaké je ROI? Kolik procent ročně můžu očekávat?</h3><div class="a"><p>Za první rok při dnešních podmínkách asi <span class="n" data-k="roiY"></span> z ceny stroje. Takové číslo ale u Zcash nejde brát jako roční výnos: odpovídá dnešní, velmi vysoké ceně ZEC. Při držení BTC se ROI v čase vyvíjí takto (hodnota BTC − zaplacená energie − cena stroje, děleno všemi vloženými penězi):</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce</span><span><i style="background:var(--s3)"></i>Růst</span></div>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Propad po pumpě</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Pokles po pumpě</span><span><i style="background:var(--s3)"></i>Mírný pokles</span></div>
     <div class="chart small"><canvas id="cRoi" aria-label="ROI v čase podle scénáře"></canvas></div></div></div>
 </section>
 
@@ -110,7 +110,7 @@
 <section class="group" id="ztrata">
   <h2>Když se těžba nevyplácí</h2>
   <div class="qa"><h3>Může se stroj stát ztrátovým? Za jaké ceny se nevyplatí?</h3><div class="a"><p>Ano, když hodnota vytěženého ZEC za den klesne pod cenu elektřiny. Dnes se to stane při ceně ZEC pod <span class="n" data-k="bePrice"></span> (dnešní cena <span class="n" data-k="zec"></span>, rezerva <span class="n" data-k="beMargin"></span>). Cena BTC na to vliv nemá. Po halvingu v roce 2028 bude hranice asi <span class="n" data-k="bePriceH"></span>. Bod zvratu v čase proti cenám ZEC ve scénářích. Bod zvratu závisí i na výkonu sítě, a ten v každém scénáři reaguje na cenu ZEC jinak (při propadu se síť zmenší), proto graf ukazuje bod zvratu pro scénář zvolený nahoře:</p>
-    <div class="legend"><span><i class="dash"></i>Bod zvratu ve zvoleném scénáři</span><span><i style="background:var(--s2)"></i>Propad</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce</span><span><i style="background:var(--s3)"></i>Růst</span></div>
+    <div class="legend"><span><i class="dash"></i>Bod zvratu ve zvoleném scénáři</span><span><i style="background:var(--s2)"></i>Propad</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Pokles po pumpě</span><span><i style="background:var(--s3)"></i>Mírný pokles</span></div>
     <div class="chart"><canvas id="cBe" aria-label="Bod zvratu a cena ZEC v čase"></canvas></div></div></div>
   <div class="qa"><h3>Co se stane, když těžba přestane být rentabilní? Mohu stroj vypnout a později zapnout?</h3><div class="a"><p>Technicky ano: stroj jde kdykoli vypnout a znovu zapnout. Vypnutý stroj nespotřebovává elektřinu, ale ani netěží. Z15 Pro těží jen algoritmus Equihash, takže ho nejde přepnout na Bitcoin.</p>
     <div class="verify">K ověření: doplňte, jestli hostingová smlouva vypnutí umožňuje a za jakých podmínek.</div></div></div>
@@ -140,7 +140,7 @@
 <section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
   <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC −70 % (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce −40 %, pak +10 %</span><span><i style="background:var(--s3)"></i>Růst +30 %, pak +20 %</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Propad po pumpě jako LTC 2017 (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Pokles po pumpě, medián</span><span><i style="background:var(--s3)"></i>Mírný pokles jako DOGE 2024</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
     <p>V pesimistickém scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section>
