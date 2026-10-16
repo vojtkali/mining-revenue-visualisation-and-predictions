@@ -79,6 +79,13 @@ node tests/browser.cjs                    # všechny stránky a změny parametr�
 
 `scripts/build_v2.py` skládá pro každý stroj jednu stránku se záložkami (Přehled, Návratnost, Těžba vs. nákup, Otázky, Metodika) a panelem parametrů vlevo; k tomu úvod se srovnáním strojů. Výpočty jsou stejné jako na stránkách v `docs/` (hlavní stránka, FAQ a srovnání podle dne vstupu stroje běží beze změny, panel jim synchronizuje parametry). `python3 scripts/build_v2.py OUT_DIR` vytvoří totéž ve formátu artefaktů claude.ai (odkazy mezi publikovanými artefakty jsou v `LINKS`).
 
+**Monte Carlo a horská dráha** (jen kalkulačky, `src/mc.js` + adaptér stroje `src/mc_<stroj>.js`). Hladká projekce posouvá cenu každý den o stejné procento, takže neukáže propady ani to, kdy DCA pomůže. Proto se vybraný scénář přehraje 2 000×. Ke scénářové cestě se přidá kolísání z historických denních logaritmických výnosů (verzovaný snímek Coin Metrics od 25. 5. 2023). Výnosy jsou očištěné o průměr a losují se v 60denních kruhových blocích ze stejných dnů pro všechny měny stroje (BTC; BTC + ZEC; BTC + LTC + DOGE). Hashrate sítě reaguje na odchylku ceny od scénáře se zpožděním asi 90 dní: u BTC s citlivostí 0,5, u Zcash a Scrypt s citlivostí z panelu. Účetnictví je stejné jako v tabulce čtyř strategií. Při kolísání 0 % dá Monte Carlo přesně čísla deterministické projekce. Generátor má pevné semínko, výpočet běží po načtení stránky v dávkách (asi 0,3 s na M2). Výstupy:
+- v záložce Těžba vs. nákup pravděpodobnosti, pásma 10.–90. percentilu, tabulka strategií s propady a „horská dráha“ jedné cesty den po dni;
+- v záložce Návratnost podíl cest se zaplaceným strojem v čase;
+- v Přehledu rozsah čisté hodnoty na konci odhadu.
+
+Vzorek je kratší než celý cyklus, výsledky jsou proto rozsah možností, ne předpověď.
+
 `CHROMIUM=/cesta/k/chromium` umožňuje použít vlastní prohlížeč. `scripts/rebuild_data.sh --offline` zopakuje kompletní sestavení z verzovaného snímku; bez přepínače obnoví data z API.
 
 GitHub Action běží denně v 6:17 UTC, validuje data a výpočty, sestaví stránky, přepočítá souhrn a změny uloží. Staré generátory založené na neaktualizovaném CSV archivu byly nahrazeny společným aktualizátorem.

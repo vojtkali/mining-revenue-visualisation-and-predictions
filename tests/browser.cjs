@@ -40,6 +40,20 @@ const ROOT=path.resolve(__dirname,'..'),chart=fs.readFileSync(path.join(path.dir
   }
   await page.close();console.log('checked',file);
  }
+ // Calculators (docs/v2): Monte Carlo finishes on load and fills its tables, no invalid output
+ const V2=path.join(ROOT,'docs','v2');
+ for(const file of fs.existsSync(V2)?fs.readdirSync(V2).filter(f=>f.endsWith('.html')&&f!=='index.html'):[]){
+  const page=await browser.newPage({viewport:{width:1280,height:900}});
+  page.on('pageerror',e=>errors.push('v2/'+file+': '+e.message));
+  await page.route(/cdnjs\.cloudflare\.com/,r=>r.fulfill({body:chart,contentType:'application/javascript'}));
+  await page.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());
+  await page.goto('file://'+path.join(V2,file));
+  await page.waitForFunction(()=>/spočteno/.test(document.getElementById('mcStat').textContent),{},{timeout:20000});
+  assert.equal(await page.locator('#mcTab tbody tr').count(),4,'v2/'+file+' Monte Carlo table');
+  assert.ok((await page.locator('#rideTab tbody tr').count())===3,'v2/'+file+' Horská dráha table');
+  assert.ok(!/NaN|Infinity|undefined|\{\{/.test(await page.locator('body').innerText()),'v2/'+file+' invalid output');
+  await page.close();console.log('checked v2/'+file);
+ }
  assert.deepEqual(errors,[]);
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

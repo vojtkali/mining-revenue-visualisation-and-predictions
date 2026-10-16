@@ -1,0 +1,52 @@
+<!--@nakup-->
+<div class="intro"><h2>Co když cena nepoběží rovně?</h2><p>Tabulka výše počítá s hladkou cenou: každý den stejné procento. Skutečná cena skáče nahoru a dolů, a podle toho se liší, kdy kdo nakupuje levně a kdy draze. Proto se tu vybraný scénář přehraje 2 000×, pokaždé s jinými propady a růsty.</p></div>
+<section class="card" id="mc">
+  <h2>Monte Carlo: 2 000 možných cest ceny</h2>
+  <p class="sub">Každá cesta je vybraný scénář plus kolísání podle skutečných denních pohybů {{MC_ASSETS}} od května 2023. Pohyby se berou po 60denních úsecích ze stejných dnů, takže zůstávají série propadů i růstů a {{MC_CORR}}. Cesty kolísají kolem scénáře; typická cesta končí pár procent pod ním, protože historické propady byly prudší než růsty. {{MC_NET}} Vklady jsou stejné jako v tabulce výše; historie do dneška je ve všech cestách stejná.</p>
+  <p class="mcstat" id="mcStat">Počítám 2 000 cest…</p>
+  <div class="kpis" id="mcKpis"></div>
+  <div class="grid2">
+    <div><h3 class="ch">Hodnota v čase</h3>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Těžba + držení</span><span><i style="background:var(--s2)"></i>Spot při ročních vkladech</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s3) 0 4px,transparent 4px 7px)!important"></i>Týdenní DCA</span><span><i class="dash"></i>Vloženo</span></div>
+      <p class="hint">Čára je medián, podbarvení rozsah, ve kterém skončí 80 % cest (10. až 90. percentil).</p>
+      <div class="chart"><canvas id="mcV" aria-label="Monte Carlo: hodnota strategií v čase, medián a 80 % cest"></canvas></div></div>
+    <div><h3 class="ch">Těžba + držení minus spot</h3>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Medián rozdílu</span><span><i class="box" style="background:color-mix(in srgb,var(--s1) 30%,transparent)!important"></i>50 % a 80 % cest</span><span><i class="dash"></i>Stejný výsledek</span></div>
+      <p class="hint">Nad nulou vede těžba. Skoky dolů jsou výročí: nový vklad spot hned promění v BTC, těžba ho utratí za energii a BTC dostává postupně. Tooltip ukazuje i podíl cest, ve kterých těžba k danému dni vede.</p>
+      <div class="chart"><canvas id="mcX" aria-label="Monte Carlo: rozdíl těžby a spotu v čase"></canvas></div></div>
+  </div>
+  <div class="tbl"><table id="mcTab"></table></div>
+  <p class="hint">„Pod vklady“: podíl cest, ve kterých strategie na konci odhadu nemá ani tolik, kolik se do ní vložilo. „Největší propad“: o kolik nejvíc spadla hodnota na vložený dolar od svého maxima; nové vklady se tedy jako zisk nepočítají. Těžba + prodej drží dolary, a proto nepadá. Zbytková hodnota stroje ani nevyčerpaná energie se nezapočítávají.</p>
+</section>
+<section class="card" id="ride">
+  <h2>Horská dráha: jedna možná cesta den po dni</h2>
+  <p class="sub">Medián v grafu výše vyhlazuje to podstatné: jednotlivá cesta je hodně divoká. Jednorázový nákup nese celý propad hned od začátku. Těžba přidává BTC postupně, takže v propadu získá víc mincí, ale držené BTC padá s cenou stejně.</p>
+  <div class="seg" id="rideSel" role="group" aria-label="Která cesta">
+    <button type="button" data-r="low" aria-pressed="false">Nepříznivá (10 % nejhorších cen BTC)</button>
+    <button type="button" data-r="mid" aria-pressed="true">Typická (medián)</button>
+    <button type="button" data-r="high" aria-pressed="false">Příznivá (10 % nejlepších)</button>
+    <button type="button" data-r="rnd" aria-pressed="false">Náhodná</button>
+  </div>
+  <p class="hint" id="rideTxt"></p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Těžba + držení</span><span><i style="background:var(--s2)"></i>Spot (jednorázové nákupy)</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s3) 0 4px,transparent 4px 7px)!important"></i>Týdenní DCA</span><span><i class="dash"></i>Vloženo</span></div>
+  <div class="chart"><canvas id="rideV" aria-label="Horská dráha: hodnota strategií v jedné cestě"></canvas></div>
+  <h3 class="ch">Propad od maxima</h3>
+  <p class="hint">O kolik procent je hodnota na vložený dolar pod svým dosavadním maximem.</p>
+  <div class="chart small"><canvas id="rideD" aria-label="Horská dráha: propad od maxima"></canvas></div>
+  <div class="tbl"><table id="rideTab"></table></div>
+</section>
+<!--@navratnost-->
+<section class="card" id="mcPay">
+  <h2>Návratnost v 2 000 cestách ceny</h2>
+  <p class="sub">Stejné Monte Carlo jako v záložce Těžba vs. nákup: vybraný scénář s kolísáním podle historie. Křivka ukazuje, v kolika procentech cest je stroj k danému dni aspoň jednou zaplacený (hodnota BTC, nebo tržby z prodeje, převýší cenu stroje i zaplacenou energii).</p>
+  <p id="mcPayTxt"></p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Držení BTC</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Průběžný prodej</span></div>
+  <div class="chart small"><canvas id="mcPayC" aria-label="Monte Carlo: podíl cest se zaplaceným strojem v čase"></canvas></div>
+  <div class="tbl"><table id="mcPayTab"></table></div>
+</section>
+<!--@metodika-->
+<section class="notes"><h3>Monte Carlo a horská dráha</h3>
+<p>Deterministická projekce posouvá cenu každý den o stejné procento. V takovém světě spot vždycky porazí DCA, pokud cena roste, a žádné propady nejsou vidět. Monte Carlo proto k cestě scénáře přidá náhodné kolísání: denní logaritmické výnosy {{MC_ASSETS}} od 25. 5. 2023 do posledního dne dat, očištěné o průměr (směr určuje jen scénář) a brané v 60denních blocích ze stejných dnů pro všechny měny (kruhový blokový bootstrap, takže každý den se losuje stejně často). Průměrná logaritmická změna tedy odpovídá scénáři. Medián cest končí o několik procent níž, protože propady ve vzorku byly prudší než růsty, a průměr ceny je kvůli kolísání naopak výš. Kolísání jde v panelu Projekce zmenšit nebo zvětšit; 0 % vrátí hladkou projekci.</p>
+<p>{{MC_NET}} Bez toho by v propadu těžba sypala stejně BTC jako v růstu, což neodpovídá tomu, jak se síť chová. Poplatky za blok zůstávají konstantní, stroj běží i ve dnech, kdy nevydělá na energii.</p>
+<p>Vzorek je krátký (něco přes tři roky). Obsahuje propad BTC o 53 % i velké výkyvy altcoinů, ale ne celý medvědí trh typu 2018 nebo 2022. Výsledky jsou rozsah možností, ne předpověď. Generátor má pevné semínko, takže stejné vstupy dají stejná čísla; 2 000 cest dává podíly s přesností zhruba ± 1–2 procentní body.</p>
+</section>

@@ -7,7 +7,7 @@ app's inputs; the FAQ and timing apps keep hidden copies that are synced from it
 
     python3 scripts/build_v2.py OUT_DIR      # s21.html, z15.html, l9.html
 """
-import json, re, sys
+import json, math, re, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -22,7 +22,8 @@ MACHINES = {
     sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg']},
     prices=[('Cena BTC dnes', 'fPrice')],
     scen={'bear': [('BTC', 'yBear')], 'base': [('BTC', 'yBase')], 'bull': [('BTC', 'yBull')]},
-    proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')]),
+    proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')],
+    mc=dict(assets='BTC', corr='dlouhé trendy', net='Hashrate sítě BTC reaguje na odchylku ceny od scénáře se zpožděním asi tří měsíců s citlivostí 0,5: když je BTC o 20 % levnější, než říká scénář, síť časem zpomalí asi o 10 % a stroj natěží víc BTC.')),
   'z15': dict(name='Z15 Pro', title='Antminer Z15 Pro', data='zec', main=('zbody', 'zapp'), faq=('fzbody', 'fzapp'), lump=('zlbody', 'zlapp'),
     spec='840 kSol/s · 2 780 W · Equihash (Zcash) · výplata v BTC', today='Při dnešních cenách ZEC a BTC a výkonu sítě Zcash, po elektřině a poplatku poolu.',
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
@@ -30,7 +31,8 @@ MACHINES = {
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
     scen={'bear': [('ZEC 1. rok', 'zB1'), ('ZEC dál', 'zB2'), ('BTC', 'bB')], 'base': [('ZEC 1. rok', 'zM1'), ('ZEC dál', 'zM2'), ('BTC', 'bM')],
           'bull': [('ZEC 1. rok', 'zU1'), ('ZEC dál', 'zU2'), ('BTC', 'bU')]},
-    proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')]),
+    proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
+    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Hashrate Zcash reaguje na odchylku ceny ZEC od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
     spec='16,2 GH/s · 3 260 W · Scrypt, merge mining LTC + DOGE · výplata v BTC', today='Při dnešních cenách LTC, DOGE a BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwL', hg='lhg', faq_sel='qScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
@@ -38,7 +40,8 @@ MACHINES = {
     prices=[('Cena LTC dnes', 'qLtc'), ('Cena DOGE dnes', 'qDoge'), ('Cena BTC dnes', 'qBtc')],
     scen={'bear': [('LTC', 'llB'), ('DOGE', 'ldB'), ('BTC', 'lbB')], 'base': [('LTC', 'llM'), ('DOGE', 'ldM'), ('BTC', 'lbM')],
           'bull': [('LTC', 'llU'), ('DOGE', 'ldU'), ('BTC', 'lbU')]},
-    proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')]),
+    proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
+    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Hashrate Scrypt reaguje na odchylku cen LTC a DOGE od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
 }
 # claude.ai links of the published calculators (None = not published yet)
 LINKS = {'index': 'https://claude.ai/artifact/GjajZXcYDdL5dyNdzHUf2M', 's21': 'https://claude.ai/artifact/6tEzys5PUCArXZCpfADioK',
@@ -63,6 +66,32 @@ def rename_ids(html, js, ids, prefix, extra_js=()):
     for i in extra_js:
         js = re.sub(rf'#{i}\b', f'#{prefix}{i}', js)
     return html, js
+
+
+MC_ASSETS = {'s21': ['btc'], 'z15': ['btc', 'zec'], 'l9': ['btc', 'ltc', 'doge']}
+
+
+def mc_returns(assets):
+    """Daily log returns (x 1e5, rounded) of the closing prices in the versioned Coin Metrics snapshot,
+    on the days all the assets have a price; the Monte Carlo draws its swings from these."""
+    snap = json.loads((B.ROOT / 'data' / 'source' / 'coinmetrics.json').read_text())
+    px = {a: {} for a in assets}
+    for r in snap['data']:
+        if r['asset'] in px:
+            px[r['asset']][r['time'][:10]] = float(r['PriceUSD'])
+    days = sorted(set.intersection(*(set(v) for v in px.values())))
+    out = {a: [round(math.log(px[a][d] / px[a][p]) * 1e5) for p, d in zip(days, days[1:])] for a in assets}
+    out['from'], out['to'] = days[0], days[-1]
+    return json.dumps(out, separators=(',', ':'))
+
+
+def mc_parts(key):
+    M = MACHINES[key]
+    t = B.read('mcbody.html')
+    for k, v in M['mc'].items():
+        t = t.replace('{{MC_' + k.upper() + '}}', v)
+    assert '{{' not in t
+    return {m.group(1): m.group(2) for m in re.finditer(r'<!--@(\w+)-->(.*?)(?=<!--@|\Z)', t, re.S)}
 
 
 FONT_SWAP = [('IBM Plex Mono', 'Geist Mono'), ('IBM Plex Sans', 'Geist')]
@@ -107,6 +136,7 @@ def build(key):
         faq_hidden = faq_hidden.replace(fi[pid], '')
 
     ms, fs, ls = sections(main_html), sections(faq_html), sections(lump_html)
+    mc = mc_parts(key)
     main_kpis = '<div class="kpis" id="kpis"></div>'
     lump_kpis = '<div class="kpis" id="L_kpis"></div>'
 
@@ -148,6 +178,7 @@ def build(key):
   {field('Odhad do', mi['end'], '', 'Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.')}
   {field('Růst hashrate sítě', mi[M['hg']], '% / rok')}
   {''.join(field(lbl, mi[i], u) for lbl, i, u in M['proj_extra'])}
+  {field('Kolísání cen (Monte Carlo)', '<input id="mcVol" type="number" value="100" min="0" max="300" step="10">', '%', 'Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.')}
   <span hidden>{sel}</span>
   </details>
 </form>
@@ -174,9 +205,11 @@ def build(key):
 {ms["c4"]}'''),
         ('navratnost', 'Návratnost', f'''<div class="intro"><h2>Kdy se stroj zaplatí</h2><p>Tři scénáře ceny vedle sebe. Procenta změníte v panelu vlevo.</p></div>
 {strip_heading(ms["c5"])}
+{mc["navratnost"]}
 {fs["navratnost"]}'''),
         ('nakup', 'Těžba vs. nákup', f'''<div class="intro"><h2>Těžit, nebo koupit BTC?</h2><p>Stejné vklady ve stejných dnech pro těžbu, jednorázový nákup a týdenní DCA.</p></div>
 {strategy}
+{mc["nakup"]}
 <div class="grid2">{strip_heading(ms["c7"])}{strip_heading(ms["c8"])}</div>
 <div class="intro"><h2>Načasování nákupu v historii</h2><p>Jak by dopadla těžba proti nákupu BTC podle dne vstupu. Vlastní data vstupu zadáte níže.</p></div>
 {lump_kpis}
@@ -187,7 +220,7 @@ def build(key):
 <nav class="toc">{toc}</nav>
 {"".join(fs[g] for g in faq_groups if g not in moved)}'''),
         ('metodika', 'Metodika', f'''<div class="intro"><h2>Data a metodika</h2></div>
-<div class="notes-grid">{ms["Data a metodika"]}{fs["Metodika"]}{ls["Metodika"]}</div>'''),
+<div class="notes-grid">{ms["Data a metodika"]}{mc["metodika"]}{fs["Metodika"]}{ls["Metodika"]}</div>'''),
     ]
     tabbar = ''.join(f'<button type="button" role="tab" id="t-{k}" aria-controls="p-{k}" aria-selected="{"true" if i == 0 else "false"}" data-tab="{k}">{n}</button>' for i, (k, n, _) in enumerate(tabs))
     panels = ''.join(f'<section class="panel" role="tabpanel" id="p-{k}" aria-labelledby="t-{k}"{"" if i == 0 else " hidden"}>{c}</section>' for i, (k, n, c) in enumerate(tabs))
@@ -216,8 +249,9 @@ def build(key):
 <script>{V2_PRE}</script>
 <script>{B.read("economics.js")}</script>
 <script>const DATA={B.embedded_data(M["data"])};
+const MCR={mc_returns(MC_ASSETS[key])};
 {GLOBAL_FMT}
-{v2_fonts(scoped(main_js))}
+{v2_fonts(scoped(main_js + chr(10) + B.read('mc_' + key + '.js') + chr(10) + B.read('mc.js')))}
 {v2_fonts(scoped(faq_js, mute_strategy=True))}
 {v2_fonts(scoped(lump_js, mute_strategy=True))}
 </script>
