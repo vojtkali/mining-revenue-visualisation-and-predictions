@@ -22,11 +22,24 @@ const TH = 270, W = 3645, FEE0 = (L0.fee ?? Math.max(0, L0.hv*L0.hr*1e6/144 - su
 
 function P(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0);
-  return {price:n('fPrice')||L0.p, kwh:n('fKwh'), fee:Math.min(.9,n('fFee')/100), up:Math.min(1,n('fUp')/100), hw:n('fHwS'), g:(parseFloat($('fHg').value)||0)/100};
+  const g = (parseFloat($('fHg').value)||0)/100;
+  return {price:n('fPrice')||L0.p, kwh:n('fKwh'), fee:Math.min(.9,n('fFee')/100), up:Math.min(1,n('fUp')/100), hw:n('fHwS'), g, g0:g,
+          q:netQ({mode:'fNetMode', up:'fNetUp', down:'fNetDown', c:'fNetEff'}, g)};
 }
+/*@include netmodel.js*/
+const NET_GAP = netGap(r => r.hv*r.hr*1e6*r.p, r => r.hr*1e6);
 // daily BTC per TH for the network state t days from today
 let FEE_MUL = 1, FEE_SPIKE = null;   // FEE_SPIKE = {from, to, mul}: temporary fee mania   // multiplier on today's block fees, used by the "what would have to happen" variants
-const hvAt = (p, t, d, g=p.g) => 144*(subsidy(d)+FEE0*FEE_MUL*(FEE_SPIKE && d>=FEE_SPIKE.from && d<FEE_SPIKE.to ? FEE_SPIKE.mul : 1))/(L0.hr*1e6*Math.pow(1+g, t/365));
+const feeAt = d => FEE0*FEE_MUL*(FEE_SPIKE && d>=FEE_SPIKE.from && d<FEE_SPIKE.to ? FEE_SPIKE.mul : 1);
+const hvAt = (d, f) => 144*(subsidy(d)+feeAt(d))/(L0.hr*1e6*f);   // f = network hashrate relative to today
+// network hashrate over N days for a BTC price path (r a year from p.price): the catch-up model, or fixed growth g
+// when the model is switched off or a "what would have to happen" variant sets the growth itself
+function netF(p, r, N, g=p.g){
+  const q = (p.gFixed || g !== p.g0) ? {mode:'fixed', g} : {...p.q, g};
+  return netPath(N, t => { const d = addDays(TODAY, t);
+    return Math.log((subsidy(d)+feeAt(d))/(subsidy(TODAY)+FEE0)) + Math.log(p.price/L0.p) + t/365*Math.log(1+r); }, q, NET_GAP);
+}
+const gEff = f => Math.pow(f[f.length-1], 365/(f.length-1)) - 1;   // average yearly network growth of a path
 
 // ---- "what would have to happen for mining to beat spot / DCA" ----
 // Each variant moves one condition (others stay as set on the left) and compares 5-year end values of the same deposits.
@@ -67,7 +80,7 @@ function renderEdgeNow(){
   // levers: how to set them, grid, which direction helps mining
   const LV = {
     kwh:  {n:'Cena elektřiny', cur:p.kwh, set:(o,x)=>{o.kwh=x}, xs:range(0,Math.max(.1,p.kwh),.005), dir:'pod', fx:x=>n3(x)+' USD/kWh', ax:x=>n3(x)},
-    g:    {n:'Růst hashrate sítě', cur:p.g*100, set:(o,x)=>{o.g=x/100}, xs:range(-40,Math.max(60,p.g*100),5), dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %', ext:-95},
+    g:    {n:'Růst hashrate sítě', cur:(p.q.mode==='catch' ? gEff(netF(p, r, 1826)) : p.g)*100, set:(o,x)=>{o.g=x/100; o.gFixed=true}, xs:range(-40,Math.max(60,p.g*100),5), dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %', ext:-95},
     hw:   {n:'Cena stroje', cur:p.hw, set:(o,x)=>{o.hw=x}, xs:range(0,Math.max(p.hw,1000),Math.max(250,Math.round(p.hw/16/50)*50)), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
     fee:  {n:'Poplatek poolu', cur:p.fee*100, set:(o,x)=>{o.fee=x/100}, xs:range(0,Math.max(30,p.fee*100),2), dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
     fm:   {n:'Transakční poplatky v bloku', cur:1, set:(o,x)=>{o.fm=x}, xs:[1,10,25,50,75,100,125,150,175,200,210,220,230,250], dir:'nad', fx:x=>n1(x)+'× dnešek', ax:x=>Math.round(x)+'×', ext:1e5, fx2:x=>` (≈ ${n1(x*FEE0)} BTC poplatků na blok proti dnešním ${n3(FEE0)} BTC)`},
@@ -174,10 +187,10 @@ function renderEdgeNow(){
 
 // machine bought today, run 5 years; price changes r per year
 function proj(p, r, years=5, g=p.g){
-  const N = Math.round(365*years), eff = TH*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
+  const N = Math.round(365*years), eff = TH*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [], f = netF(p, r, N, g);
   let b=0, el=0, rev=0, firstLoss=null, payS=null, payH=null, btcPreH=0;
   for (let t=0; t<N; t++){
-    const d = addDays(TODAY, t), pr = p.price*Math.pow(1+r, t/365), m = hvAt(p,t,d,g)*eff;
+    const d = addDays(TODAY, t), pr = p.price*Math.pow(1+r, t/365), m = hvAt(d, f[t])*eff;
     b += m; el += elec; rev += m*pr; if (d < NEXT_HALVING) btcPreH = b;
     if (firstLoss===null && m*pr < elec) firstLoss = d;
     if (payS===null && rev-el >= p.hw) payS = d;
@@ -206,8 +219,8 @@ function render(){
   const p = P(); charts.forEach(c=>c.destroy()); charts = [];
   const eff = TH*p.up*(1-p.fee), btcDay = L0.hv*eff, revDay = btcDay*p.price, elecDay = W/1000*24*p.kwh*p.up, netDay = revDay-elecDay;
   const M = 30.44, bePrice = elecDay/btcDay;
-  const dH = daysBetween(TODAY, NEXT_HALVING), btcDayH = hvAt(p, dH, NEXT_HALVING)*eff;
-  const btcDay1y = hvAt(p, 365, addDays(TODAY,365))*eff;
+  const dH = daysBetween(TODAY, NEXT_HALVING), fB = netF(p, scnNow()[+($('fScen3').value||1)][1], Math.max(dH, 365));
+  const btcDayH = hvAt(NEXT_HALVING, fB[dH])*eff, btcDay1y = hvAt(addDays(TODAY,365), fB[365])*eff;
   // last 12 months history with current parameters
   const from12 = addDays(TODAY,-365), from6 = addDays(TODAY,-182);
   const H = ALL.filter(r => r.d > from12);
@@ -231,7 +244,7 @@ function render(){
   const V = {
     btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     dcaCash: usd(comparison.at(-1).cash), sell5yHw: usd(base.end.sell-p.hw), roiHw: pct(Economics.roi(base.end.hodl-p.hw,p.hw)),
-    today: fmtDate(TODAY), price: usd(p.price), hw: usd(p.hw), fee: pct(p.fee), up: pct(p.up), hg: pct(p.g),
+    today: fmtDate(TODAY), price: usd(p.price), hw: usd(p.hw), fee: pct(p.fee), up: pct(p.up), hg: pct(p.q.mode === 'catch' ? gEff(netF(p, base.r, 1826)) : p.g),
     revDay: usd(revDay,2), elecDay: usd(elecDay,2), netDay: usd(netDay,2), revMonth: usd(revDay*M), elecMonth: usd(elecDay*M), netMonth: usd(netDay*M), netYear: usd(netDay*365),
     btcMonth: btc(btcDay*M), satsDay: sats(btcDay), btcMonth1y: btc(btcDay1y*M), hpPH: usd(L0.hv*p.price*1000,2),
     paySimple: netDay>0 ? yrs(p.hw/netDay) : 'nikdy (stroj je ve ztrátě)', roiY: pct(Economics.roi(netDay*365,p.hw)),
@@ -252,7 +265,7 @@ function render(){
   $('kpis').innerHTML = [
     ['Čistě za měsíc', usd(netDay*M), `výnos ${usd(revDay*M)} − elektřina ${usd(elecDay*M)}`, netDay],
     ['BTC za měsíc', btc(btcDay*M), `${sats(btcDay)} denně`],
-    ['Bod zvratu, cena BTC', usd(bePrice), `při dnešní síti; ${beSeries(base.out, o => usd(o.be), dH)} (síť ${sgnPct(p.g)} ročně)`, p.price-bePrice],
+    ['Bod zvratu, cena BTC', usd(bePrice), `při dnešní síti; ${beSeries(base.out, o => usd(o.be), dH)} (${p.q.mode === 'catch' ? `síť dohání tržby, v průměru ${sgnPct(gEff(netF(p, base.r, 1826)))} ročně` : `síť ${sgnPct(p.g)} ročně`})`, p.price-bePrice],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Cena BTC</th><th>Cena za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>Stack − zaplaceno (vč. stroje)</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
@@ -302,7 +315,7 @@ function render(){
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS2.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.2,'--s1'],[.35,'--s4'],[.5,'--s2']];
   charts.push(new Chart($('cHr'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS2, datasets:
-    gs.map(([g,c]) => line(`Síť +${g*100} % ročně`, proj(p, 0, 5, g).out.map(o=>o.btc), css(c)))}}));
+    gs.map(([g,c]) => line(`Síť +${g*100} % ročně`, proj({...p, gFixed:true}, 0, 5, g).out.map(o=>o.btc), css(c)))}}));
   const HL = ALL.filter(r => r.d > from12);
   charts.push(new Chart($('cVar'), {type:'line', plugins:[zones,crosshair], options:opts(v=>'$'+v, v=>usd(v,2)+' /PH/den'), data:{labels:HL.map(r=>r.d), datasets:[
     line('Hashprice', HL.map(r=>r.hv*r.p*1000), css('--s1')), ref('Bod zvratu', HL.map(()=>elecDay/eff*1000))]}}));

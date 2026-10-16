@@ -41,18 +41,27 @@ function scnNow(){
 function P(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   return {ltc:n('qLtc')||L0.l, doge:n('qDoge')||L0.g, btc:n('qBtc')||L0.p, kwh:n('qKwh'), fee:Math.min(.9,n('qFee')/100), up:Math.min(1,n('qUp')/100), hw:n('qHwL'),
-          g:raw('qHg')/100, k:raw('qK'), br:Math.max(-.9,raw('qBtcR')/100), si:+($('qScen').value||2)};
+          g:raw('qHg')/100, g0:raw('qHg')/100, k:raw('qK'), br:Math.max(-.9,raw('qBtcR')/100), si:+($('qScen').value||2),
+          q:netQ({mode:'qNetMode', up:'qNetUp', down:'qNetDown', c:'qNetEff'}, raw('qHg')/100)};
 }
+/*@include netmodel.js*/
+const NET_GAP = netGap(r => r.ml*r.l + r.mg*r.g, r => r.hl);   // LTC + DOGE revenue in USD a day, LTC hashrate
+const gEff = f => Math.pow(f[f.length-1], 365/(f.length-1)) - 1;
 // coins per GH/s per day today
 const ltcPerGH = L0.ml/(L0.hl*1e3), dogePerGH = L0.mg/(L0.hg*1e3);
 // machine bought today, 5 years: LTC and DOGE change r a year, BTC br a year; Scrypt hashrate = today x (1+g)^t x (price ratio)^k
 function proj(p, r, g=p.g, years=5, rd=r){
   const N = Math.round(365*years), eff = GH*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
+  // network: catch-up to the LTC + DOGE revenue of this price path, or fixed growth g with the price sensitivity k
+  const fixed = p.gFixed || g !== p.g0 || p.q.mode !== 'catch';
+  const mlAt = d => (L0.ml-(L0.fl||0))*ltcSub(d)/ltcSub(TODAY)+(L0.fl||0);
+  const F = netPath(N, t => Math.log((mlAt(addDays(TODAY, t))*p.ltc*Math.pow(1+r, t/365) + L0.mg*p.doge*Math.pow(1+rd, t/365))/(L0.ml*L0.l + L0.mg*L0.g)),
+                    fixed ? {mode:'fixed', g} : {...p.q, g}, NET_GAP);
   let b=0, el=0, rev=0, firstLoss=null, payS=null, payH=null, btcPreH=0;
   for (let t=0; t<N; t++){
     // LTC changes r a year, DOGE rd a year; Scrypt hashrate follows the revenue-weighted price index
     const d = addDays(TODAY, t), f = Math.pow(1+r, t/365), fd = Math.pow(1+rd, t/365), bp = p.btc*Math.pow(1+p.br, t/365);
-    const hrF = Math.pow(1+g, t/365)*Math.pow(rd===r ? f : L0.sd*fd+(1-L0.sd)*f, p.k);
+    const hrF = F[t]*(fixed ? Math.pow(rd===r ? f : L0.sd*fd+(1-L0.sd)*f, p.k) : 1);
     const usdDay = (((L0.ml-(L0.fl||0))*ltcSub(d)/ltcSub(TODAY)+(L0.fl||0))/(L0.hl*1e3)*p.ltc*f + dogePerGH*p.doge*fd)/hrF*eff, m = usdDay/bp;
     b += m; el += elec; rev += usdDay; if (d < NEXT_HALVING) btcPreH = b;
     if (firstLoss===null && usdDay < elec) firstLoss = d;
@@ -65,7 +74,7 @@ function proj(p, r, g=p.g, years=5, rd=r){
   payS = accounted.find(o => o.profitSell >= 0)?.d ?? null;
   payH = accounted.find(o => o.profitHold >= 0)?.d ?? null;
   accounted.forEach(o => o.res = 1 - o.elecDay/o.usd);
-  return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH};
+  return {out:accounted, btc:b, el:accounted.at(-1).el, elec, end:accounted.at(-1), firstLoss, payS, payH, btcPreH, gEff:gEff(F)};
 }
 
 /*@include edge.js*/
@@ -78,14 +87,14 @@ function edgeSimL(o){
 function renderEdgeL(p, base){
   const n1 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:1}), n3 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:3}), n4 = v => v.toLocaleString('cs-CZ',{maximumFractionDigits:4});
   const sgn = v => (v<0?'−':'+')+n1(Math.abs(v)), money = x => '$'+Math.round(x).toLocaleString('cs-CZ');
-  const o0 = {...base.pp, r:base.r, rd:base.rd};
+  const o0 = {...base.pp, r:base.r, rd:base.rd}, gNow = p.q.mode === 'catch' ? base.gEff : o0.g;
   const LV = {
     kwh:  {n:'Cena elektřiny', cur:o0.kwh, set:(o,x)=>{o.kwh=x}, min:0, max:.5, step:.01, dir:'pod', fx:x=>n3(x)+' USD/kWh', ax:x=>n3(x)},
     rd:   {n:'Růst ceny DOGE', cur:o0.rd*100, set:(o,x)=>{o.rd=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     r:    {n:'Růst ceny LTC', cur:o0.r*100, set:(o,x)=>{o.r=x/100}, min:-90, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     doge: {n:'Cena DOGE v den nákupu', cur:o0.doge, set:(o,x)=>{o.doge=x}, min:.001, max:o0.doge*50, step:Math.max(.005,o0.doge*.1), dir:'nad', fx:x=>'$'+n4(x), ax:x=>'$'+n3(x)},
     br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
-    g:    {n:'Růst hashrate Scrypt', cur:o0.g*100, set:(o,x)=>{o.g=x/100}, min:-90, max:Math.max(500, o0.g*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    g:    {n:'Růst hashrate Scrypt', cur:gNow*100, set:(o,x)=>{o.g=x/100; o.gFixed=true}, min:-90, max:Math.max(500, gNow*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     hw:   {n:'Cena stroje', cur:o0.hw, set:(o,x)=>{o.hw=x}, min:0, max:o0.hw*20, step:Math.max(250,o0.hw*.1), dir:'pod', fx:money, ax:x=>'$'+kfmt(x)},
     fee:  {n:'Poplatek poolu', cur:o0.fee*100, set:(o,x)=>{o.fee=x/100}, min:0, max:90, step:2, dir:'pod', fx:x=>n1(x)+' %', ax:x=>n1(x)+' %'},
     rs:   {n:'Prodej stroje na konci 5 let', cur:0, set:(o,x)=>{o.rs=x/100}, min:0, max:5000, step:25, dir:'nad', fx:x=>`${Math.round(x)} % nákupní ceny`, ax:x=>Math.round(x)+' %', fx2:x=>` (≈ ${money(x/100*o0.hw)})`},
@@ -158,7 +167,7 @@ function render(){
   $('kpis').innerHTML = [
     ['Čistě za měsíc', usd(netDay*M), `výnos ${usd(revDay*M)} − elektřina ${usd(elecDay*M)}`, netDay],
     ['BTC za měsíc', btc(btcDay*M), `${sats(btcDay)} denně, DOGE ${pct(shD)} výnosu`],
-    ['Rezerva do bodu zvratu', pct(beDrop), `o kolik mohou dnes klesnout ceny DOGE a LTC; ${beSeries(base.out, o => o.res >= 0 ? pct(o.res) : `ztráta, výnos pokryje ${pct(1-o.res)} elektřiny`, dH)} (proti cenám ve zvoleném scénáři; síť ${pcs(p.g)} ročně a sleduje ceny)`, beDrop],
+    ['Rezerva do bodu zvratu', pct(beDrop), `o kolik mohou dnes klesnout ceny DOGE a LTC; ${beSeries(base.out, o => o.res >= 0 ? pct(o.res) : `ztráta, výnos pokryje ${pct(1/(1-o.res))} elektřiny`, dH)} (proti cenám ve zvoleném scénáři; ${p.q.mode === 'catch' ? `síť dohání tržby, v průměru ${pcs(base.gEff)} ročně` : `síť ${pcs(p.g)} ročně a sleduje ceny`})`, beDrop],
   ].map(([l,v,s,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${s}</div></div>`).join('');
 
   $('tPay').innerHTML = `<thead><tr><th>Scénář cen LTC a DOGE</th><th>DOGE za 5 let</th><th>Zaplacení, prodej</th><th>Zaplacení, držení</th><th>BTC za 5 let</th><th>Stack − zaplaceno</th><th>ROI všech vkladů za 5 let</th><th>První den ve ztrátě</th></tr></thead><tbody>`+
@@ -195,7 +204,7 @@ function render(){
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.15,'--s1'],[.3,'--s4'],[.6,'--s2']];
   charts.push(new Chart($('cHr'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:
-    gs.map(([g,c]) => line(`Síť +${g*100} % ročně`, proj({...p, br:0}, 0, g).out.map(o=>o.btc), css(c)))}}));
+    gs.map(([g,c]) => line(`Síť +${g*100} % ročně`, proj({...p, br:0, gFixed:true}, 0, g).out.map(o=>o.btc), css(c)))}}));
   const linX = (o, lo, hi, title, fmt) => { o.scales.x = {type:'linear', min:lo, max:hi, grid:{display:false}, border:{color:css('--line')}, ticks:{color:css('--fg2'), callback:fmt, maxTicksLimit:8, font:{family:'IBM Plex Mono',size:11}}};
     o.plugins.tooltip.callbacks.title = it => `${title} ${fmt(it[0].parsed.x)}`; return o; };
   const xs = []; for (let v=-80; v<=200; v+=5) xs.push(v);

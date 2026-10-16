@@ -22,20 +22,29 @@ function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   let end = $('end').value || '2030-12-31'; if (end <= TODAY) end = addDays(TODAY, 30);
   return {start:$('start').value||'2023-06-15', end, kwh:n('kwh'), fee:n('poolFee')/100, up:Math.min(1,n('uptime')/100), hw:n('hwz'),
-          th:n('th')||840, w:n('w')||2780, sc:$('sc').value, g:raw('zhg')/100, k:raw('zk')};
+          th:n('th')||840, w:n('w')||2780, sc:$('sc').value, g:raw('zhg')/100, k:raw('zk'),
+          q:netQ({mode:'netMode', up:'netUp', down:'netDown', c:'netEff'}, raw('zhg')/100)};
 }
+/*@include netmodel.js*/
+// network revenue in USD a day (all issued ZEC + fees; mz holds the miners' 80 %) and hashrate (Coin Metrics units)
+const zTot = r => (r.mz-(r.fees||0))/.8 + (r.fees||0);
+const NET_GAP = netGap(r => zTot(r)*r.z, r => r.hr);
 
 // Projection: BTC price at a constant yearly rate; ZEC price with its own first-year move and a later yearly rate;
 // Zcash hashrate = baseline growth x (ZEC price ratio)^k; halving halves the subsidy (fees on Zcash are negligible).
 function future(p, scKey){
   const L = ALL[ALL.length-1], [, , bId, z1Id, z2Id] = SC[scKey];
   const rb = pctv(bId,-90)/100, z1 = pctv(z1Id)/100, z2 = pctv(z2Id,-90)/100, N = daysBetween(L.d, p.end), out = [];
+  const zAt = t => L.z*Math.pow(1+z1, Math.min(t,365)/365)*Math.pow(1+z2, Math.max(0,t-365)/365);
+  const mzAt = d => (L.mz-(L.fees||0))*subsidy(d)/subsidy(L.d)+(L.fees||0);
+  // network hashrate: catch-up to the revenue (ZEC a day x price), or fixed growth with the price sensitivity k
+  const lrr = t => { const d = addDays(L.d, t); return Math.log(zTot({mz:mzAt(d), fees:L.fees})*zAt(t)/(zTot(L)*L.z)); };
+  const f = netPath(N, lrr, p.q, NET_GAP);
   for (let t=1; t<=N; t++){
-    const d = addDays(L.d, t), pb = L.p*Math.pow(1+rb, t/365);
-    const z = L.z*Math.pow(1+z1, Math.min(t,365)/365)*Math.pow(1+z2, Math.max(0,t-365)/365);
-    const hr = L.hr*Math.pow(1+p.g, t/365)*Math.pow(z/L.z, p.k);
-    const mz = (L.mz-(L.fees||0))*subsidy(d)/subsidy(L.d)+(L.fees||0);
-    out.push({d, p:pb, z, hr, mz, hv:mz/(hr*1e6)*z/pb, e:2});
+    const d = addDays(L.d, t), pb = L.p*Math.pow(1+rb, t/365), z = zAt(t);
+    const hr = L.hr*f[t]*(p.q.mode === 'catch' ? 1 : Math.pow(z/L.z, p.k));
+    const mz = mzAt(d);
+    out.push({d, p:pb, z, hr, mz, hv:mz/(hr*1e6)*z/pb, e:2, lrr:lrr(t), lf:Math.log(hr/L.hr)});
   }
   return out;
 }

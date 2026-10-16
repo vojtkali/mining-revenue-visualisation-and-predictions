@@ -22,20 +22,29 @@ function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   let end = $('end').value || '2030-12-31'; if (end <= TODAY) end = addDays(TODAY, 30);
   return {start:$('start').value||'2024-05-15', end, kwh:n('kwh'), fee:n('poolFee')/100, up:Math.min(1,n('uptime')/100), hw:n('hwL'),
-          th:n('th')||16.2, w:n('w')||3260, sc:$('sc').value, g:raw('lhg')/100, k:raw('lk')};
+          th:n('th')||16.2, w:n('w')||3260, sc:$('sc').value, g:raw('lhg')/100, k:raw('lk'),
+          q:netQ({mode:'netMode', up:'netUp', down:'netDown', c:'netEff'}, raw('lhg')/100)};
 }
+/*@include netmodel.js*/
+// Scrypt network revenue in USD a day (LTC + DOGE, merge mining) and hashrate (LTC, Coin Metrics units)
+const NET_GAP = netGap(r => r.ml*r.l + r.mg*r.g, r => r.hl);
 
 // Projection: BTC, LTC and DOGE prices at constant yearly rates; Scrypt hashrate = baseline growth x (revenue-weighted
 // LTC/DOGE price ratio)^k, applied to both chains; the LTC halving halves LTC rewards, DOGE stays 10 000 per block.
 function future(p, scKey){
   const L = ALL[ALL.length-1], [, , bId, lId, dId] = SC[scKey];
   const rb = pctv(bId)/100, rl = pctv(lId)/100, rd = pctv(dId)/100, N = daysBetween(L.d, p.end), out = [];
+  const mlAt = d => (L.ml-(L.fl||0))*ltcSub(d)/ltcSub(L.d)+(L.fl||0);
+  // Scrypt hashrate: catch-up to the LTC + DOGE revenue, or fixed growth with the price sensitivity k
+  const lrr = t => { const d = addDays(L.d, t);
+    return Math.log((mlAt(d)*L.l*Math.pow(1+rl, t/365) + L.mg*L.g*Math.pow(1+rd, t/365))/(L.ml*L.l + L.mg*L.g)); };
+  const F = netPath(N, lrr, p.q, NET_GAP);
   for (let t=1; t<=N; t++){
     const d = addDays(L.d, t), pb = L.p*Math.pow(1+rb, t/365), pl = L.l*Math.pow(1+rl, t/365), pg = L.g*Math.pow(1+rd, t/365);
-    const idx = L.sd*pg/L.g + (1-L.sd)*pl/L.l, f = Math.pow(1+p.g, t/365)*Math.pow(idx, p.k);
-    const hl = L.hl*f, hg = L.hg*f, ml = (L.ml-(L.fl||0))*ltcSub(d)/ltcSub(L.d)+(L.fl||0), mg = L.mg;
+    const idx = L.sd*pg/L.g + (1-L.sd)*pl/L.l, f = F[t]*(p.q.mode === 'catch' ? 1 : Math.pow(idx, p.k));
+    const hl = L.hl*f, hg = L.hg*f, ml = mlAt(d), mg = L.mg;
     const ul = ml/(hl*1e3)*pl, ug = mg/(hg*1e3)*pg;
-    out.push({d, p:pb, l:pl, g:pg, hl, hg, ml, mg, sd:ug/(ul+ug), hv:(ul+ug)/pb, e:2});
+    out.push({d, p:pb, l:pl, g:pg, hl, hg, ml, mg, sd:ug/(ul+ug), hv:(ul+ug)/pb, e:2, lrr:lrr(t), lf:Math.log(f)});
   }
   return out;
 }

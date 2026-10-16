@@ -14,6 +14,10 @@
   <label for="zHw">Cena stroje, USD<input id="zHw" type="number" step="100" min="0" value="12000"></label>
   <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad −70 %, pak 0 % (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Korekce −40 %, pak +10 % ročně</option><option value="3">Růst +30 %, pak +20 % ročně</option></select></label>
   <label for="zBtcR">Cena BTC, % ročně<input id="zBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
+  <label for="zNetMode">Model sítě<select id="zNetMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
+  <label for="zNetUp">Poločas růstu sítě, dny<input id="zNetUp" type="number" step="30" min="1" value="180"></label>
+  <label for="zNetDown">Poločas poklesu sítě, dny<input id="zNetDown" type="number" step="30" min="1" value="2920"></label>
+  <label for="zNetEff">Zlepšování strojů, % za rok<input id="zNetEff" type="number" step="5" min="0" max="80" value="20"></label>
   <label for="zHg">Růst hashrate Zcash, % ročně<input id="zHg" type="number" step="5" min="-50" value="300"></label>
   <label for="zK">Citlivost hashrate na cenu ZEC<input id="zK" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form>
@@ -143,6 +147,6 @@
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě a ceny: Coin Metrics Community API, uzavřené dny UTC do {{LAST}}. Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash roste zadaným tempem a sleduje cenu ZEC, halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
+  <div>Stroj: 840 kSol/s, 2 780 W. Data sítě a ceny: Coin Metrics Community API, uzavřené dny UTC do {{LAST}}. Projekce: cena ZEC podle scénáře (první rok a pak roční tempo), cena BTC o zadané procento ročně, hashrate Zcash: výkon sítě dohání tržby těžařů (model kalibrovaný na historii, viz Metodika; v panelu jde přepnout na pevný růst), halving kolem 20. 11. 2028, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/Da2FmoaXTDHXKR36hHM7fN">Z15 Pro: těžba Zcash s výplatou v BTC</a>.</div>
 </section>
 </div>

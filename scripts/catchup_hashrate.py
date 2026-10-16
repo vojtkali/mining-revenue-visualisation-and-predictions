@@ -93,8 +93,9 @@ def main():
         full = calibrate(lh, lr, t, np.ones(len(d), bool))   # all data: the parameters for the calculators
         hp_now = full['hp0'] * math.exp(-full['c'] * (t[-1] - full['t0']))
         gap = float(lr[-1] - math.log(hp_now) - lh[-1])
+        # for the calculators: normal hashprice (USD a day per Coin Metrics hashrate unit) on the last day, falling by c a year
         result['nets'][net] = dict(start=days[0], end=days[-1], tests=rows, params=dict(up=full['up'], down=full['down'], c=full['c'], cap=full['cap'],
-                                   rmse_all=full['rmse']), gap_now=gap, target_vs_now=float(math.exp(gap)))
+                                   rmse_all=full['rmse']), lhp_ref=float(math.log(hp_now)), ref=days[-1], gap_now=gap, target_vs_now=float(math.exp(gap)))
         mm = np.mean([abs(math.log(1 + r['err_model'])) for r in rows]); mf = np.mean([abs(math.log(1 + r['err_fixed'])) for r in rows])
         print(f"{net:6s} all data: half-life up {full['up']} d, down {full['down']} d, efficiency {full['c']*100:.0f} %/y, cap {full['cap']:g}/y, fit RMSE {full['rmse']:.3f}; "
               f"target today = {math.exp(gap):.2f}x the actual hashrate")

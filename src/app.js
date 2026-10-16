@@ -20,19 +20,25 @@ function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
   let end = $('end').value || '2030-12-31'; if (end <= TODAY) end = addDays(TODAY, 30);
   return {start:$('start').value||'2024-06-17', end, kwh:n('kwh'), fee:n('poolFee')/100, up:Math.min(1,n('uptime')/100), hw:n('hwS'),
-          th:n('th')||270, w:n('w')||3645, sc:$('sc').value, g:raw('hgr')/100, F:1+raw('feeBull')/100};
+          th:n('th')||270, w:n('w')||3645, sc:$('sc').value, g:raw('hgr')/100, F:1+raw('feeBull')/100,
+          q:netQ({mode:'netMode', up:'netUp', down:'netDown', c:'netEff'}, raw('hgr')/100)};
 }
+/*@include netmodel.js*/
+// network revenue in USD a day and hashrate in Coin Metrics units (TH/s) from a data row
+const NET_GAP = netGap(r => r.hv*r.hr*1e6*r.p, r => r.hr*1e6);
 
 // Daily projection after the last known day: scenario price path, growing network hashrate,
 // halving-adjusted subsidy and fees per block (flat, or rising after the halving when bullFees).
 function future(p, scKey, bullFees){
   const L = ALL[ALL.length-1], r = Math.min(500, Math.max(-90, parseFloat($(SC[scKey][2]).value) || 0))/100;   // yearly price change
   const fee0 = (L.fee ?? Math.max(0, L.hv*L.hr*1e6/144 - subsidy(L.d))), N = daysBetween(L.d, p.end), out = [];
+  const feeAt = d => fee0*(bullFees ? 1+(p.F-1)*Math.min(1, Math.max(0, daysBetween(HALVINGS[0], d)/365)) : 1);
+  // network hashrate follows the scenario's revenue (BTC a day x price) with the catch-up model, or grows by p.g
+  const lrr = t => { const d = addDays(L.d, t); return Math.log((subsidy(d)+feeAt(d))/(subsidy(L.d)+fee0)) + t/365*Math.log(1+r); };
+  const f = netPath(N, lrr, p.q, NET_GAP);
   for (let t=1; t<=N; t++){
-    const d = addDays(L.d, t), hr = L.hr*Math.pow(1+p.g, t/365);
-    const ramp = Math.min(1, Math.max(0, daysBetween(HALVINGS[0], d)/365));
-    const fee = fee0*(bullFees ? 1+(p.F-1)*ramp : 1);
-    out.push({d, p:L.p*Math.pow(1+r, t/365), hr, hv:144*(subsidy(d)+fee)/(hr*1e6), e:2});
+    const d = addDays(L.d, t), hr = L.hr*f[t];
+    out.push({d, p:L.p*Math.pow(1+r, t/365), hr, hv:144*(subsidy(d)+feeAt(d))/(hr*1e6), e:2, lrr:lrr(t), lf:Math.log(f[t])});
   }
   return out;
 }

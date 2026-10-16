@@ -19,29 +19,29 @@ MACHINES = {
   's21': dict(name='S21 XP', title='Antminer S21 XP', data='btc', main=('body', 'app'), faq=('fbody', 'fapp'), lump=('lbody', 'lapp'),
     spec='270 TH/s · 3 645 W · SHA-256 · výplata v BTC', today='Při dnešní ceně BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwS', hg='hgr', faq_sel='fScen3', faq_si={'bear': 0, 'base': 1, 'bull': 2},
-    sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg']},
+    sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg'], 'netMode': ['fNetMode'], 'netUp': ['fNetUp'], 'netDown': ['fNetDown'], 'netEff': ['fNetEff']},
     prices=[('Cena BTC dnes', 'fPrice')],
     scen={'bear': [('BTC', 'yBear')], 'base': [('BTC', 'yBase')], 'bull': [('BTC', 'yBull')]},
     proj_extra=[('Nárůst poplatků v bull marketu', 'feeBull', '%')],
-    mc=dict(assets='BTC', corr='dlouhé trendy', net='Hashrate sítě BTC reaguje na odchylku ceny od scénáře se zpožděním asi tří měsíců s citlivostí 0,5: když je BTC o 20 % levnější, než říká scénář, síť časem zpomalí asi o 10 % a stroj natěží víc BTC.')),
+    mc=dict(assets='BTC', corr='dlouhé trendy', net='Každá cesta má vlastní výkon sítě BTC: dohání tržby těžařů v této cestě stejně jako v projekci (poločas růstu podle panelu), takže po propadu ceny síť zpomalí a stroj natěží víc BTC.')),
   'z15': dict(name='Z15 Pro', title='Antminer Z15 Pro', data='zec', main=('zbody', 'zapp'), faq=('fzbody', 'fzapp'), lump=('zlbody', 'zlapp'),
     spec='840 kSol/s · 2 780 W · Equihash (Zcash) · výplata v BTC', today='Při dnešních cenách ZEC a BTC a výkonu sítě Zcash, po elektřině a poplatku poolu.',
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
-    sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR']},
+    sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR'], 'netMode': ['zNetMode'], 'netUp': ['zNetUp'], 'netDown': ['zNetDown'], 'netEff': ['zNetEff']},
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
     scen={'bear': [('ZEC 1. rok', 'zB1'), ('ZEC dál', 'zB2'), ('BTC', 'bB')], 'base': [('ZEC 1. rok', 'zM1'), ('ZEC dál', 'zM2'), ('BTC', 'bM')],
           'bull': [('ZEC 1. rok', 'zU1'), ('ZEC dál', 'zU2'), ('BTC', 'bU')]},
     proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
-    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Hashrate Zcash reaguje na odchylku ceny ZEC od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
+    mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Každá cesta má vlastní výkon sítě Zcash, který dohání tržby těžařů v této cestě stejně jako v projekci.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
     spec='16,2 GH/s · 3 260 W · Scrypt, merge mining LTC + DOGE · výplata v BTC', today='Při dnešních cenách LTC, DOGE a BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwL', hg='lhg', faq_sel='qScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
-    sync={'kwh': ['qKwh'], 'poolFee': ['qFee'], 'uptime': ['qUp'], 'hwL': ['qHwL'], 'lhg': ['qHg'], 'lk': ['qK'], 'lbM': ['qBtcR']},
+    sync={'kwh': ['qKwh'], 'poolFee': ['qFee'], 'uptime': ['qUp'], 'hwL': ['qHwL'], 'lhg': ['qHg'], 'lk': ['qK'], 'lbM': ['qBtcR'], 'netMode': ['qNetMode'], 'netUp': ['qNetUp'], 'netDown': ['qNetDown'], 'netEff': ['qNetEff']},
     prices=[('Cena LTC dnes', 'qLtc'), ('Cena DOGE dnes', 'qDoge'), ('Cena BTC dnes', 'qBtc')],
     scen={'bear': [('LTC', 'llB'), ('DOGE', 'ldB'), ('BTC', 'lbB')], 'base': [('LTC', 'llM'), ('DOGE', 'ldM'), ('BTC', 'lbM')],
           'bull': [('LTC', 'llU'), ('DOGE', 'ldU'), ('BTC', 'lbU')]},
     proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
-    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Hashrate Scrypt reaguje na odchylku cen LTC a DOGE od scénáře se zpožděním asi tří měsíců, s citlivostí z panelu Projekce.')),
+    mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Každá cesta má vlastní výkon sítě Scrypt, který dohání tržby těžařů z LTC a DOGE v této cestě stejně jako v projekci.')),
 }
 # links between the pages: in the claude.ai artifact all pages are files of one artifact (index.html is a shell
 # that shows them in frames and switches between them); the website build (--public) uses PUBLIC_LINKS
@@ -125,7 +125,9 @@ def build(key):
     lump_html, lump_js = rename_ids(lump_html, lump_js, ['f', 'start', 'kwh', 'poolFee', 'uptime', M['hw'], 'th', 'w', 'kpis', 'budget', 'fl'], 'L_', extra_js=['fx'])
 
     def inputs(html):
-        return {m.group(1): m.group(0) for m in re.finditer(r'<input id="([^"]+)"[^>]*>', html)}
+        out = {m.group(1): m.group(0) for m in re.finditer(r'<input id="([^"]+)"[^>]*>', html)}
+        out.update({m.group(1): m.group(0) for m in re.finditer(r'<select id="([^"]+)">.*?</select>', html, re.S)})
+        return out
     mi, fi = inputs(main_html), inputs(faq_html)
     sel = re.search(r'<select id="sc">.*?</select>', main_html, re.S).group(0)
     lump_form = re.search(r'<form class="controls" id="L_f".*?</form>', lump_html, re.S).group(0)
@@ -176,8 +178,12 @@ def build(key):
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
   {field('Odhad do', mi['end'], '', 'Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.')}
-  {field('Růst hashrate sítě', mi[M['hg']], '% / rok')}
-  {''.join(field(lbl, mi[i], u) for lbl, i, u in M['proj_extra'])}
+  {field('Model sítě', mi['netMode'], '', 'Dohánění: hashrate sleduje tržby těžařů se zpožděním (kalibrováno na 2017–2026). Pevný růst: stejné procento každý rok.')}
+  {field('Poločas růstu sítě', mi['netUp'], 'dní')}
+  {field('Poločas poklesu sítě', mi['netDown'], 'dní')}
+  {field('Zlepšování strojů', mi['netEff'], '% / rok')}
+  {field('Pevný růst sítě', mi[M['hg']], '% / rok', 'Jen pro model Pevný růst.')}
+  {''.join(field(lbl, mi[i], u, 'Jen pro model Pevný růst.' if i in ('zk', 'lk') else '') for lbl, i, u in M['proj_extra'])}
   {field('Kolísání cen (Monte Carlo)', '<input id="mcVol" type="number" value="100" min="0" max="300" step="10">', '%', 'Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.')}
   <span hidden>{sel}</span>
   </details>

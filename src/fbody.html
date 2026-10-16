@@ -12,6 +12,10 @@
   <label for="fUp">Uptime, %<input id="fUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="fHwS">Cena stroje, USD<input id="fHwS" type="number" step="100" min="0" value="7180"></label>
   <label for="fScen3">Scénář ceny BTC pro grafy<select id="fScen3"><option value="0">Pesimistický +10 % ročně</option><option value="1" selected>Základní +20 % ročně</option><option value="2">Optimistický +40 % ročně</option></select></label>
+  <label for="fNetMode">Model sítě<select id="fNetMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
+  <label for="fNetUp">Poločas růstu sítě, dny<input id="fNetUp" type="number" step="30" min="1" value="270"></label>
+  <label for="fNetDown">Poločas poklesu sítě, dny<input id="fNetDown" type="number" step="30" min="1" value="2920"></label>
+  <label for="fNetEff">Zlepšování strojů, % za rok<input id="fNetEff" type="number" step="5" min="0" max="80" value="20"></label>
   <label for="fHg">Růst hashrate sítě, % ročně<input id="fHg" type="number" step="5" min="-50" value="30"></label>
 </form>
 
@@ -114,6 +118,6 @@
 
 <section class="notes">
   <h3>Metodika</h3>
-  <div>Stroj: 270 TH/s, 3 645 W. Data sítě a ceny: Coin Metrics Community API, uzavřené dny UTC do {{LAST}}. Projekce: cena BTC se mění o zadané procento ročně, hashrate roste zadaným tempem, halving kolem 10. 4. 2028, transakční poplatky na dnešní úrovni, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/DiNVfn1d7mGmYRQYYaENSj">S21 XP: těžba od uvedení na trh</a>.</div>
+  <div>Stroj: 270 TH/s, 3 645 W. Data sítě a ceny: Coin Metrics Community API, uzavřené dny UTC do {{LAST}}. Projekce: cena BTC se mění o zadané procento ročně, hashrate: výkon sítě dohání tržby těžařů (model kalibrovaný na historii, viz Metodika; v panelu jde přepnout na pevný růst), halving kolem 10. 4. 2028, transakční poplatky na dnešní úrovni, stroj běží nepřetržitě. Podrobné grafy jsou na stránce <a href="https://claude.ai/artifact/DiNVfn1d7mGmYRQYYaENSj">S21 XP: těžba od uvedení na trh</a>.</div>
 </section>
 </div>
