@@ -13,7 +13,7 @@ const TODAY = ALL[ALL.length-1].d;
 const HALVINGS = ['2028-11-20', '2032-11-20', '2036-11-20', '2040-11-20', '2044-11-20'];
 const NEXT_HALVING = HALVINGS.find(d=>d>TODAY);          // Zcash, every 1 680 000 blocks of 75 s
 const subsidy = d => 1.5625/Math.pow(2, HALVINGS.filter(h => d >= h).length);
-const SC = {bear:['Pesimistický','--s2','bB','zB1','zB2'], base:['Základní','--s1','bM','zM1','zM2'], bull:['Optimistický','--s3','bU','zU1','zU2']};
+const SC = {bear:['Pesimistický','--s2','bB'], base:['Základní','--s1','bM'], bull:['Optimistický','--s3','bU']};
 function addDays(s,n){ const d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 const daysBetween = (a,b) => Math.round((Date.parse(b)-Date.parse(a))/864e5);
 const pctv = (id, lo=-95, hi=500) => Math.min(hi, Math.max(lo, parseFloat($(id).value) || 0));

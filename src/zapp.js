@@ -13,14 +13,14 @@ const TODAY = ALL[ALL.length-1].d;
 const HALVINGS = ['2028-11-20', '2032-11-20', '2036-11-20', '2040-11-20', '2044-11-20'];
 const NEXT_HALVING = HALVINGS.find(d=>d>TODAY);          // Zcash, every 1 680 000 blocks of 75 s
 const subsidy = d => 1.5625/Math.pow(2, HALVINGS.filter(h => d >= h).length);
-const SC = {bear:['Pesimistický','--s2','bB','zB1','zB2'], base:['Základní','--s1','bM','zM1','zM2'], bull:['Optimistický','--s3','bU','zU1','zU2']};
+const SC = {bear:['Pesimistický','--s2','bB'], base:['Základní','--s1','bM'], bull:['Optimistický','--s3','bU']};
 function addDays(s,n){ const d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 const daysBetween = (a,b) => Math.round((Date.parse(b)-Date.parse(a))/864e5);
 const pctv = (id, lo=-95, hi=500) => Math.min(hi, Math.max(lo, parseFloat($(id).value) || 0));
 /*@include zpath.js*/
-// ZEC "po pumpě" inputs of each scenario (share of the top after 3 months, 1 year, 2 years; trend after that)
+// ZEC/BTC inputs of each scenario: change against today after 3 months, 1 year, 2 years; yearly rate after that
 const ZP = {bear:{k3:'zB3', k12:'zB12', k24:'zB24', tr:'zBt'}, base:{k3:'zM3', k12:'zM12', k24:'zM24', tr:'zMt'}, bull:{k3:'zU3', k12:'zU12', k24:'zU24', tr:'zUt'}};
-const zScen = k => zScenIn('zShape', {z1:SC[k][3], z2:SC[k][4], ...ZP[k]});
+const zScen = k => zScenIn(ZP[k]);
 
 function params(){
   const n = id => Math.max(0, parseFloat($(id).value) || 0), raw = id => parseFloat($(id).value) || 0;
@@ -210,9 +210,9 @@ function renderProj(p, s, iT){
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
   const endD = fmtDate(res[0].e.d);
-  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>${$('zShape')?.value === 'pct' ? 'ZEC/BTC 1. rok / dál' : 'ZEC/BTC za rok / 2 roky, % vrcholu; dál'}</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
+  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>ZEC vůči BTC za 3 měs. / rok / 2 roky; dál ročně</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
     `<tr><td><span class="sw" style="background:var(--fg2)"></span>Dnes, ${fmtDate(now.d)}</td><td>–</td><td>–</td><td>${usd(now.hodl)}</td><td>${now.hodl>=p.hw?'splaceno':'–'}</td><td>${btc(now.btc)}</td><td>–</td><td>${usd(now.price)}</td><td>${usd(now.z)}</td><td>${usd(now.el)}</td><td>–</td></tr>`+
-    res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2],-90))}</td><td>${(z => typeof z.z1 === 'object' ? `${Math.round(z.z1.k12*100)} % / ${Math.round(z.z1.k24*100)} %; ${sg(Math.round(z.z2*100))}` : `${sg(Math.round(z.z1*100))} / ${sg(Math.round(z.z2*100))}`)(zScen(x.k))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)}</td><td>${usd(x.e.z)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
+    res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2],-90))}</td><td>${(z => `${sg(Math.round(z.z1.k3*100))} / ${sg(Math.round(z.z1.k12*100))} / ${sg(Math.round(z.z1.k24*100))}; ${sg(Math.round(z.z2*100))}`)(zScen(x.k))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)}</td><td>${usd(x.e.z)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
 }
 document.querySelectorAll('#f input, #f select, #fx input, #fx select').forEach(i => i.addEventListener('input', render));
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
