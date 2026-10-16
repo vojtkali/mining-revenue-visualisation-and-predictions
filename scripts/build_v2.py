@@ -256,6 +256,8 @@ const MCR={mc_returns(MC_ASSETS[key])};
 {v2_fonts(scoped(lump_js, mute_strategy=True))}
 </script>
 <script>{V2_POST.replace('__CFG__', json.dumps(cfg))}</script>'''
+    # the FAQ points to the machine's old main page for the charts; here they are in the Přehled tab
+    page = re.sub(r'Podrobné grafy jsou na stránce <a href="https://claude\.ai/(code/)?artifact/\w+">[^<]*</a>', 'Podrobné grafy jsou v záložce Přehled', page)
     return page
 
 
@@ -271,6 +273,11 @@ def build_index():
     body = re.sub(r'<header>.*?</header>', '', body, count=1, flags=re.S)
     body = re.sub(r'\s*<h3>Podrobné stránky</h3>\s*<div class="links">.*?</div>', '<h3>Data</h3>', body, count=1, flags=re.S)
     body = body.replace('<div class="wrap">', '<div class="ov-body">', 1)
+    # links to the old per-machine pages lead to the machine's calculator instead (the calculator has all of it)
+    old = {'s21xp.html': 's21', 'z15pro.html': 'z15', 'l9.html': 'l9'}
+    for art, page in B.ARTIFACT_LINKS.items():
+        if page in old:
+            body = re.sub(r'href="https://claude\.ai/(code/)?artifact/' + art + '"', f'data-m="{old[page]}" href="{LINKS[old[page]]}"', body)
     cards = []
     for key, m in MACHINES.items():
         k = lambda n: sv[f'{key}.{n}']
