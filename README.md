@@ -31,7 +31,7 @@ Při srovnání konečných hodnot mají všechny strategie totožné vklady. Ku
 - `<stroj>-faq.html`: pětiletá simulace stroje pořízeného k datu posledních dat.
 - `<stroj>-nakup.html`: čistý historický backtest; každý den vstupu má vlastní těžbu i nákup se stejnými vklady, konec je vždy datum posledních pozorování. Žádné budoucí předpoklady neovlivňují historické skóre. Vstupy mají různé délky držení; podíl výher není pravděpodobností budoucího úspěchu. Používá se zadaná konstantní cena stroje a energie, nikoli archiv nabídek ASICů. Před skutečným dodáním stroje je simulace hypotetická.
 
-BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimistická varianta modelu, nikoli dolní mez možného výsledku. Samostatný růst hashratu je na všech projekčních stránkách: BTC výchozích 30 %, ZEC 50 %, Scrypt 15 % ročně. Jsou to upravitelné předpoklady, nikoli tvrzení o historickém průměru. U ZEC/Scrypt je zvlášť citlivost hashratu na cenu mince (výchozí 0,3).
+BTC scénáře zůstávají +10 / +20 / +40 % ročně (CAGR). +10 % je pesimistická varianta modelu, nikoli dolní mez možného výsledku. Samostatný růst hashratu je na všech projekčních stránkách: BTC výchozích 30 %, ZEC 300 %, Scrypt 15 % ročně. Jsou to upravitelné předpoklady, nikoli tvrzení o historickém průměru. U ZEC/Scrypt je zvlášť citlivost hashratu na cenu mince (výchozí 0,3).
 
 Halvingy jsou přibližná kalendářní data, skutečně závisí na výšce bloků. Projekce půlí pouze dotaci, zachovává transakční poplatky a normalizuje odměnu vůči datu posledních dat, takže už proběhlý halving neaplikuje podruhé. U ZEC je modelovaný podíl těžařů 80 % dotace; případná budoucí změna protokolu vyžaduje aktualizaci tohoto předpokladu.
 

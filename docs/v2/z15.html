@@ -273,7 +273,7 @@ details.qa .a p{margin:0 0 8px}
 <form id="fx" onsubmit="return false">
   <details class="sg adv" id="adv2"><summary>Projekce</summary>
   <label class="field"><span class="fl">Odhad do</span><span class="fi"><input id="end" type="date" value="2030-12-31" min="2026-11-15" max="2040-12-31"><span class="u"></span></span><span class="hint">Nastaví se na začátek těžby + 4,5 roku; jde změnit ručně.</span></label>
-  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="zhg" type="number" step="5" min="-50" max="300" value="50"><span class="u">% / rok</span></span></label>
+  <label class="field"><span class="fl">Růst hashrate sítě</span><span class="fi"><input id="zhg" type="number" step="5" min="-50" max="300" value="300"><span class="u">% / rok</span></span></label>
   <label class="field"><span class="fl">Citlivost hashrate na cenu ZEC</span><span class="fi"><input id="zk" type="number" step="0.05" min="0" max="1.5" value="0.3"><span class="u"></span></span></label>
   <label class="field"><span class="fl">Kolísání cen (Monte Carlo)</span><span class="fi"><input id="mcVol" type="number" value="100" min="0" max="300" step="10"><span class="u">%</span></span><span class="hint">Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.</span></label>
   <span hidden><select id="sc"><option value="bear">Pesimistický</option><option value="base" selected>Základní</option><option value="bull">Optimistický</option></select></span>
@@ -516,7 +516,7 @@ details.qa .a p{margin:0 0 8px}
   <label for="zHw">Cena stroje, USD<input id="zHw" type="number" step="100" min="0" value="12000"></label>
   <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad −70 %, pak 0 % (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Korekce −40 %, pak +10 % ročně</option><option value="3">Růst +30 %, pak +20 % ročně</option></select></label>
   <label for="zBtcR">Cena BTC, % ročně<input id="zBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
-  <label for="zHg">Růst hashrate Zcash, % ročně<input id="zHg" type="number" step="5" min="-50" max="300" value="50"></label>
+  <label for="zHg">Růst hashrate Zcash, % ročně<input id="zHg" type="number" step="5" min="-50" max="300" value="300"></label>
   <label for="zK">Citlivost hashrate na cenu ZEC<input id="zK" type="number" step="0.05" min="0" max="1.5" value="0.3"></label>
 </form><form class="controls" id="L_f" onsubmit="return false">
   <label for="L_start">Začátek těžby<input id="L_start" type="date" value="2023-06-15" min="2023-06-01" max="2026-10-13"></label>
