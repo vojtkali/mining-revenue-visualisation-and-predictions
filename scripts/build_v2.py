@@ -568,12 +568,15 @@ if (window.parent !== window){
 # the artifact's own page: shows the overview and the calculators (files of the same artifact) in frames, switches
 # between them without reloading, remembers the last one; each frame keeps its own scroll position
 SHELL = '''<title>Těžba: kalkulačky</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
 :root{--bg:#f3f4f7}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0d0f14}}
 :root[data-theme="dark"]{--bg:#0d0f14}
 html,body{margin:0;height:100%;background:var(--bg);overflow:hidden}
-iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:none;background:var(--bg)}
+/* frames do not see the safe-area insets (the app's own bar on phones), so the shell keeps them out of it */
+:root{--st:env(safe-area-inset-top,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--sb:env(safe-area-inset-bottom,0px)}
+iframe{position:fixed;top:var(--st);left:var(--sl);width:calc(100% - var(--sl) - var(--sr));height:calc(100% - var(--st) - var(--sb));border:0;display:none;background:var(--bg)}
 iframe.on{display:block}
 </style>
 <script>
