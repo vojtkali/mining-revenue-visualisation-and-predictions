@@ -28,9 +28,9 @@
   <label for="hgr">Růst hashrate sítě, % za rok<input id="hgr" type="number" step="5" min="-50" value="30"></label>
   <label for="feeBull">Nárůst poplatků v bull marketu, %<input id="feeBull" type="number" step="10" min="-90" max="2000" value="33"></label>
 </form>
-<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Cena BTC se od dnešní ceny mění o zadané procento za rok, každý rok stejně (plynule, složeně). Hashrate sítě roste zadaným tempem. Halvingy (kolem 10. 4. 2028, dále po 4 letech) snižují dotaci za blok na polovinu. Stroj běží nepřetržitě, i když je denní výnos nižší než cena elektřiny.</p>
+<p class="sub" style="margin:-8px 0 0;color:var(--fg2);font-size:13.5px;max-width:90ch">Od dneška grafy pokračují projekcí (šedě podbarveno) až do zvoleného data. Cena BTC se od dnešní ceny mění o zadané procento za rok, každý rok stejně (plynule, složeně). Hashrate sítě dohání tržby těžařů se zpožděním (model dohánění, popis v Metodice); v panelu Projekce jde přepnout na pevný růst. Halvingy (kolem 10. 4. 2028, dále po 4 letech) snižují dotaci za blok na polovinu. Stroj běží nepřetržitě, i když je denní výnos nižší než cena elektřiny.</p>
 
-<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadaná průměrná roční tempa (CAGR), nikoli pravděpodobnostní prognóza. BTC +10 % je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Růst hashratu se nastavuje nezávisle; u ZEC a Scrypt je navíc samostatná citlivost sítě na cenu mince.</p>
+<div class="kpis" id="kpis"></div><p class="sub">Scénáře jsou zadané předpoklady, nikoli pravděpodobnostní prognóza. Pesimistický scénář je pesimistická varianta tohoto modelu, nikoli nejhorší možný výsledek. Model sítě a jeho parametry jsou v panelu Projekce.</p>
 
 <section class="card">
   <h2>1 · Prodávám průběžně: kumulativní zisk v USD</h2>

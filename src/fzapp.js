@@ -162,7 +162,7 @@ function render(){
     btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
-    bearZec: usd(p.zec*0.3), bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
+    bearZec: usd(sc[0].out[Math.min(365, sc[0].out.length-1)].zp), sc0: SCN[0][0].replace(/^[^:]*: /, ''), bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
     bearLossTxt: sc[0].firstLoss ? `je stroj poprvé ve ztrátě ${fmtDate(sc[0].firstLoss)} a dál běží se ztrátou.` : 'stroj do ztráty nespadne ani po halvingu.',
   };
   document.querySelectorAll('[data-k]').forEach(e => { const v = V[e.dataset.k]; e.textContent = v===undefined ? '?' : v; });

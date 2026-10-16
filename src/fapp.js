@@ -256,7 +256,7 @@ function render(){
     payBull: fmtPay(sc[2].payH), payBase: fmtPay(sc[1].payH), payBear: sc[0].payH ? fmtDate(sc[0].payH) : `se nezaplatí ani do ${longY}`,
     btc5y: btc(base.btc), btcPreH: btc(base.btcPreH), cost5y: usd(p.hw+base.el), costPerBtc: usd((p.hw+base.el)/base.btc), lump5y: btc(lump),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
-    scName: SCN[si][0].toLowerCase(), monthVal5y: usd(btcDay*M*base.end.pr), stack5y: usd(base.end.stack), hodl5y: usd(base.end.hodl), hodl5yHw: usd(base.end.hodl-p.hw), el5y: usd(base.el),
+    scName: SCN[si][0].toLowerCase(), sc0: SCN[0][0].replace(/^\S+ /, ''), sc1: SCN[1][0].replace(/^\S+ /, ''), sc2: SCN[2][0].replace(/^\S+ /, ''), monthVal5y: usd(btcDay*M*base.end.pr), stack5y: usd(base.end.stack), hodl5y: usd(base.end.hodl), hodl5yHw: usd(base.end.hodl-p.hw), el5y: usd(base.el),
     price5y: usd(base.end.pr), life0: usd(sc[0].btc*sc[0].end.pr), life1: usd(sc[1].btc*sc[1].end.pr), life2: usd(sc[2].btc*sc[2].end.pr),
     dca5y: btc(dcaAcc), valMine: usd(base.btc*base.end.pr), valLump: usd(lump*base.end.pr), valDca: usd(comparison.at(-1).dcaValue),
     bearLoss: sc[0].firstLoss ? fmtDate(sc[0].firstLoss) : '–', bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
