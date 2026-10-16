@@ -261,6 +261,8 @@ const MCR={mc_returns(MC_ASSETS[key])};
     return page
 
 
+BASE = {'s21': 'BTC +20 % ročně', 'z15': 'ZEC −40 % v prvním roce, pak +10 % ročně; BTC +20 % ročně',
+        'l9': 'LTC a DOGE +10 % ročně; BTC +20 % ročně'}
 RISK = {'s21': 'Růst sítě a halving v dubnu 2028', 'z15': 'Pád ceny ZEC po prudkém růstu', 'l9': 'Cena DOGE, která tvoří většinu výnosu'}
 
 
@@ -292,6 +294,7 @@ def build_index():
     <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm">{k("payBase")}</span><span class="czk">základní scénář</span></dd></div>
     <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}">{val5.group(2)}</span><span class="czk">základní scénář</span></dd></div>
   </dl>
+  <p class="risk"><b>Základní scénář:</b> {BASE[key]}; stroj koupený {vals["LAST"]}, 5 let, výchozí parametry kalkulačky.</p>
   <p class="risk"><b>Hlavní riziko:</b> {RISK[key]}</p>
   {link}
 </article>''')
@@ -306,7 +309,7 @@ def build_index():
   {THEME_BTN}
 </div></header>
 <div class="overview">
-<div class="intro"><h2>Tři stroje vedle sebe</h2><p>Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %; základní scénář ceny. Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p></div>
+<div class="intro"><h2>Tři stroje vedle sebe</h2><p>Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p></div>
 <div class="mcards">{"".join(cards)}</div>
 {body}
 </div>
