@@ -38,7 +38,7 @@ const NET_GAP = netGap(r => zTot(r)*r.z, r => r.hr);
 // Zcash hashrate = baseline growth x (ZEC price ratio)^k; halving halves the subsidy (fees on Zcash are negligible).
 function future(p, scKey){
   const L = ALL[ALL.length-1], [, , bId] = SC[scKey];
-  const rb = pctv(bId,-90)/100, {z1, z2} = zScen(scKey), zr = zRatio(z1, z2), N = daysBetween(L.d, p.end), out = [];
+  const rb = pctv(bId,-90)/100, {z1, z2} = zScen(scKey), zr = zRatio(z1, z2, rb), N = daysBetween(L.d, p.end), out = [];
   const zAt = t => L.z*zr(t);
   const mzAt = d => (L.mz-(L.fees||0))*subsidy(d)/subsidy(L.d)+(L.fees||0);
   // network hashrate: catch-up to the revenue (ZEC a day x price), or fixed growth with the price sensitivity k
@@ -158,7 +158,7 @@ function render(){
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
     [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
     [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
-    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář). Z toho už natěžené ${btc(now.btc)} = ${usd(now.btc*end.price)}, budoucí těžba ${btc(end.btc-now.btc)} = ${usd((end.btc-now.btc)*end.price)} za elektřinu ${usd(end.el-now.el)}. Po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
@@ -210,7 +210,7 @@ function renderProj(p, s, iT){
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
   const endD = fmtDate(res[0].e.d);
-  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>${$('zShape')?.value === 'pct' ? 'ZEC 1. rok / dál' : 'ZEC za rok / 2 roky, % vrcholu; dál'}</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
+  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně</th><th>${$('zShape')?.value === 'pct' ? 'ZEC/BTC 1. rok / dál' : 'ZEC/BTC za rok / 2 roky, % vrcholu; dál'}</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Cena BTC ${endD}</th><th>Cena ZEC ${endD}</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
     `<tr><td><span class="sw" style="background:var(--fg2)"></span>Dnes, ${fmtDate(now.d)}</td><td>–</td><td>–</td><td>${usd(now.hodl)}</td><td>${now.hodl>=p.hw?'splaceno':'–'}</td><td>${btc(now.btc)}</td><td>–</td><td>${usd(now.price)}</td><td>${usd(now.z)}</td><td>${usd(now.el)}</td><td>–</td></tr>`+
     res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2],-90))}</td><td>${(z => typeof z.z1 === 'object' ? `${Math.round(z.z1.k12*100)} % / ${Math.round(z.z1.k24*100)} %; ${sg(Math.round(z.z2*100))}` : `${sg(Math.round(z.z1*100))} / ${sg(Math.round(z.z2*100))}`)(zScen(x.k))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)}</td><td>${usd(x.e.z)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
 }

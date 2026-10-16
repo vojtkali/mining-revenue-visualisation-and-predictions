@@ -12,7 +12,7 @@
   <label for="zFee">Poplatek poolu, %<input id="zFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="zUp">Uptime, %<input id="zUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="zHw">Cena stroje, USD<input id="zHw" type="number" step="100" min="0" value="12000"></label>
-  <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad po pumpě jako LTC 2017 (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Pokles po pumpě, medián minulých pump</option><option value="3">Mírný pokles po pumpě jako DOGE 2024</option></select></label>
+  <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad po pumpě (BTC +10 %)</option><option value="1">ZEC drží kurz vůči BTC</option><option value="2" selected>Pokles po pumpě, medián minulých pump</option><option value="3">Mírný pokles po pumpě</option></select></label>
   <label for="zBtcR">Cena BTC, % ročně<input id="zBtcR" type="number" step="5" min="-50" max="200" value="20"></label>
   <label for="zNetMode">Model sítě<select id="zNetMode"><option value="catch" selected>dohánění tržeb (kalibrováno)</option><option value="fixed">pevný růst</option></select></label>
   <label for="zNetUp">Poločas růstu sítě, dny<input id="zNetUp" type="number" step="30" min="1" value="180"></label>
@@ -140,7 +140,7 @@
 <section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
   <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad po pumpě jako LTC 2017 (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Pokles po pumpě, medián</span><span><i style="background:var(--s3)"></i>Mírný pokles jako DOGE 2024</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Propad po pumpě (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>ZEC drží kurz vůči BTC</span><span><i style="background:var(--s1)"></i>Pokles po pumpě, medián</span><span><i style="background:var(--s3)"></i>Mírný pokles po pumpě</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
     <p>V pesimistickém scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section>

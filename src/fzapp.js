@@ -22,8 +22,8 @@ const yrs = d => { const y = d/365; return y < 1 ? `${Math.round(d/30.4)} měsí
 const KS = 840, W = 2780;
 /*@include zpath.js*/
 // scenarios [name, ZEC z1, ZEC z2, colour, BTC]; ZEC after the pump as in the calculator's defaults (see zpath.js)
-const SCN_DEF = [['Propad po pumpě jako LTC 2017; BTC +10 %',{k3:.30,k12:.08,k24:.08},-.10,'--s2',.10],['Stagnace ZEC 0 %',0,0,'--fg2'],
-  ['Pokles po pumpě, medián minulých pump',{k3:.35,k12:.15,k24:.12},0,'--s1'],['Mírný pokles po pumpě jako DOGE 2024',{k3:.45,k12:.30,k24:.20},.10,'--s3']].map(s => [`${s[0]}: ${zPathTxt(s[1], s[2])}`, ...s.slice(1)]);
+const SCN_DEF = [['Propad po pumpě; BTC +10 %',{k3:.40,k12:.28,k24:.20},-.30,'--s2',.10],['ZEC drží kurz vůči BTC',0,0,'--fg2'],
+  ['Pokles po pumpě, medián minulých pump',{k3:.45,k12:.40,k24:.25},-.15,'--s1'],['Mírný pokles po pumpě',{k3:.55,k12:.55,k24:.31},-.05,'--s3']].map(s => [`${s[0]}: ${zPathTxt(s[1], s[2])}`, ...s.slice(1)]);
 // with the scenario inputs of the main page present (calculator), the FAQ follows them: [name, BTC, ZEC ids]
 const SCN_IN = [['Pesimistický','bB',{z1:'zB1', z2:'zB2', k3:'zB3', k12:'zB12', k24:'zB24', tr:'zBt'}], null,
   ['Základní','bM',{z1:'zM1', z2:'zM2', k3:'zM3', k12:'zM12', k24:'zM24', tr:'zMt'}], ['Optimistický','bU',{z1:'zU1', z2:'zU2', k3:'zU3', k12:'zU12', k24:'zU24', tr:'zUt'}]];
@@ -37,7 +37,7 @@ function scnNow(){
   const v = (id, lo) => Math.max(lo, (parseFloat(document.getElementById(id)?.value) || 0)/100);
   if (!document.getElementById('bM')) return SCN_DEF;
   return SCN_DEF.map((s,i) => { const m = SCN_IN[i];
-    if (!m) { const br = v('bM',-.9); return [`Stagnace ZEC 0 %; BTC ${pcs(br)} ročně`, 0, 0, s[3], br]; }
+    if (!m) { const br = v('bM',-.9); return [`ZEC drží kurz vůči BTC; BTC ${pcs(br)} ročně`, 0, 0, s[3], br]; }
     const br = v(m[1],-.9), {z1, z2} = zScenIn('zShape', m[2]);
     return [`${m[0]}: ${zPathTxt(z1, z2)}; BTC ${pcs(br)}`, z1, z2, s[3], br]; });
 }
@@ -58,7 +58,7 @@ function proj(p, z1, z2, g=p.g, years=5){
   const N = Math.round(365*years), eff = KS*p.up*(1-p.fee), elec = W/1000*24*p.kwh*p.up, out = [];
   // network: catch-up to the ZEC revenue of this price path, or fixed growth g with the price sensitivity k
   const fixed = p.gFixed || g !== p.g0 || p.q.mode !== 'catch';
-  const zr = zRatio(z1, z2), zAt = t => p.zec*zr(t);
+  const zr = zRatio(z1, z2, p.br), zAt = t => p.zec*zr(t);
   const mzAt = d => (L0.mz-(L0.fees||0))*subsidyRatio(d)/subsidyRatio(TODAY)+(L0.fees||0);
   const F = netPath(N, t => Math.log(zTot({mz:mzAt(addDays(TODAY, t)), fees:L0.fees})*zAt(t)/(zTot(L0)*L0.z)), fixed ? {mode:'fixed', g} : {...p.q, g}, NET_GAP);
   let b=0, el=0, rev=0, firstLoss=null, payS=null, payH=null, btcPreH=0;
@@ -94,8 +94,8 @@ function renderEdgeZ(p, base){
   const o0 = {...base.pp, z1:base.z1, z2:base.z2}, gNow = p.q.mode === 'catch' ? base.gEff : o0.g;
   const LV = {
     kwh:  {n:'Cena elektřiny', cur:o0.kwh, set:(o,x)=>{o.kwh=x}, min:0, max:.5, step:.01, dir:'pod', fx:x=>n3(x)+' USD/kWh', ax:x=>n3(x)},
-    z1:   {n:'Cena ZEC za první rok', cur:(zRatio(o0.z1, o0.z2)(365)-1)*100, set:(o,x)=>{o.z1=x/100}, min:-95, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' %', ax:x=>sgn(x)+' %'},
-    z2:   {n:'Růst ceny ZEC v dalších letech', cur:o0.z2*100, set:(o,x)=>{o.z2=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
+    z1:   {n:'ZEC vůči BTC za první rok', cur:(zRatio(o0.z1, o0.z2)(365)-1)*100, set:(o,x)=>{o.z1=x/100}, min:-95, max:2000, step:10, dir:'nad', fx:x=>sgn(x)+' %', ax:x=>sgn(x)+' %'},
+    z2:   {n:'ZEC vůči BTC v dalších letech', cur:o0.z2*100, set:(o,x)=>{o.z2=x/100}, min:-90, max:500, step:5, dir:'nad', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     zec:  {n:'Cena ZEC v den nákupu', cur:o0.zec, set:(o,x)=>{o.zec=x}, min:5, max:o0.zec*50, step:Math.max(10,o0.zec*.1), dir:'nad', fx:money, ax:x=>'$'+kfmt(x)},
     br:   {n:'Růst ceny BTC', cur:o0.br*100, set:(o,x)=>{o.br=x/100}, min:-90, max:500, step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
     g:    {n:'Růst hashrate Zcash', cur:gNow*100, set:(o,x)=>{o.g=x/100; o.gFixed=true}, min:-90, max:Math.max(500, gNow*300), step:5, dir:'pod', fx:x=>sgn(x)+' % ročně', ax:x=>sgn(x)+' %'},
@@ -108,8 +108,8 @@ function renderEdgeZ(p, base){
      m:'ZEC během roku 2025–2026 vyrostl z desítek na více než tisíc USD. Pokud se cena v prvním roce po nákupu nezlomí, těžba vyplácí hodně BTC; korekce o desítky procent je ale po takovém růstu obvyklá.'},
     {t:'Síť Zcash přestane růst', key:'g', base:{},
      m:'Výkon sítě Zcash sleduje cenu ZEC: po růstu ceny přibývají stroje Z15 a Z15 Pro. Kdyby se nové stroje nedostaly na trh (omezená výroba Equihash ASICů) nebo by část minerů odešla, zbývající stroje dostávají větší podíl odměn.'},
-    {t:'BTC roste pomaleji než ZEC', key:'br', base:{},
-     m:'Pool vyplácí v BTC podle kurzu ZEC/BTC. Když BTC roste pomaleji, za stejné ZEC dostanete víc BTC, kdežto spot a DCA nakupují dražší BTC jen podle ceny BTC.'},
+    {t:'BTC roste pomaleji', key:'br', base:{},
+     m:'Pool vyplácí v BTC podle kurzu ZEC/BTC, který scénář zadává zvlášť. Pomalejší BTC sníží tržby těžařů Zcash v USD, síť Zcash pak roste méně a stroj dostane větší díl odměn.'},
     {t:'Levná elektřina (0,03 USD/kWh) a pomalejší síť Zcash', key:'g', base:{kwh:.03},
      m:'Hosting na levném zdroji (vlastní FVE s přebytky, hydro, Skandinávie, Paraguay, Etiopie) a k tomu období, kdy síť Zcash roste pomalu.'},
     {t:'ZEC po korekci stagnuje, elektřina 0,05 USD/kWh, levnější stroj', key:'hw', base:{kwh:.05, z1:-.4, z2:0},

@@ -33,7 +33,8 @@ const NET_GAP = netGap(r => r.ml*r.l + r.mg*r.g, r => r.hl);
 // LTC/DOGE price ratio)^k, applied to both chains; the LTC halving halves LTC rewards, DOGE stays 10 000 per block.
 function future(p, scKey){
   const L = ALL[ALL.length-1], [, , bId, lId, dId] = SC[scKey];
-  const rb = pctv(bId)/100, rl = pctv(lId)/100, rd = pctv(dId)/100, N = daysBetween(L.d, p.end), out = [];
+  // LTC and DOGE are given against BTC: USD rate = (1 + BTC) x (1 + against BTC) - 1
+  const rb = pctv(bId)/100, rl = (1+rb)*(1+pctv(lId)/100)-1, rd = (1+rb)*(1+pctv(dId)/100)-1, N = daysBetween(L.d, p.end), out = [];
   const mlAt = d => (L.ml-(L.fl||0))*ltcSub(d)/ltcSub(L.d)+(L.fl||0);
   // Scrypt hashrate: catch-up to the LTC + DOGE revenue, or fixed growth with the price sensitivity k
   const lrr = t => { const d = addDays(L.d, t);
@@ -157,7 +158,7 @@ function render(){
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
     [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
     [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
-    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář). Z toho už natěžené ${btc(now.btc)} = ${usd(now.btc*end.price)}, budoucí těžba ${btc(end.btc-now.btc)} = ${usd((end.btc-now.btc)*end.price)} za elektřinu ${usd(end.el-now.el)}. Po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
@@ -197,7 +198,7 @@ function renderProj(p, s, iT){
     return {k, name:SC[k][0], col:SC[k][1], r, e, off:r.slice(iT+1).filter(x=>x.loss).length,
             pay:r.find(x=>x.d>TODAY && x.hodl>=p.hw), held:r.slice(iT).every(x=>x.hodl>=p.hw)}; });
   const sgp = v => `${v<0?'−':'+'}${Math.abs(v)} %`;
-  res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))}, BTC ${sgp(pctv(b))} / rok)`;
+  res.forEach(x => { const [n,,b,l,d] = SC[x.k], t = `${n} (BTC ${sgp(pctv(b))} / rok; vůči BTC LTC ${sgp(pctv(l))}, DOGE ${sgp(pctv(d))} / rok)`;
     x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
   PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
@@ -209,7 +210,7 @@ function renderProj(p, s, iT){
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
   const endD = fmtDate(res[0].e.d);
-  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC / LTC / DOGE ročně</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Ceny ${endD} (BTC / LTC / DOGE)</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
+  $('ptab').innerHTML = `<thead><tr><th>Scénář</th><th>BTC ročně / LTC a DOGE vůči BTC</th><th>Čistá hodnota ${endD}</th><th>Návratnost stroje</th><th>Stack celkem</th><th>Vyplaceno v projekci</th><th>Ceny ${endD} (BTC / LTC / DOGE)</th><th>Elektřina celkem</th><th>Dnů ve ztrátě</th></tr></thead><tbody>`+
     `<tr><td><span class="sw" style="background:var(--fg2)"></span>Dnes, ${fmtDate(now.d)}</td><td>–</td><td>${usd(now.hodl)}</td><td>${now.hodl>=p.hw?'splaceno':'–'}</td><td>${btc(now.btc)}</td><td>–</td><td>${usd(now.price)} / ${usd(now.l,2)} / ${usd(now.g,4)}</td><td>${usd(now.el)}</td><td>–</td></tr>`+
     res.map(x=>`<tr><td><span class="sw" style="background:var(${x.col})"></span>${x.name}</td><td>${sg(pctv(SC[x.k][2]))} / ${sg(pctv(SC[x.k][3]))} / ${sg(pctv(SC[x.k][4]))}</td><td class="${x.e.hodl>=p.hw?'pos':'neg'}">${usd(x.e.hodl)}</td><td>${x.held?'splaceno, trvale':x.pay?(now.hodl>=p.hw?'znovu ':'')+fmtDate(x.pay.d):'do konce ne'}</td><td>${btc(x.e.btc)}</td><td>${(x.e.btc-now.btc).toFixed(4).replace('.',',')} BTC</td><td>${usd(x.e.price)} / ${usd(x.e.l,2)} / ${usd(x.e.g,4)}</td><td>${usd(x.e.el)}</td><td>${x.off}</td></tr>`).join('')+'</tbody>';
 }

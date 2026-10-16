@@ -29,10 +29,11 @@ MACHINES = {
     hw='hwz', hg='zhg', faq_sel='zScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
     sync={'kwh': ['zKwh'], 'poolFee': ['zFee'], 'uptime': ['zUp'], 'hwz': ['zHw'], 'zhg': ['zHg'], 'zk': ['zK'], 'bM': ['zBtcR'], 'netMode': ['zNetMode'], 'netUp': ['zNetUp'], 'netDown': ['zNetDown'], 'netEff': ['zNetEff']},
     prices=[('Cena ZEC dnes', 'zZec'), ('Cena BTC dnes', 'zBtc')],
-    scen={k: [('ZEC 3–6 měs.', f'z{c}3', '% vrch.', 'pump'), ('ZEC za rok', f'z{c}12', '% vrch.', 'pump'), ('ZEC za 2 roky', f'z{c}24', '% vrch.', 'pump'),
-              ('ZEC potom', f'z{c}t', '% / rok', 'pump'), ('ZEC 1. rok', f'z{c}1', '%', 'pct'), ('ZEC dál', f'z{c}2', '% / rok', 'pct'), ('BTC', f'b{c}', '% / rok', '')]
+    scen={k: [('BTC v USD', f'b{c}', '% / rok', ''), ('ZEC/BTC 3–6 měs.', f'z{c}3', '% vrch.', 'pump'), ('ZEC/BTC za rok', f'z{c}12', '% vrch.', 'pump'),
+              ('ZEC/BTC 2 roky', f'z{c}24', '% vrch.', 'pump'), ('ZEC/BTC potom', f'z{c}t', '% / rok', 'pump'), ('ZEC/BTC 1. rok', f'z{c}1', '%', 'pct'), ('ZEC/BTC dál', f'z{c}2', '% / rok', 'pct')]
           for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
-    shape=('zShape', 'Tvar ceny ZEC', 'Po pumpě: cena jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024), v % vrcholu z posledního roku dat; potom roční trend. Procenta: první rok změna, pak roční tempo.'),
+    shape=('zShape', 'Tvar ceny ZEC', 'ZEC se zadává vůči BTC (kurz ZEC/BTC). Po pumpě: kurz jako po minulých pumpách těžených mincí (LTC 2017, DOGE 2018, 2021, 2024, ZEC 2021), v % vrcholu z posledního roku dat; potom roční trend. Procenta: první rok změna, pak roční tempo.'),
+    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD, ZEC vůči BTC; pokles se znaménkem minus.',
     proj_extra=[('Citlivost hashrate na cenu ZEC', 'zk', '')],
     mc=dict(assets='BTC a ZEC', corr='vazba mezi BTC a ZEC', net='Výnos v BTC sleduje poměr ZEC/BTC. Každá cesta má vlastní výkon sítě Zcash, který dohání tržby těžařů v této cestě stejně jako v projekci.')),
   'l9': dict(name='L9', title='Antminer L9', data='l9', main=('l9body', 'l9app'), faq=('l9fbody', 'l9fapp'), lump=('l9lbody', 'l9lapp'),
@@ -40,8 +41,8 @@ MACHINES = {
     hw='hwL', hg='lhg', faq_sel='qScen', faq_si={'bear': 0, 'base': 2, 'bull': 3},
     sync={'kwh': ['qKwh'], 'poolFee': ['qFee'], 'uptime': ['qUp'], 'hwL': ['qHwL'], 'lhg': ['qHg'], 'lk': ['qK'], 'lbM': ['qBtcR'], 'netMode': ['qNetMode'], 'netUp': ['qNetUp'], 'netDown': ['qNetDown'], 'netEff': ['qNetEff']},
     prices=[('Cena LTC dnes', 'qLtc'), ('Cena DOGE dnes', 'qDoge'), ('Cena BTC dnes', 'qBtc')],
-    scen={'bear': [('LTC', 'llB'), ('DOGE', 'ldB'), ('BTC', 'lbB')], 'base': [('LTC', 'llM'), ('DOGE', 'ldM'), ('BTC', 'lbM')],
-          'bull': [('LTC', 'llU'), ('DOGE', 'ldU'), ('BTC', 'lbU')]},
+    scen={k: [('BTC v USD', f'lb{c}'), ('LTC vůči BTC', f'll{c}'), ('DOGE vůči BTC', f'ld{c}')] for k, c in (('bear', 'B'), ('base', 'M'), ('bull', 'U'))},
+    scen_hint='Klik vybere scénář pro grafy. BTC se mění v USD, LTC a DOGE vůči BTC (za 2–5 let DOGE −21 až −25 % ročně, LTC −14 až −31 %); pokles se znaménkem minus.',
     proj_extra=[('Citlivost hashrate na ceny LTC a DOGE', 'lk', '')],
     mc=dict(assets='BTC, LTC a DOGE', corr='vazby mezi BTC, LTC a DOGE', net='Výnos sleduje ceny LTC a DOGE vůči BTC. Každá cesta má vlastní výkon sítě Scrypt, který dohání tržby těžařů z LTC a DOGE v této cestě stejně jako v projekci.')),
 }
@@ -165,7 +166,7 @@ def build(key):
   <div class="sg"><h3>Scénář ceny</h3>
   {field(M['shape'][1], mi[M['shape'][0]], '', M['shape'][2]) if M.get('shape') else ''}
   <div class="scens" role="radiogroup" aria-label="Scénář ceny">{scen}</div>
-  <p class="hint">Klik vybere scénář pro grafy. Procenta platí každý rok; pokles zadejte se znaménkem minus.</p></div>
+  <p class="hint">{M.get('scen_hint', 'Klik vybere scénář pro grafy. Procenta platí každý rok; pokles zadejte se znaménkem minus.')}</p></div>
   <div class="sg"><h3>Náklady</h3>
   {field('Elektřina', mi['kwh'], 'USD/kWh')}
   {field('Cena stroje', mi[M['hw']], 'USD')}
