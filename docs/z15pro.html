@@ -394,6 +394,9 @@ function render(){
   const hodlTile = [`HODL: spot nákupy k ${fmtDate(end.d)}`, usd(cE.spotValue), `${btc(cE.spot)} koupeno za stejné vklady ve stejné dny (stroj + rok energie při startu, pak energie každých 365 dní) a drženo do konce; `+(cE.spotValue>=end.stack?'o ':'')+`${usd(Math.abs(cE.spotValue-end.stack))} ${cE.spotValue>=end.stack?'víc':'méně'} než těžba + držení`, cE.spotValue-end.invested];
   // side by side: what went in, mining + holding, HODL; then BTC count, selling, payback; then today
   const K = [k[1], k[3], hodlTile, k[4], k[2], k[5], k[0], k[6]];
+  // summary for the overview of the one-artifact suite (its cards follow the calculators)
+  window.v2Sum = {start:p.start, end:end.d, scen:SC[p.sc][0], pay: be2 ? fmtDate(be2.d) : `do ${fmtDate(end.d)} ne`, res:end.stack-end.invested, resTxt:usd(end.stack-end.invested)};
+  window.dispatchEvent(new Event('v2sum'));
   $('kpis').innerHTML = K.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
   document.querySelectorAll('.endLabel').forEach(e => e.textContent = fmtDate(p.end));
 }

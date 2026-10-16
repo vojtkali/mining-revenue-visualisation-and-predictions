@@ -291,15 +291,17 @@ def build_index():
   <dl>
     <div><dt>Čistě za měsíc dnes</dt><dd><span class="big">{k("netMonth")}</span><span class="czk">{B.sep(czk)} Kč</span></dd></div>
     <div><dt>BTC za měsíc</dt><dd><span class="big">{k("btcM")}</span><span class="czk">{k("netDay")} denně</span></dd></div>
-    <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm">{k("payBase")}</span><span class="czk">základní scénář</span></dd></div>
-    <div><dt>Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}">{val5.group(2)}</span><span class="czk">základní scénář</span></dd></div>
+    <div><dt>Zaplacení při držení BTC</dt><dd><span class="big sm" data-f="pay-{key}">{k("payBase")}</span><span class="czk" data-f="paysub-{key}">základní scénář</span></dd></div>
+    <div><dt data-f="resl-{key}">Za 5 let: BTC − vše zaplacené</dt><dd><span class="big {val5.group(1)}" data-f="res-{key}">{val5.group(2)}</span><span class="czk" data-f="ressub-{key}">základní scénář</span></dd></div>
   </dl>
-  <p class="risk"><b>Základní scénář:</b> {BASE[key]}; stroj koupený {vals["LAST"]}, 5 let, výchozí parametry kalkulačky.</p>
+  <p class="risk" data-f="scn-{key}"><b>Základní scénář:</b> {BASE[key]}; stroj koupený {vals["LAST"]}, 5 let, výchozí parametry kalkulačky.</p>
   <p class="risk"><b>Hlavní riziko:</b> {RISK[key]}</p>
   {link}
 </article>''')
     machines = ''.join(f'<a class="m" data-m="{k}" href="{LINKS[k]}">{m["name"]}</a>' if LINKS[k] else f'<span class="m off">{m["name"]}</span>' for k, m in MACHINES.items())
     head = (Path(__file__).resolve().parent.parent / 'src' / 'v2head.html').read_text(encoding='utf-8').replace('{{V2_TITLE}}', 'Přehled těžebních strojů')
+    LAST_ISO = B.meta()['updated']
+    MIN_START = min(json.loads(B.embedded_data(M['data']))['rows'][0]['d'] for M in MACHINES.values())
     return f'''{head}
 <header class="top"><div class="top-in">
   <div class="brand"><b>Těžba</b><span class="sep">/</span><span>Přehled strojů</span></div>
@@ -309,7 +311,8 @@ def build_index():
   {THEME_BTN}
 </div></header>
 <div class="overview">
-<div class="intro"><h2>Tři stroje vedle sebe</h2><p>Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p></div>
+<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
+<div class="ovstart" id="ovStartBox" hidden><label class="field"><span class="fl">Začátek těžby pro všechny stroje</span><span class="fi"><input type="date" id="ovStart" min="{MIN_START}" max="{LAST_ISO}"><button type="button" class="today" id="ovToday">Dnes</button></span><span class="hint">Nastaví začátek těžby ve všech třech kalkulačkách; konec odhadu se posune na začátek + 4,5 roku. Karty pak ukazují výsledky podle kalkulaček.</span></label></div></div>
 <div class="mcards">{"".join(cards)}</div>
 {body}
 </div>
@@ -487,10 +490,17 @@ if (hm && hm[2] !== undefined) goPlace(hm[0].slice(1), true);   // show() has al
 // inside the one-artifact suite (index.html shows every page in a frame): machine links ask the shell to switch,
 // handing over the place; the shell sends it back to the frame it shows
 if (window.parent !== window){
+  const key = KEY.slice(3), sendSum = () => window.v2Sum && parent.postMessage({type:'v2sum', key, sum:window.v2Sum}, '*');
   document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
     parent.postMessage({type:'v2switch', to:a.dataset.m, place:place()}, '*'); });
-  addEventListener('message', e => { if (e.source !== parent || !e.data || e.data.type !== 'v2go') return;
-    window.v2Theme && window.v2Theme(); goPlace(e.data.place); });
+  addEventListener('v2sum', sendSum);   // the main app recalculated: the overview cards follow
+  addEventListener('message', e => { if (e.source !== parent || !e.data) return;
+    if (e.data.type === 'v2go'){ window.v2Theme && window.v2Theme(); goPlace(e.data.place); }
+    if (e.data.type === 'v2start'){   // start set for all machines in the overview (clamped to this machine's data)
+      const s = $('start'); let v = e.data.start; if (s.min && v < s.min) v = s.min; if (s.max && v > s.max) v = s.max;
+      if (s.value !== v){ s.value = v; fire(s); startLbl(); } else sendSum(); }
+  });
+  parent.postMessage({type:'v2ready', key}, '*'); sendSum();
 }
 // links inside the FAQ to a group: switch tab first
 document.querySelectorAll('.toc a').forEach(a => a.addEventListener('click', e => {
@@ -510,9 +520,34 @@ st.addEventListener('click', () => { const open = st.getAttribute('aria-expanded
 
 SUITE_CHILD = r'''
 if (window.parent !== window){
+  const $ = id => document.getElementById(id), F = n => document.querySelector(`[data-f="${n}"]`);
+  const fmt = s => `${+s.slice(8,10)}. ${+s.slice(5,7)}. ${s.slice(0,4)}`;
   document.addEventListener('click', e => { const a = e.target.closest('a[data-m]'); if (!a) return; e.preventDefault();
     parent.postMessage({type:'v2switch', to:a.dataset.m}, '*'); });
-  addEventListener('message', e => { if (e.source === parent && e.data && e.data.type === 'v2go') window.v2Theme && window.v2Theme(); });
+  // one start date for all machines: sent to every calculator through the shell
+  const box = $('ovStartBox'), inp = $('ovStart'); box.hidden = false;
+  // the field shows the start the calculators share; empty while they differ
+  const starts = {};
+  const send = () => { if (!inp.value) return;
+    parent.postMessage({type:'v2start', start:inp.value}, '*'); };
+  inp.addEventListener('change', send);
+  $('ovToday').addEventListener('click', () => { inp.value = inp.max; send(); });
+  // the cards follow the calculators (each with its own parameters and scenario)
+  let live = false;
+  addEventListener('message', e => { if (e.source !== parent || !e.data) return;
+    if (e.data.type === 'v2go') window.v2Theme && window.v2Theme();
+    if (e.data.type !== 'v2sum') return;
+    const k = e.data.key, s = e.data.sum; if (!F('pay-' + k)) return;
+    starts[k] = s.start; const all = Object.values(starts);
+    if (document.activeElement !== inp) inp.value = all.length === 3 && all.every(v => v === all[0]) ? all[0] : '';
+    if (!live){ live = true; $('ovIntro').textContent = 'Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Návratnost a výsledek na konci odhadu jsou podle nastavení každé kalkulačky: scénář a parametry má každý stroj svoje, začátek těžby lze nastavit všem najednou.'; }
+    F('pay-' + k).textContent = s.pay; F('paysub-' + k).textContent = `při držení BTC; ${s.scen.toLowerCase()} scénář`;
+    F('resl-' + k).textContent = `Do ${fmt(s.end)}: hodnota BTC − vše vložené`;
+    const r = F('res-' + k); r.textContent = s.resTxt; r.classList.toggle('pos', s.res >= 0); r.classList.toggle('neg', s.res < 0);
+    F('ressub-' + k).textContent = `${s.scen.toLowerCase()} scénář`;
+    F('scn-' + k).innerHTML = `<b>Podle kalkulačky:</b> ${s.scen.toLowerCase()} scénář, stroj od ${fmt(s.start)} do ${fmt(s.end)}.`;
+  });
+  parent.postMessage({type:'v2ready', key:'index'}, '*');
 }
 '''
 
@@ -530,19 +565,30 @@ iframe.on{display:block}
 <script>
 (() => {
   const PAGES = {index:'overview.html', s21:'s21.html', z15:'z15.html', l9:'l9.html'}, TITLES = {index:'Přehled strojů', s21:'S21 XP', z15:'Z15 Pro', l9:'L9'};
-  const fr = {}, KEY = 'v2-suite';
+  const fr = {}, KEY = 'v2-suite', sums = {}, ready = {}; let start = null;
   try { const t = localStorage.getItem('v2-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  const make = (k, place) => { if (fr[k]) return false; const f = document.createElement('iframe'); f.src = PAGES[k] + (place ? '#' + place : '');
+    f.title = TITLES[k]; document.body.append(f); fr[k] = f; return true; };
   function show(k, place){
     if (!PAGES[k]) k = 'index';
-    if (!fr[k]){ const f = document.createElement('iframe'); f.src = PAGES[k] + (place ? '#' + place : ''); f.title = TITLES[k]; document.body.append(f); fr[k] = f; }
-    else fr[k].contentWindow.postMessage({type:'v2go', place:place || ''}, '*');
+    if (!make(k, place)) fr[k].contentWindow.postMessage({type:'v2go', place:place || ''}, '*');
     for (const [kk, f] of Object.entries(fr)) f.classList.toggle('on', kk === k);
     try { localStorage.setItem(KEY, k); } catch (e) {}
   }
-  addEventListener('message', e => { const d = e.data;
-    if (d && d.type === 'v2switch' && Object.values(fr).some(f => f.contentWindow === e.source)) show(d.to, d.place); });
+  // every page is loaded (the overview cards are filled from the calculators); summaries and the shared start are
+  // passed on, and kept for pages that are not ready yet
+  const post = (k, msg) => { if (fr[k] && ready[k]) fr[k].contentWindow.postMessage(msg, '*'); };
+  addEventListener('message', e => { const d = e.data; if (!d) return;
+    const from = Object.keys(fr).find(k => fr[k].contentWindow === e.source); if (!from) return;
+    if (d.type === 'v2switch') show(d.to, d.place);
+    if (d.type === 'v2ready'){ ready[from] = true;
+      if (from === 'index') Object.entries(sums).forEach(([key, sum]) => post('index', {type:'v2sum', key, sum}));
+      else if (start) post(from, {type:'v2start', start}); }
+    if (d.type === 'v2sum'){ sums[d.key] = d.sum; post('index', {type:'v2sum', key:d.key, sum:d.sum}); }
+    if (d.type === 'v2start'){ start = d.start; ['s21', 'z15', 'l9'].forEach(k => post(k, {type:'v2start', start})); }
+  });
   let k0 = 'index'; try { k0 = localStorage.getItem(KEY) || 'index'; } catch (e) {}
-  document.addEventListener('DOMContentLoaded', () => show(k0));
+  document.addEventListener('DOMContentLoaded', () => { show(k0); setTimeout(() => Object.keys(PAGES).forEach(k => make(k)), 300); });
 })();
 </script>'''
 
