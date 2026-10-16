@@ -9,7 +9,7 @@
   <label for="zZec">Cena ZEC, USD<input id="zZec" type="number" step="10" min="1" value="{{P_ZEC}}"></label>
   <label for="zBtc">Cena BTC, USD<input id="zBtc" type="number" step="1000" min="1000" value="{{P_BTC}}"></label>
   <label for="zKwh">Elektřina, USD/kWh<input id="zKwh" type="number" step="0.005" min="0" value="0.07"></label>
-  <label for="zFee">Poplatek poolu, %<input id="zFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="zFee">Poplatek poolu, %<input id="zFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="zUp">Uptime, %<input id="zUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="zHw">Cena stroje, USD<input id="zHw" type="number" step="100" min="0" value="12000"></label>
   <label for="zScen">Scénář ceny ZEC pro grafy<select id="zScen"><option value="0">Propad −70 %, pak 0 % (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Korekce −40 %, pak +10 % ročně</option><option value="3">Růst +30 %, pak +20 % ročně</option></select></label>
@@ -38,7 +38,7 @@
   <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p>
     <p><b>Při držení BTC</b> si necháváte celou výplatu. Z vyplacených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>, BTC <span class="n" data-k="btcR"></span> ročně). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p>
     <p>Rok po roku:</p><div class="tbl"><table id="tYears"></table></div>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Hodnota stacku − elektřina</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Tržby z průběžného prodeje</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div>
     <div class="verify">K ověření: pokud účtujete další poplatky (hosting, servis, správa), doplňte je sem i do výpočtu.</div></div></div>
 </section>
@@ -135,10 +135,10 @@
 
 <section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
-  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC minus zaplacená elektřina, po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC −70 % (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce −40 %, pak +10 %</span><span><i style="background:var(--s3)"></i>Růst +30 %, pak +20 %</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Propad ZEC −70 % (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Korekce −40 %, pak +10 %</span><span><i style="background:var(--s3)"></i>Růst +30 %, pak +20 %</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
-    <p>V pesimistickém scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
+    <p>V pesimistickém scénáři (ZEC za rok −70 % na <span class="n" data-k="bearZec"></span> a pak beze změny, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section>
 
 <section class="notes">

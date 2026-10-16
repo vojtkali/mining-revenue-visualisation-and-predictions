@@ -151,7 +151,7 @@ function render(){
     btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
-    bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl),
+    bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
     bearLossTxt: sc[0].firstLoss ? `je stroj poprvé ve ztrátě ${fmtDate(sc[0].firstLoss)} a dál běží se ztrátou.` : 'stroj do ztráty nespadne.',
   };
   document.querySelectorAll('[data-k]').forEach(e => { const v = V[e.dataset.k]; e.textContent = v===undefined ? '?' : v; });
@@ -189,9 +189,8 @@ function render(){
   charts.push(new Chart($('cBtcM'), {type:'line', plugins:[zones,crosshair], options:monthlyX(opts(yb, v=>btc(v))), data:{labels:MO.map(o=>o.k), datasets:[
     line('BTC za měsíc', MO.map(o=>o.btc), css('--s1'), {fill:'origin', backgroundColor:css('--s1')+'22'})]}}));
   charts.push(new Chart($('cHodl'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:[
-    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Energie zaplacená předem', base.out.map(o=>o.el), css('--s2')),
-    line('Hodnota stacku − elektřina', base.out.map(o=>o.hodl), css('--s3')), line('Čistě při prodeji', base.out.map(o=>o.sell), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', LS.map(()=>p.hw))]}}));
+    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Tržby z průběžného prodeje', base.out.map(o=>o.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))]}}));
   charts.push(new Chart($('cRoi'), {type:'line', plugins:[zones,crosshair], options:opts(v=>v+' %', v=>Math.round(v)+' %'), data:{labels:LS, datasets:
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.15,'--s1'],[.3,'--s4'],[.6,'--s2']];
@@ -213,7 +212,7 @@ function render(){
   charts.push(new Chart($('cVs'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:[
     line('Těžba', base.out.map(o=>o.btc), css('--s1')), line('Spot při ročních vkladech', lumpS, css('--s2')), line('Týdenní DCA', dcaS, css('--s3'))]}}));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:
-    sc.map(x => line(x.name, x.out.map(o=>o.hodl), css(x.col))).concat([ref('Cena stroje', LS.map(()=>p.hw))])}}));
+    sc.map(x => line(x.name, x.out.map(o=>o.stack), css(x.col))).concat([ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))])}}));
 }
 document.querySelectorAll('#f input, #f select').forEach(i => i.addEventListener('input', render));
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);

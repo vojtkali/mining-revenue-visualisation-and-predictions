@@ -113,18 +113,15 @@ function render(){
   charts.forEach(c => c.destroy()); charts = [];
   if (!s.length) return;
   const L = s.map(r => r.d), iT = Math.max(0, L.indexOf(TODAY)), now = s[iT], end = s[s.length-1];
-  const hw = s.map(()=>p.hw), tip = v => usd(v), pl = [zones, crosshair];
+  const tip = v => usd(v), pl = [zones, crosshair];
   charts.push(new Chart($('c1'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Tržba celkem', s.map(r=>r.rev), css('--s1')),
     line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistý zisk', s.map(r=>r.net), css('--s3')),
-    ref('Cena stroje', hw)]}}));
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   charts.push(new Chart($('c2'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Hodnota stacku', s.map(r=>r.stack), css('--s1')),
-    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistá hodnota', s.map(r=>r.hodl), css('--s3')),
-    line('Průběžný prodej', s.map(r=>r.net), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', hw)]}}));
+    line('Tržby z průběžného prodeje', s.map(r=>r.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   const o3 = opts(v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:2}), v=>btc(v));
   o3.plugins.tooltip.callbacks.afterBody = it => { const r=s[it[0].dataIndex]; return [` Cena BTC: ${usd(r.price)}`, ` Cena LTC: ${usd(r.l,2)}`, ` Cena DOGE: ${usd(r.g,4)}`]; };
   charts.push(new Chart($('c3'), {type:'line', plugins:pl, options:o3, data:{labels:L, datasets:[
@@ -195,9 +192,10 @@ function renderProj(p, s, iT){
     x.label = t; const el = $('lg_'+x.k); if (el) el.textContent = t; });
   PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
-  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
-    .concat([ref('Cena stroje', L.map(()=>p.hw))]);
+  // value of the mined BTC against everything put in (machine + energy prepaid a year ahead): above it, all is paid back
+  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.stack : null), css('--fg2'))]
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.stack : null), css(x.col))))
+    .concat([ref('Vloženo celkem (stroj + energie)', s.slice(from).map(r=>r.invested))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const sg = v => v.toLocaleString('cs-CZ',{signDisplay:'always'})+' %';

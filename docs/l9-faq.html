@@ -97,7 +97,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <label for="qDoge">Cena DOGE, USD<input id="qDoge" type="number" step="0.005" min="0.001" value="0.081"></label>
   <label for="qBtc">Cena BTC, USD<input id="qBtc" type="number" step="1000" min="1000" value="82116"></label>
   <label for="qKwh">Elektřina, USD/kWh<input id="qKwh" type="number" step="0.005" min="0" value="0.07"></label>
-  <label for="qFee">Poplatek poolu, %<input id="qFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="qFee">Poplatek poolu, %<input id="qFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="qUp">Uptime, %<input id="qUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="qHwL">Cena stroje, USD<input id="qHwL" type="number" step="100" min="0" value="7100"></label>
   <label for="qScen">Scénář cen LTC a DOGE pro grafy<select id="qScen"><option value="0">Propad −30 % ročně (BTC +10 %)</option><option value="1">Stagnace 0 %</option><option value="2" selected>Základní +10 % ročně</option><option value="3">Růst +30 % ročně</option></select></label>
@@ -126,7 +126,7 @@ code{font-family:var(--f-mono);font-size:12.5px}
   <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p>
     <p><b>Při držení BTC</b> si necháváte celou výplatu. Z vyplacených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>, BTC <span class="n" data-k="btcR"></span> ročně). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p>
     <p>Rok po roku:</p><div class="tbl"><table id="tYears"></table></div>
-    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Hodnota stacku − elektřina</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vyplacených BTC</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Tržby z průběžného prodeje</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div></div></div>
 </section>
 
@@ -216,10 +216,10 @@ code{font-family:var(--f-mono);font-size:12.5px}
 
 <section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
-  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC minus zaplacená elektřina, po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Propad −30 % ročně (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní +10 % ročně</span><span><i style="background:var(--s3)"></i>Růst +30 % ročně</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vyplacených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Propad −30 % ročně (BTC +10 %)</span><span><i style="background:var(--fg2)"></i>Stagnace</span><span><i style="background:var(--s1)"></i>Základní +10 % ročně</span><span><i style="background:var(--s3)"></i>Růst +30 % ročně</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
-    <p>V pesimistickém scénáři (DOGE a LTC každý rok −30 %, za 5 let DOGE <span class="n" data-k="bearDoge"></span>, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
+    <p>V pesimistickém scénáři (DOGE a LTC každý rok −30 %, za 5 let DOGE <span class="n" data-k="bearDoge"></span>, BTC jen +10 % ročně) <span data-k="bearLossTxt"></span> Na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section>
 
 <section class="notes">
@@ -555,7 +555,7 @@ function render(){
     btc10y: btc(p10.btc), btc6to10: btc(p10.btc-base.btc), el6to10: usd(p10.el-base.el),
     life0: btc(sc[0].btc), life1: btc(sc[1].btc), life2: btc(sc[2].btc), life3: btc(sc[3].btc),
     btc12: btc(sum(hist,'btc')), net12: usd(sum(hist,'net')), btc6: btc(sum(h6,'btc')), net6: usd(sum(h6,'net')),
-    bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl),
+    bearDoge: usd(p.doge*Math.pow(0.7,5),4), bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
     bearLossTxt: sc[0].firstLoss ? `je stroj poprvé ve ztrátě ${fmtDate(sc[0].firstLoss)} a dál běží se ztrátou.` : 'stroj do ztráty nespadne.',
   };
   document.querySelectorAll('[data-k]').forEach(e => { const v = V[e.dataset.k]; e.textContent = v===undefined ? '?' : v; });
@@ -593,9 +593,8 @@ function render(){
   charts.push(new Chart($('cBtcM'), {type:'line', plugins:[zones,crosshair], options:monthlyX(opts(yb, v=>btc(v))), data:{labels:MO.map(o=>o.k), datasets:[
     line('BTC za měsíc', MO.map(o=>o.btc), css('--s1'), {fill:'origin', backgroundColor:css('--s1')+'22'})]}}));
   charts.push(new Chart($('cHodl'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:[
-    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Energie zaplacená předem', base.out.map(o=>o.el), css('--s2')),
-    line('Hodnota stacku − elektřina', base.out.map(o=>o.hodl), css('--s3')), line('Čistě při prodeji', base.out.map(o=>o.sell), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', LS.map(()=>p.hw))]}}));
+    line('Hodnota vyplacených BTC', base.out.map(o=>o.stack), css('--s1')), line('Tržby z průběžného prodeje', base.out.map(o=>o.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))]}}));
   charts.push(new Chart($('cRoi'), {type:'line', plugins:[zones,crosshair], options:opts(v=>v+' %', v=>Math.round(v)+' %'), data:{labels:LS, datasets:
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.15,'--s1'],[.3,'--s4'],[.6,'--s2']];
@@ -617,7 +616,7 @@ function render(){
   charts.push(new Chart($('cVs'), {type:'line', plugins:[zones,crosshair], options:opts(yb, v=>btc(v)), data:{labels:LS, datasets:[
     line('Těžba', base.out.map(o=>o.btc), css('--s1')), line('Spot při ročních vkladech', lumpS, css('--s2')), line('Týdenní DCA', dcaS, css('--s3'))]}}));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS, datasets:
-    sc.map(x => line(x.name, x.out.map(o=>o.hodl), css(x.col))).concat([ref('Cena stroje', LS.map(()=>p.hw))])}}));
+    sc.map(x => line(x.name, x.out.map(o=>o.stack), css(x.col))).concat([ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))])}}));
 }
 document.querySelectorAll('#f input, #f select').forEach(i => i.addEventListener('input', render));
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);

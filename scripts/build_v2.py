@@ -312,7 +312,7 @@ def build_index():
   {THEME_BTN}
 </div></header>
 <div class="overview">
-<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 20 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
+<div class="intro"><h2>Tři stroje vedle sebe</h2><p id="ovIntro">Dnešní výnos po elektřině a poplatku poolu, výplata v BTC. Elektřina $0,07/kWh, pool 22 %, uptime 95 %. Návratnost a výsledek za 5 let počítají se strojem koupeným v poslední den dat a se základním scénářem cen každého stroje (je uveden na kartě). Podrobnosti a vlastní parametry jsou v kalkulačce každého stroje.</p>
 <div class="ovstart" id="ovStartBox" hidden><label class="field"><span class="fl">Začátek těžby pro všechny stroje</span><span class="fi"><input type="date" id="ovStart" min="{MIN_START}" max="{LAST_ISO}"><button type="button" class="today" id="ovToday">Dnes</button></span><span class="hint">Nastaví začátek těžby ve všech třech kalkulačkách; konec odhadu se posune na začátek + 4,5 roku. Karty pak ukazují výsledky podle kalkulaček.</span></label></div></div>
 <div class="mcards">{"".join(cards)}</div>
 {body}

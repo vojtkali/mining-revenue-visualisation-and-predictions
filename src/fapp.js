@@ -246,7 +246,7 @@ function render(){
     scName: SCN[si][0].toLowerCase(), monthVal5y: usd(btcDay*M*base.end.pr), stack5y: usd(base.end.stack), hodl5y: usd(base.end.hodl), hodl5yHw: usd(base.end.hodl-p.hw), el5y: usd(base.el),
     price5y: usd(base.end.pr), life0: usd(sc[0].btc*sc[0].end.pr), life1: usd(sc[1].btc*sc[1].end.pr), life2: usd(sc[2].btc*sc[2].end.pr),
     dca5y: btc(dcaAcc), valMine: usd(base.btc*base.end.pr), valLump: usd(lump*base.end.pr), valDca: usd(comparison.at(-1).dcaValue),
-    bearLoss: sc[0].firstLoss ? fmtDate(sc[0].firstLoss) : '–', bearEnd: usd(sc[0].end.hodl),
+    bearLoss: sc[0].firstLoss ? fmtDate(sc[0].firstLoss) : '–', bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
   };
   document.querySelectorAll('[data-k]').forEach(e => { const v = V[e.dataset.k]; e.textContent = v===undefined ? '?' : v; });
   $('kpis').innerHTML = [
@@ -296,9 +296,8 @@ function render(){
   charts.push(new Chart($('cBtcM'), {type:'line', plugins:[zones,crosshair], options:oB, data:{labels:MO.map(o=>o.k), datasets:[
     line('BTC za měsíc', MO.map(o=>o.btc), css('--s1'), {fill:'origin', backgroundColor:css('--s1')+'22'})]}}));
   charts.push(new Chart($('cHodl'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS2, datasets:[
-    line('Hodnota vytěžených BTC', base.out.map(o=>o.stack), css('--s1')), line('Energie zaplacená předem', base.out.map(o=>o.el), css('--s2')),
-    line('Čistě při držení', base.out.map(o=>o.hodl), css('--s3')), line('Čistě při prodeji', base.out.map(o=>o.sell), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', LS2.map(()=>p.hw))]}}));
+    line('Hodnota vytěžených BTC', base.out.map(o=>o.stack), css('--s1')), line('Tržby z průběžného prodeje', base.out.map(o=>o.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))]}}));
   charts.push(new Chart($('cRoi'), {type:'line', plugins:[zones,crosshair], options:opts(v=>v+' %', v=>Math.round(v)+' %'), data:{labels:LS2, datasets:
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS2.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.2,'--s1'],[.35,'--s4'],[.5,'--s2']];
@@ -325,7 +324,7 @@ function render(){
   const LS = base.out.map(x=>x.d);
   const o3 = opts(yUsd, v=>usd(v));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:o3, data:{labels:LS, datasets:
-    sc.map(x => line(x.name, x.out.map(o=>o.hodl), css(x.col))).concat([ref('Cena stroje', LS.map(()=>p.hw))])}}));
+    sc.map(x => line(x.name, x.out.map(o=>o.stack), css(x.col))).concat([ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))])}}));
   renderEdge(p, base.r, SCN[si][0]);
 }
 document.querySelectorAll('#f input, #f select').forEach(i => i.addEventListener('input', render));

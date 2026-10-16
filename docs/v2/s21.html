@@ -273,7 +273,7 @@ details.qa .a p{margin:0 0 8px}
   <label class="field"><span class="fl">Začátek těžby</span><span class="fi"><input id="start" type="date" value="2024-06-17" min="2024-06-01" max="2026-10-14"><button type="button" class="today" id="startToday" title="Nejbližší možný den: jen projekce bez historie">Dnes</button><span class="u"></span></span><span class="hint">Od kdy počítat historii a srovnání. „Dnes“ nastaví nejbližší možný den, výpočet je pak čistá projekce.</span></label>
   </div>
   <details class="sg adv" id="adv"><summary>Pokročilé</summary>
-  <label class="field"><span class="fl">Poplatek poolu</span><span class="fi"><input id="poolFee" type="number" step="0.5" min="0" max="50" value="20"><span class="u">%</span></span></label>
+  <label class="field"><span class="fl">Poplatek poolu</span><span class="fi"><input id="poolFee" type="number" step="0.5" min="0" max="50" value="22"><span class="u">%</span></span></label>
   <label class="field"><span class="fl">Uptime</span><span class="fi"><input id="uptime" type="number" step="1" min="50" max="100" value="95"><span class="u">%</span></span></label>
   <label class="field"><span class="fl">Cena BTC dnes</span><span class="fi"><input id="fPrice" type="number" step="1000" min="1000" value="82116"><span class="u">USD</span></span><span class="hint">Pro odpovědi v Otázkách</span></label>
   <span hidden><input id="th" type="number" step="1" min="1" value="270"><input id="w" type="number" step="5" min="1" value="3645"></span>
@@ -297,16 +297,16 @@ details.qa .a p{margin:0 0 8px}
 <div class="kpis" id="kpis"></div>
 <section class="card">
   <h2>Těžím a držím: hodnota natěženého stacku v USD</h2>
-  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Elektřina se platí předem vždy za celý rok (v den dodání a pak každých 365 dní), proto oranžová křivka a s ní i čisté hodnoty dělají schody. Čárkovaná fialová je čistý zisk z grafu 1 pro srovnání: kumulativní tržba z průběžného prodeje BTC v USD, ze které se jednou ročně zaplatí elektřina na další rok. Nad ní se držení vyplatilo víc než průběžný prodej.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistá hodnota (stack − elektřina)</span><span><i style="background:var(--s4)"></i>Průběžný prodej po roční platbě elektřiny (graf 1)</span><span><i class="dash"></i>Cena stroje</span></div>
+  <p class="sub">Vytěžené BTC si nechávám. Elektřinu platím v USD. Hodnota stacku je kumulativní hashvalue (BTC) krát cena BTC v daném dni. Porovnává se se vším vloženým: cena stroje plus elektřina placená předem vždy za celý rok (v den dodání a pak každých 365 dní), proto čárkovaná šedá čára dělá schody. Nad ní je stroj i elektřina zaplacené. Fialová čárkovaná je tržba z průběžného prodeje (graf 1): nad ní se držení vyplatilo víc než prodej.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Hodnota stacku</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Tržby z průběžného prodeje (graf 1)</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
   <div class="chart"><canvas id="c2" aria-label="Hodnota natěženého BTC při držení"></canvas></div>
   <div class="legend" style="margin-top:14px"><span><i style="background:var(--s1)"></i>Natěženo celkem, BTC</span></div>
   <div class="chart small"><canvas id="c3" aria-label="Kumulativně natěžené BTC"></canvas></div>
 </section>
 <section class="card">
   <h2>Prodávám průběžně: kumulativní zisk v USD</h2>
-  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Výsledek před cenou stroje je tržba minus elektřina. Z USD získaných prodejem se jednou ročně předem zaplatí elektřina na celý další rok, proto křivka v den platby spadne a pak zase plynule roste. Stroj se zaplatí v okamžiku, kdy čistý zisk překročí jeho cenu.</p>
-  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Výsledek před cenou stroje</span><span><i class="dash"></i>Cena stroje</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
+  <p class="sub">Každý den vytěžené BTC prodám za tehdejší cenu, tedy za hashprice toho dne. Tržba celkem se porovnává se vším, co do těžby vložím: cena stroje plus elektřina placená vždy rok předem (čárkovaná čára, při každé roční platbě poskočí). Stroj i elektřina jsou zaplacené ve chvíli, kdy tržba tuto čáru překročí.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Tržba celkem</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span><span><i class="box" style="background:var(--grid)!important"></i>Projekce</span></div>
   <div class="chart"><canvas id="c1" aria-label="Kumulativní zisk při průběžném prodeji"></canvas></div>
 </section>
 <section class="card">
@@ -317,8 +317,8 @@ details.qa .a p{margin:0 0 8px}
 </section></section><section class="panel" role="tabpanel" id="p-navratnost" aria-labelledby="t-navratnost" hidden><div class="intro"><h2>Kdy se stroj zaplatí</h2><p>Tři scénáře ceny vedle sebe. Procenta změníte v panelu vlevo.</p></div>
 <section class="card">
   <h2>Scénáře: těžím a držím</h2>
-  <p class="sub">Čistá hodnota stacku (natěžené BTC × cena − veškerá elektřina) za poslední rok a v projekci do <span class="endLabel"></span> pro všechny tři scénáře ceny. Sloupec „Dnů ve ztrátě“ udává, kolik dní v projekci má denní výnos menší hodnotu než elektřina; stroj přesto běží a natěží víc BTC.</p>
-  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (čistá hodnota)</span><span><i style="background:var(--s2)"></i><span id="lg_bear">Pesimistický</span></span><span><i style="background:var(--s1)"></i><span id="lg_base">Základní</span></span><span><i style="background:var(--s3)"></i><span id="lg_bull">Optimistický</span></span><span><i class="dash"></i>Cena stroje</span></div>
+  <p class="sub">Hodnota stacku (natěžené BTC × cena) za poslední rok a v projekci do <span class="endLabel"></span> pro všechny tři scénáře ceny, proti všemu vloženému (stroj + elektřina placená rok předem, čárkovaně). Sloupec „Dnů ve ztrátě“ udává, kolik dní v projekci má denní výnos menší hodnotu než elektřina; stroj přesto běží a natěží víc BTC.</p>
+  <div class="legend" style="margin-top:14px"><span><i style="background:var(--fg2)"></i>Dosud (hodnota stacku)</span><span><i style="background:var(--s2)"></i><span id="lg_bear">Pesimistický</span></span><span><i style="background:var(--s1)"></i><span id="lg_base">Základní</span></span><span><i style="background:var(--s3)"></i><span id="lg_bull">Optimistický</span></span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
   <div class="chart"><canvas id="c5" aria-label="Projekce čisté hodnoty při držení"></canvas></div>
   <div class="tbl"><table id="ptab"></table></div>
   <p class="sub" style="margin-top:10px">Scénáře nejsou předpověď. Ukazují, jak citlivý je výsledek na cenu BTC a na růst sítě. Čistá hodnota = natěžené BTC × cena v daném dni − veškerá elektřina zaplacená od začátku.</p>
@@ -423,7 +423,7 @@ details.qa .a p{margin:0 0 8px}
   <div class="qa"><h3>Kolik vydělá denně?</h3><div class="a"><p>Výnos je <span class="n" data-k="revDay"></span> denně, elektřina <span class="n" data-k="elecDay"></span>, čistě tedy <span class="n" data-k="netDay"></span> za den.</p></div></div>
   <div class="qa"><h3>Kolik BTC dostanu za měsíc?</h3><div class="a"><p>Asi <span class="n" data-k="btcMonth"></span> měsíčně, to je <span class="n" data-k="satsDay"></span> denně. Množství BTC nezávisí na ceně BTC, jen na výkonu stroje a výkonu celé sítě. Protože síť roste, bude každý měsíc o něco méně: při růstu sítě o <span class="n" data-k="hg"></span> ročně za rok asi <span class="n" data-k="btcMonth1y"></span> měsíčně.</p><div class="legend"><span><i style="background:var(--s1)"></i>Vytěžené BTC za měsíc</span></div><div class="chart small"><canvas id="cBtcM" aria-label="BTC za měsíc v projekci"></canvas></div></div></div>
   <div class="qa"><h3>Jaký je aktuální výnos konkrétního stroje?</h3><div class="a"><p>Výnos těžby se udává jako hashprice: kolik USD vydělá 1 PH/s (1 000 TH/s) výkonu za den. Dnes je to <span class="n" data-k="hpPH"></span> za PH/s za den. S21 XP má 270 TH/s, tedy 0,27 PH/s, a s uptime <span class="n" data-k="up"></span> a po poplatku poolu <span class="n" data-k="fee"></span> z toho dostane <span class="n" data-k="revDay"></span> denně.</p></div></div>
-  <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p><p><b>Při držení BTC</b> si necháváte celý výtěžek. Z vytěžených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p><p>Proč je to méně než 5 × <span class="n" data-k="netYear"></span>: těch <span class="n" data-k="netYear"></span> ročně platí jen při dnešních podmínkách. Síť roste, takže stroj těží každý rok méně BTC, a po halvingu v dubnu 2028 vytěží jen polovinu, zatímco elektřina stojí pořád stejně. Rok po roku:</p><div class="tbl"><table id="tYears"></table></div><div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vytěžených BTC</span><span><i style="background:var(--s2)"></i>Energie zaplacená předem</span><span><i style="background:var(--s3)"></i>Čistě při držení</span><span><i style="background:var(--s4)"></i>Čistě při prodeji</span><span><i class="dash"></i>Cena stroje</span></div><div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div></div></div>
+  <div class="qa"><h3>Kolik dostanu čistého po odečtení všech nákladů?</h3><div class="a"><p><span class="n" data-k="netDay"></span> denně, <span class="n" data-k="netMonth"></span> měsíčně a <span class="n" data-k="netYear"></span> za rok, pokud by se podmínky nezměnily. Odečtená je elektřina a poplatek poolu. Cena stroje se splácí z tohoto čistého výnosu (viz návratnost).</p><p><b>Při držení BTC</b> si necháváte celý výtěžek. Z vytěžených BTC se nic neodečítá: elektřinu platíte zvlášť v USD. Za 5 let budete mít <span class="n" data-k="btc5y"></span> v hodnotě <span class="n" data-k="stack5y"></span> (scénář <b data-k="scName"></b>). Proti tomu jste za 5 let zaplatili <span class="n" data-k="el5y"></span> za elektřinu a <span class="n" data-k="hw"></span> za stroj, celkem <span class="n" data-k="cost5y"></span>. Hodnota stacku minus všechno zaplacené: <span class="n" data-k="hodl5yHw"></span>.</p><p>Proč je to méně než 5 × <span class="n" data-k="netYear"></span>: těch <span class="n" data-k="netYear"></span> ročně platí jen při dnešních podmínkách. Síť roste, takže stroj těží každý rok méně BTC, a po halvingu v dubnu 2028 vytěží jen polovinu, zatímco elektřina stojí pořád stejně. Rok po roku:</p><div class="tbl"><table id="tYears"></table></div><div class="legend"><span><i style="background:var(--s1)"></i>Hodnota vytěžených BTC</span><span><i class="dash" style="background:repeating-linear-gradient(90deg,var(--s4) 0 4px,transparent 4px 7px)!important"></i>Tržby z průběžného prodeje</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div><div class="chart"><canvas id="cHodl" aria-label="Držení vs. prodej v projekci"></canvas></div></div></div>
 </section><section class="group" id="garance">
   <h2>Garance</h2>
   <div class="qa"><h3>Máte nějaký garantovaný výnos? Garantujete návratnost? Je výnos na stránkách garantovaný?</h3><div class="a"><p>Výnos z těžby garantovat nejde. Závisí na ceně BTC, na výkonu celé sítě a na halvingu, a nic z toho nikdo neovlivní. Kalkulace ukazuje výnos při dnešních podmínkách a scénáře do budoucna, ne slib.</p></div></div>
@@ -462,10 +462,10 @@ details.qa .a p{margin:0 0 8px}
   <div class="qa"><h3>Máte historické výsledky? Můžu vidět reálné výsledky jiných strojů?</h3><div class="a"><p>Čísla výše jsou výpočet z dat celé sítě, ne výpisy z konkrétních strojů. Reálný stroj se od výpočtu liší hlavně uptime a štěstím poolu.</p></div></div>
 </section><section class="group" id="nejhorsi">
   <h2>Pesimistické scénáře</h2>
-  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, čistá hodnota při držení BTC (hodnota vytěžených BTC − elektřina) po dobu 5 let. Čárkovaně je cena stroje: nad ní je stroj zaplacený.</p>
-    <div class="legend"><span><i style="background:var(--s2)"></i>Pesimistický +10 %</span><span><i style="background:var(--s1)"></i>Základní +20 %</span><span><i style="background:var(--s3)"></i>Optimistický +40 %</span><span><i class="dash"></i>Cena stroje</span></div>
+  <div class="qa"><h3>Jaké jsou pesimistické scénáře návratnosti?</h3><div class="a"><p>Stroj koupený dnes, hodnota vytěžených BTC při držení po dobu 5 let. Čárkovaně je všechno vložené: cena stroje plus elektřina placená vždy rok předem. Nad touto čarou je zaplacený stroj i elektřina.</p>
+    <div class="legend"><span><i style="background:var(--s2)"></i>Pesimistický +10 %</span><span><i style="background:var(--s1)"></i>Základní +20 %</span><span><i style="background:var(--s3)"></i>Optimistický +40 %</span><span><i class="dash"></i>Vloženo celkem (stroj + energie)</span></div>
     <div class="chart"><canvas id="cScen" aria-label="Scénáře pro stroj koupený dnes"></canvas></div>
-    <p>V pesimistickém scénáři (cena BTC roste jen o 10 % ročně) je stroj ve ztrátě od <span class="n" data-k="bearLoss"></span> a na konci má hodnota stacku minus elektřina <span class="n" data-k="bearEnd"></span> proti ceně stroje <span class="n" data-k="hw"></span>.</p></div></div>
+    <p>V pesimistickém scénáři (cena BTC roste jen o 10 % ročně) je stroj ve ztrátě od <span class="n" data-k="bearLoss"></span> a na konci má hodnota stacku <span class="n" data-k="bearStack"></span> proti všemu vloženému <span class="n" data-k="bearInv"></span> (stroj + elektřina placená rok předem).</p></div></div>
 </section></section><section class="panel" role="tabpanel" id="p-metodika" aria-labelledby="t-metodika" hidden><div class="intro"><h2>Data a metodika</h2></div>
 <div class="notes-grid"><section class="notes">
   <h3>Data a metodika</h3>
@@ -488,7 +488,7 @@ details.qa .a p{margin:0 0 8px}
 <div hidden id="engine"><form class="controls" id="F_f" onsubmit="return false">
   <label for="fPrice">Cena BTC, USD</label>
   <label for="fKwh">Elektřina, USD/kWh<input id="fKwh" type="number" step="0.005" min="0" value="0.07"></label>
-  <label for="fFee">Poplatek poolu, %<input id="fFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="fFee">Poplatek poolu, %<input id="fFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="fUp">Uptime, %<input id="fUp" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="fHwS">Cena stroje, USD<input id="fHwS" type="number" step="100" min="0" value="7180"></label>
   <label for="fScen3">Scénář ceny BTC pro grafy<select id="fScen3"><option value="0">Pesimistický +10 % ročně</option><option value="1" selected>Základní +20 % ročně</option><option value="2">Optimistický +40 % ročně</option></select></label>
@@ -496,7 +496,7 @@ details.qa .a p{margin:0 0 8px}
 </form><form class="controls" id="L_f" onsubmit="return false">
   <label for="L_start">Začátek těžby<input id="L_start" type="date" value="2024-06-17" min="2024-06-01" max="2026-10-14"></label>
   <label for="L_kwh">Elektřina, USD/kWh<input id="L_kwh" type="number" step="0.005" min="0" value="0.07"></label>
-  <label for="L_poolFee">Poplatek poolu, %<input id="L_poolFee" type="number" step="0.5" min="0" max="50" value="20"></label>
+  <label for="L_poolFee">Poplatek poolu, %<input id="L_poolFee" type="number" step="0.5" min="0" max="50" value="22"></label>
   <label for="L_uptime">Uptime, %<input id="L_uptime" type="number" step="1" min="50" max="100" value="95"></label>
   <label for="L_hwS">Cena stroje, USD<input id="L_hwS" type="number" step="100" min="0" value="7180"></label>
   <label for="L_th">Výkon, TH/s<input id="L_th" type="number" step="1" min="1" value="270"></label>
@@ -747,18 +747,15 @@ function render(){
   charts.forEach(c => c.destroy()); charts = [];
   if (!s.length) return;
   const L = s.map(r => r.d), iT = Math.max(0, L.indexOf(TODAY)), now = s[iT], end = s[s.length-1];
-  const hw = s.map(()=>p.hw), tip = v => usd(v), pl = [zones, crosshair];
+  const tip = v => usd(v), pl = [zones, crosshair];
   charts.push(new Chart($('c1'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Tržba celkem', s.map(r=>r.rev), css('--s1')),
     line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistý zisk', s.map(r=>r.net), css('--s3')),
-    ref('Cena stroje', hw)]}}));
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   charts.push(new Chart($('c2'), {type:'line', plugins:pl, options:opts(yUsd,tip), data:{labels:L, datasets:[
     line('Hodnota stacku', s.map(r=>r.stack), css('--s1')),
-    line('Energie zaplacená předem', s.map(r=>r.el), css('--s2')),
-    line('Čistá hodnota', s.map(r=>r.hodl), css('--s3')),
-    line('Průběžný prodej', s.map(r=>r.net), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', hw)]}}));
+    line('Tržby z průběžného prodeje', s.map(r=>r.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', s.map(r=>r.invested))]}}));
   const o3 = opts(v=>v.toLocaleString('cs-CZ',{maximumFractionDigits:2}), v=>btc(v));
   o3.plugins.tooltip.callbacks.afterBody = it => { const r=s[it[0].dataIndex]; return [` Cena BTC: ${usd(r.price)}`]; };
   charts.push(new Chart($('c3'), {type:'line', plugins:pl, options:o3, data:{labels:L, datasets:[
@@ -822,9 +819,10 @@ function renderProj(p, s, iT){
     res[i].label = t; const el = $('lg_'+k); if (el) el.textContent = t; });
   PROJ = res;
   const from = Math.max(0, iT-365), L = s.slice(from).map(r=>r.d), now = s[iT];
-  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.hodl : null), css('--fg2'))]
-    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.hodl : null), css(x.col))))
-    .concat([ref('Cena stroje', L.map(()=>p.hw))]);
+  // value of the mined BTC against everything put in (machine + energy prepaid a year ahead): above it, all is paid back
+  const ds = [line('Dosud', s.slice(from).map((r,i)=> from+i<=iT ? r.stack : null), css('--fg2'))]
+    .concat(res.map(x => line(x.label||x.name, x.r.slice(from).map((r,i)=> from+i>=iT ? r.stack : null), css(x.col))))
+    .concat([ref('Vloženo celkem (stroj + energie)', s.slice(from).map(r=>r.invested))]);
   const o = opts(yUsd, v=>usd(v)); o.plugins.tooltip.filter = it => it.parsed.y!==null;
   charts.push(new Chart($('c5'), {type:'line', plugins:[zones,crosshair], options:o, data:{labels:L, datasets:ds}}));
   const pct = x => Math.min(500,Math.max(-90,parseFloat($(SC[Object.keys(SC).find(k=>SC[k][0]===x.name)][2]).value)||0)).toLocaleString('cs-CZ',{signDisplay:'always'})+' %';
@@ -1365,7 +1363,7 @@ function render(){
     scName: SCN[si][0].toLowerCase(), monthVal5y: usd(btcDay*M*base.end.pr), stack5y: usd(base.end.stack), hodl5y: usd(base.end.hodl), hodl5yHw: usd(base.end.hodl-p.hw), el5y: usd(base.el),
     price5y: usd(base.end.pr), life0: usd(sc[0].btc*sc[0].end.pr), life1: usd(sc[1].btc*sc[1].end.pr), life2: usd(sc[2].btc*sc[2].end.pr),
     dca5y: btc(dcaAcc), valMine: usd(base.btc*base.end.pr), valLump: usd(lump*base.end.pr), valDca: usd(comparison.at(-1).dcaValue),
-    bearLoss: sc[0].firstLoss ? fmtDate(sc[0].firstLoss) : '–', bearEnd: usd(sc[0].end.hodl),
+    bearLoss: sc[0].firstLoss ? fmtDate(sc[0].firstLoss) : '–', bearEnd: usd(sc[0].end.hodl), bearStack: usd(sc[0].end.stack), bearInv: usd(sc[0].end.invested),
   };
   document.querySelectorAll('[data-k]').forEach(e => { const v = V[e.dataset.k]; e.textContent = v===undefined ? '?' : v; });
   $('F_kpis').innerHTML = [
@@ -1415,9 +1413,8 @@ function render(){
   charts.push(new Chart($('cBtcM'), {type:'line', plugins:[zones,crosshair], options:oB, data:{labels:MO.map(o=>o.k), datasets:[
     line('BTC za měsíc', MO.map(o=>o.btc), css('--s1'), {fill:'origin', backgroundColor:css('--s1')+'22'})]}}));
   charts.push(new Chart($('cHodl'), {type:'line', plugins:[zones,crosshair], options:opts(yUsd, v=>usd(v)), data:{labels:LS2, datasets:[
-    line('Hodnota vytěžených BTC', base.out.map(o=>o.stack), css('--s1')), line('Energie zaplacená předem', base.out.map(o=>o.el), css('--s2')),
-    line('Čistě při držení', base.out.map(o=>o.hodl), css('--s3')), line('Čistě při prodeji', base.out.map(o=>o.sell), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
-    ref('Cena stroje', LS2.map(()=>p.hw))]}}));
+    line('Hodnota vytěžených BTC', base.out.map(o=>o.stack), css('--s1')), line('Tržby z průběžného prodeje', base.out.map(o=>o.rev), css('--s4'), {borderDash:[6,4], borderWidth:1.5}),
+    ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))]}}));
   charts.push(new Chart($('cRoi'), {type:'line', plugins:[zones,crosshair], options:opts(v=>v+' %', v=>Math.round(v)+' %'), data:{labels:LS2, datasets:
     sc.map(x => line(x.name, x.out.map(o=>(Economics.roi(o.hodl-p.hw,p.hw+o.el)??0)*100), css(x.col))).concat([ref('Nula', LS2.map(()=>0))])}}));
   const gs = [[0,'--s3'],[.2,'--s1'],[.35,'--s4'],[.5,'--s2']];
@@ -1444,7 +1441,7 @@ function render(){
   const LS = base.out.map(x=>x.d);
   const o3 = opts(yUsd, v=>usd(v));
   charts.push(new Chart($('cScen'), {type:'line', plugins:[zones,crosshair], options:o3, data:{labels:LS, datasets:
-    sc.map(x => line(x.name, x.out.map(o=>o.hodl), css(x.col))).concat([ref('Cena stroje', LS.map(()=>p.hw))])}}));
+    sc.map(x => line(x.name, x.out.map(o=>o.stack), css(x.col))).concat([ref('Vloženo celkem (stroj + energie)', base.out.map(o=>o.invested))])}}));
   renderEdge(p, base.r, SCN[si][0]);
 }
 document.querySelectorAll('#F_f input, #F_f select').forEach(i => i.addEventListener('input', render));
