@@ -199,7 +199,7 @@ function mcDecorate(){
   tiles.forEach(t => t.querySelector('.mc')?.remove());
   const add = (t, html) => { const e = document.createElement('span'); e.className = 'mc'; e.innerHTML = html; t.append(e); };
   if (!MC || MC.key !== mcInputs()){ add(tiles[2], '<br>Monte Carlo: počítám…'); return; }
-  add(tiles[2], `<br>Monte Carlo: v 80 % cest ${mcRange(MC.hodl(.1), MC.hodl(.9), yUsd)}`);
+  add(tiles[2], `<br>Monte Carlo: po odečtení energie v 80 % cest ${mcRange(MC.hodl(.1), MC.hodl(.9), yUsd)}`);
   add(tiles[4], `<br>Monte Carlo: při držení aspoň jednou zaplaceno v ${mcPct(MC.payH.at(-1))} cest, na konci nad vklady v ${mcPct(MC.paidEndH)}`);
 }
 

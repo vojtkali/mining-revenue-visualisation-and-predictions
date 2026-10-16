@@ -142,10 +142,12 @@ function render(){
 
   const be1 = s.find(r => r.net >= p.hw), be2 = s.find(r => r.hodl >= p.hw);
   const maxNet = s.reduce((m,r)=>r.net>m.net?r:m, s[0]);
+  // energy is prepaid a whole contractual year ahead: the last payment also covers days after the end of the projection
+  const pre = end.prepaid > 0 ? ` (z toho ${usd(end.prepaid)} předplaceno na dny po konci odhadu)` : '';
   const k = [
     ['Vyplaceno dosud', btc(now.btc), `${iT+1} dní těžby`],
-    [`Průběžný prodej k ${fmtDate(end.d)}`, usd(end.net), `${SC[p.sc][0].toLowerCase()} scénář: tržba ${usd(end.rev)} − energie ${usd(end.el)} placená rok předem; `+(end.net-p.hw>=0?'po odečtení stroje zbývá ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.net)}`, end.net],
-    [`Držení BTC k ${fmtDate(end.d)}`, usd(end.hodl), `${SC[p.sc][0].toLowerCase()} scénář: BTC ${usd(end.stack)} při ${usd(end.price)}/BTC − energie ${usd(end.el)} placená rok předem; `+(end.hodl-p.hw>=0?'po odečtení stroje zbývá ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.hodl)}`, end.hodl],
+    [`Průběžný prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`],
+    [`Držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
