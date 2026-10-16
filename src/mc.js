@@ -198,8 +198,9 @@ function mcDecorate(){
   const tiles = document.querySelectorAll('#kpis .kpi .s'); if (tiles.length < 6) return;
   tiles.forEach(t => t.querySelector('.mc')?.remove());
   const add = (t, html) => { const e = document.createElement('span'); e.className = 'mc'; e.innerHTML = html; t.append(e); };
-  if (!MC || MC.key !== mcInputs()){ add(tiles[3], '<br>Monte Carlo: počítám…'); return; }
-  add(tiles[3], `<br>Monte Carlo: po odečtení energie v 80 % cest ${mcRange(MC.hodl(.1), MC.hodl(.9), yUsd)}`);
+  if (!MC || MC.key !== mcInputs()){ add(tiles[1], '<br>Monte Carlo: počítám…'); add(tiles[2], '<br>Monte Carlo: počítám…'); return; }
+  add(tiles[1], `<br>Monte Carlo: v 80 % cest ${mcRange(MC.strat[0].q10, MC.strat[0].q90, yUsd)}`);
+  add(tiles[2], `<br>Monte Carlo: v 80 % cest ${mcRange(MC.strat[2].q10, MC.strat[2].q90, yUsd)}; HODL vede v ${mcPct(1-MC.holdSpot)} cest`);
   add(tiles[5], `<br>Monte Carlo: při držení aspoň jednou zaplaceno v ${mcPct(MC.payH.at(-1))} cest, na konci nad vklady v ${mcPct(MC.paidEndH)}`);
 }
 

@@ -139,14 +139,19 @@ function render(){
   const k = [
     ['Natěženo dosud', btc(now.btc), `${iT+1} dní těžby`],
     [`Celkem vloženo do ${fmtDate(end.d)}`, usd(end.invested), `stroj ${usd(p.hw)} + energie ${usd(end.el)} (${Math.floor(Economics.days(s[0].d, end.d)/365)+1} ročních plateb předem${end.prepaid > 0 ? `; ${usd(end.prepaid)} z toho připadá na dny po konci odhadu` : ""})`],
-    [`Průběžný prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
-    [`Držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
+    [`Těžba + prodej: tržby do ${fmtDate(end.d)}`, usd(end.rev), `${SC[p.sc][0].toLowerCase()} scénář; po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.net)}, `+(end.net-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.net-p.hw))+`. K ${fmtDate(now.d)}: tržby ${usd(now.rev)}`, end.rev-end.invested],
+    [`Těžba + držení: hodnota BTC k ${fmtDate(end.d)}`, usd(end.stack), `${btc(end.btc)} × ${usd(end.price)}/BTC (${SC[p.sc][0].toLowerCase()} scénář); po odečtení energie ${usd(end.el)}${pre} zbývá ${usd(end.hodl)}, `+(end.hodl-p.hw>=0?'po odečtení stroje ':'na cenu stroje chybí ')+usd(Math.abs(end.hodl-p.hw))+`. K ${fmtDate(now.d)}: ${usd(now.stack)}`, end.stack-end.invested],
     [`Natěženo do ${fmtDate(end.d)}`, btc(end.btc), `${SC[p.sc][0].toLowerCase()} scénář; z toho ${btc(Math.max(0,end.btc-now.btc))} v projekci, cena BTC na konci ${usd(end.price)}`],
     [`Návratnost, stroj koupený ${fmtDate(p.start)}`, be2?fmtDate(be2.d):`do ${fmtDate(end.d)} ne`,
       'při držení BTC; průběžný prodej: '+(be1?fmtDate(be1.d):`do ${fmtDate(end.d)} ne (čistý zisk max. ${usd(maxNet.net)}, ${fmtDate(maxNet.d)})`), be2?1:-1],
     ['Aktuální denní zisk', usd((now.hp-now.be)*p.th*p.up*(1-p.fee)/1000,2), `hashprice ${usd(now.hp,2)} vs. zvrat ${usd(now.be,2)}`, now.hp-now.be],
   ];
-  $('kpis').innerHTML = k.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
+  // HODL: the same deposits on the same days bought as BTC at once and held (spot buys from the strategy table)
+  const cE = Economics.compare(s, {hw:p.hw, elecDay:p.w/1000*24*p.kwh*p.up, energyGrowth:energyGrowth()}).at(-1);
+  const hodlTile = [`HODL: spot nákupy k ${fmtDate(end.d)}`, usd(cE.spotValue), `${btc(cE.spot)} koupeno za stejné vklady ve stejné dny (stroj + rok energie při startu, pak energie každých 365 dní) a drženo do konce; `+(cE.spotValue>=end.stack?'o ':'')+`${usd(Math.abs(cE.spotValue-end.stack))} ${cE.spotValue>=end.stack?'víc':'méně'} než těžba + držení`, cE.spotValue-end.invested];
+  // side by side: what went in, mining + holding, HODL; then BTC count, selling, payback; then today
+  const K = [k[1], k[3], hodlTile, k[4], k[2], k[5], k[0], k[6]];
+  $('kpis').innerHTML = K.map(([l,v,sub,sg]) => `<div class="kpi"><div class="l">${l}</div><div class="v ${sg===undefined?'':(sg>=0?'pos':'neg')}">${v}</div><div class="s">${sub}</div></div>`).join('');
   document.querySelectorAll('.endLabel').forEach(e => e.textContent = fmtDate(p.end));
 }
 
