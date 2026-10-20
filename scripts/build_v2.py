@@ -17,6 +17,7 @@ import build_site as B  # noqa: E402
 # scenario fields shown on each scenario card, and the FAQ scenario index for bear/base/bull.
 MACHINES = {
   's21': dict(name='S21 XP', title='Antminer S21 XP', data='btc', main=('body', 'app'), faq=('fbody', 'fapp'), lump=('lbody', 'lapp'),
+    eff_hint='Výchozí 25 % ročně podle J. Bednára, „If Bitcoin does 100x, where does the electricity come from?“ (20. 10. 2026): hashrate ÷ účinnost nejlepšího ASICu sleduje tržby těžařů.',
     spec='270 TH/s · 3 645 W · SHA-256 · výplata v BTC', today='Při dnešní ceně BTC a výkonu sítě, po elektřině a poplatku poolu.',
     hw='hwS', hg='hgr', faq_sel='fScen3', faq_si={'bear': 0, 'base': 1, 'bull': 2},
     sync={'kwh': ['fKwh'], 'poolFee': ['fFee'], 'uptime': ['fUp'], 'hwS': ['fHwS'], 'hgr': ['fHg'], 'netMode': ['fNetMode'], 'netUp': ['fNetUp'], 'netDown': ['fNetDown'], 'netEff': ['fNetEff']},
@@ -184,7 +185,7 @@ def build(key):
   {field('Model sítě', mi['netMode'], '', 'Dohánění: hashrate sleduje tržby těžařů se zpožděním (kalibrováno na 2017–2026). Pevný růst: stejné procento každý rok.')}
   {field('Poločas růstu sítě', mi['netUp'], 'dní')}
   {field('Poločas poklesu sítě', mi['netDown'], 'dní')}
-  {field('Zlepšování strojů', mi['netEff'], '% / rok')}
+  {field('Zlepšování strojů', mi['netEff'], '% / rok', M.get('eff_hint', ''))}
   {field('Pevný růst sítě', mi[M['hg']], '% / rok', 'Jen pro model Pevný růst.')}
   {''.join(field(lbl, mi[i], u, 'Jen pro model Pevný růst.' if i in ('zk', 'lk') else '') for lbl, i, u in M['proj_extra'])}
   {field('Kolísání cen (Monte Carlo)', '<input id="mcVol" type="number" value="100" min="0" max="300" step="10">', '%', 'Jak silně ceny kolísají kolem scénáře: 100 % = jako denní pohyby od 5/2023, 0 % = hladká cesta.')}
