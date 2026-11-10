@@ -1,8 +1,8 @@
 {
-  "updated": "2026-11-08",
-  "czk": 21.762,
-  "czkSource": "ČNB, 2026-11-09",
-  "fetchedAt": "2026-11-09T16:30:04.353133+00:00",
+  "updated": "2026-11-09",
+  "czk": 21.702,
+  "czkSource": "ČNB, 2026-11-10",
+  "fetchedAt": "2026-11-10T14:58:22.042761+00:00",
   "dataSource": "Coin Metrics Community API",
   "priceConvention": "UTC daily close; network reward and hashrate trailing 7-day mean"
 }
